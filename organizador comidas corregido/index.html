@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Organizador de Comidas Semanales</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
+    h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
+    select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
+    button { background:var(--primario); color:#fff; border:none; cursor:pointer; transition:background .3s; }
+    button:hover { background:#0088cc; }
+    #mensaje { margin:20px; font-weight:bold; }
+    table { width:100%; max-width:800px; margin:30px auto 0; border-collapse:collapse; }
+    th,td { border:1px solid var(--borde); padding:12px; text-align:center; }
+    td:hover { background:#f0f0f0; }
+    td.selected { border:2px solid var(--primario); background:#e6f7ff; }
+    .menu-eliminar { display:inline-block; margin-top:5px; background:#bbb; color:#fff; font-size:11px; padding:3px 6px; border-radius:3px; cursor:pointer; }
+    .top-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:30px; }
+    .top-buttons button { padding:8px 12px; font-size:14px; width:auto; }
+    @media (max-width:600px){
+      table, thead, tbody, th, td, tr { display:block; }
+      thead{ display:none; }
+      tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
+      td{ text-align:left; border:none; border-bottom:1px solid var(--borde); position:relative; padding-left:50%; }
+      td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
+      td:last-child{ border-bottom:none; }
+    }
+    .plato-saludable{ width:400px; max-width:100%; height:auto; }
+    .mensaje-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); min-width:280px; max-width:90%; padding:12px 18px; border-radius:8px; font-size:15px; font-weight:500; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.2); display:none; z-index:1000; animation:fadein .3s ease, fadeout .3s ease 3.7s; }
+    .mensaje-toast.exito{ background:#4CAF50; }
+    .mensaje-toast.error{ background:#f44336; }
+    @keyframes fadein { from{opacity:0; transform:translate(-50%,20px);} to{opacity:1; transform:translate(-50%,0);} }
+    @keyframes fadeout { from{opacity:1;} to{opacity:0;} }
+  </style>
+</head>
+<body>
+
+  <h1>¿¡Qué comemos!?</h1>
+  <h2>Organizador de comidas semanal</h2>
+
+  <div style="text-align:center; margin:20px 0;">
+    <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
+  </div>
+
+  <h3>Elegí los alimentos para tu plato</h3>
+
+  <!-- Selector de Verduras y Ensaladas -->
+  <select id="verdura">
+    <option value="">-- Verduras y hortalizas --</option>
+     <option value="ensaladas">🥗 Ensaladas</option>
+     <option value="lechuga">Lechuga</option>
+     <option value="acelga">Acelga</option>
+     <option value="espinaca">Espinaca</option>
+     <option value="rucula">Rúcula</option>
+     <option value="pimiento">Pimiento</option>
+     <option value="zapallo">Zapallo</option>
+     <option value="zapallito">Zapallito</option>
+     <option value="zucchini">Zucchini</option>
+     <option value="berenjena">Berenjena</option>
+     <option value="calabaza">Calabaza</option>
+     <option value="choclo">Choclo</option>
+     <option value="cebolla">Cebolla</option>
+     <option value="palta">Palta</option>
+  </select>
+
+  <select id="ensalada" style="display:none;">
+    <option value="">-- 🥗 Elegí una ensalada --</option>
+    <option value="ensalada mixta">Ensalada mixta</option>
+    <option value="ensalada rusa">Ensalada rusa</option>
+    <option value="ensalada de lentejas">Ensalada de lentejas</option>
+  </select>
+
+  <select id="proteina">
+    <option value="">-- Proteínas --</option>  
+     <option value="milanesa-vacuna">Milanesa vacuna</option>
+     <option value="milanesa-pollo">Milanesa pollo</option>
+     <option value="milanesa-cerdo">Milanesa cerdo</option>
+     <option value="hamburguesa-vacuna">Hamburguesa vacuna</option>
+     <option value="medallones-pollo">Medallones pollo</option>
+     <option value="bife-vacuno">Bife vacuno</option>
+     <option value="filete-pollo">Filete pollo</option>
+     <option value="costeleta-vacua">Costeleta vacua</option>
+     <option value="costeleta-cerdo">Costeleta cerdo</option>
+     <option value="patamuslo-pollo">Patamuslo pollo</option>
+     <option value="cola-cuadril">Cola cuadril</option>
+     <option value="lomo-vacuno">Lomo vacuno</option>
+     <option value="entrecot">Entrecot</option>
+     <option value="bife-de-chorizo">Bife de chorizo</option>
+  </select>
+
+  <select id="hidrato">
+    <option value="">-- Hidratos de carbono --</option>
+      <option value="fideos">Fideos</option>
+         <option value="papa">Papa</option>
+         <option value="batata">Batata</option>
+         <option value="mandioca">Mandioca</option>
+         <option value="arroz">Arroz</option>
+         <option value="polenta">Polenta</option>
+         <option value="quinoa">Quínoa</option>
+  </select>
+
+  <select id="completo">
+    <option value="">-- Plato completo (opcional) --</option>
+    <option value="lasagna">Lasagna</option>
+    <option value="ensaladaCompleta">Ensalada completa</option>
+  </select>
+
+  <button onclick="validarPlato()">Validar y asignar</button>
+
+  <h2>🗓️ Calendario semanal</h2>
+  <p>Hacé click en una comida para seleccionarla y después click en otra celda para intercambiarla o moverla. Tocá en "Eliminar" para borrar un alimento.</p>
+
+  <table id="calendario">
+    <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
+    <tbody id="calendario-body"></tbody>
+  </table>
+
+  <div class="top-buttons">
+    <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
+    <button onclick="window.open('index-vegetariano.html','_blank')">Opción calendario Vegetariano</button>
+  </div>
+
+  <script>
+    const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes']; // ✅ solo lunes a viernes
+    let calendario = {}; let seleccion = null;
+    dias.forEach(dia => calendario[dia] = { almuerzo:null, cena:null });
+
+    function getSeleccionados(){
+      const vb=document.getElementById('verdura').value;
+      const sub=document.getElementById('ensalada').value;
+      const verdura=(vb==='ensaladas' && sub)?sub:vb;
+      return { verdura, proteina:document.getElementById('proteina').value, hidrato:document.getElementById('hidrato').value, completo:document.getElementById('completo').value };
+    }
+
+    function limpiarSelects(){ ['verdura','proteina','hidrato','completo'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ensalada').style.display='none'; }
+
+    function validarPlato(){
+      const s=getSeleccionados(); let valido=false, platoFinal='';
+      if(s.completo && !s.verdura && !s.proteina && !s.hidrato){ valido=true; platoFinal=s.completo; }
+      else if(s.verdura && s.proteina && s.hidrato && !s.completo){ valido=true; platoFinal=`${s.verdura}, ${s.proteina}, ${s.hidrato}`; }
+      else if(s.verdura && s.proteina && !s.hidrato && !s.completo){ valido=true; platoFinal=`${s.verdura}, ${s.proteina}`; }
+      else if(s.verdura && s.hidrato && !s.proteina && !s.completo){ valido=true; platoFinal=`${s.verdura}, ${s.hidrato}`; }
+
+      if(valido){
+        const ok=asignarAcalendario(platoFinal);
+        if(ok){ mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.','exito'); limpiarSelects(); }
+        else { mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`,'error'); limpiarSelects(); }
+      } else {
+        if(!s.verdura && s.proteina && s.hidrato) mostrarMensaje('❌ Faltan verduras u hortalizas en el plato.','error');
+        else mostrarMensaje('❌ Combinación no válida. Volvé a intentarlo.','error');
+      }
+    }
+
+    function asignarAcalendario(plato){
+      let rep=0; dias.forEach(d=>{ if(calendario[d].almuerzo===plato) rep++; if(calendario[d].cena===plato) rep++; });
+      if(rep>=2) return false;
+      let disp=[...dias];
+      while(disp.length){
+        let dia=disp[Math.floor(Math.random()*disp.length)];
+        let comida=Math.random()<.5?'almuerzo':'cena';
+        if(!calendario[dia][comida]){
+          if(calendario[dia].almuerzo!==plato && calendario[dia].cena!==plato){
+            calendario[dia][comida]=plato; actualizarCalendario(); return true;
+          }
+        }
+        disp.splice(disp.indexOf(dia),1);
+      }
+      return false;
+    }
+
+    function resetearCalendario(){ dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); actualizarCalendario(); }
+
+    function actualizarCalendario(){
+      guardarCalendario();
+      const cuerpo=document.getElementById('calendario-body'); cuerpo.innerHTML='';
+      const hoy=new Date(); let indiceHoy=hoy.getDay()-1; 
+      if(indiceHoy<0||indiceHoy>4) indiceHoy=null; // ✅ no resaltar finde
+      dias.forEach((dia,i)=>{
+        const esHoy = i===indiceHoy;
+        cuerpo.innerHTML+=`
+          <tr${esHoy?' style="background-color:#fff8dc;"':''}>
+            <td data-label="Día">${dia}</td>
+            <td data-label="Almuerzo" onclick="seleccionarCelda('${dia}','almuerzo')">${crearContenidoCelda(dia,'almuerzo')}</td>
+            <td data-label="Cena" onclick="seleccionarCelda('${dia}','cena')">${crearContenidoCelda(dia,'cena')}</td>
+          </tr>`;
+      });
+    }
+
+    function crearContenidoCelda(dia,tipo){
+      const plato=calendario[dia][tipo];
+      if(!plato) return '-';
+      return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
+    }
+
+    function eliminarPlato(e,dia,tipo){ e.stopPropagation(); calendario[dia][tipo]=null; actualizarCalendario(); }
+
+    function seleccionarCelda(dia,tipo){
+      document.querySelectorAll('td').forEach(td=>td.classList.remove('selected'));
+      if(!seleccion){ if(!calendario[dia][tipo]) return; seleccion={dia,tipo}; marcarCeldaSeleccionada(dia,tipo); return; }
+      const o=seleccion; const pO=calendario[o.dia][o.tipo]; const pD=calendario[dia][tipo];
+      if(o.dia===dia&&o.tipo===tipo){ seleccion=null; actualizarCalendario(); return; }
+      let tmp=JSON.parse(JSON.stringify(calendario)); tmp[dia][tipo]=pO; tmp[o.dia][o.tipo]=pD;
+      const ok=d=>{ const a=tmp[d].almuerzo,c=tmp[d].cena; return !(a&&c&&a===c); };
+      if(!ok(dia)||!ok(o.dia)){ mostrarMensaje('❌ No se puede repetir el mismo plato en el mismo día.','error'); seleccion=null; actualizarCalendario(); return; }
+      calendario=tmp; seleccion=null; actualizarCalendario();
+    }
+
+    function marcarCeldaSeleccionada(dia,tipo){ document.querySelectorAll('#calendario-body tr').forEach(f=>{ const c=f.children; if(c[0].innerText===dia){ if(tipo==='almuerzo') c[1].classList.add('selected'); if(tipo==='cena') c[2].classList.add('selected'); } }); }
+
+    function guardarCalendario(){ localStorage.setItem('calendario',JSON.stringify(calendario)); }
+    function cargarCalendario(){ const g=localStorage.getItem('calendario'); if(g){ try{ calendario=JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} } }
+
+    window.onload=()=>{ cargarCalendario(); actualizarCalendario(); };
+
+    document.getElementById('verdura').addEventListener('change', function(){ const ens=document.getElementById('ensalada'); if(this.value==='ensaladas'){ ens.style.display='block'; } else { ens.style.display='none'; ens.value=''; } });
+
+    function mostrarMensaje(texto,tipo){ const m=document.getElementById('mensaje'); m.className="mensaje-toast"; m.classList.add(tipo); m.innerText=texto; m.style.display='block'; setTimeout(()=>{ m.style.display='none'; },4000); }
+  </script>
+
+  <div id="mensaje" class="mensaje-toast"></div>
+</body>
+</html>
