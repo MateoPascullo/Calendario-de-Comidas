@@ -105,6 +105,7 @@
   </table>
 
   <div class="top-buttons">
+    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
     <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
     <button onclick="window.open('index.html','_blank')">Opción calendario Tradicional</button>
@@ -205,5 +206,68 @@
   </script>
 
   <div id="mensaje" class="mensaje-toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  async function descargarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("🍴 Menú semanal", 20, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+
+    let y = 40;
+    dias.forEach(dia => {
+      const almuerzo = calendario[dia].almuerzo || "-";
+      const cena = calendario[dia].cena || "-";
+      doc.text(`${dia}:`, 20, y);
+      doc.text(`Almuerzo: ${almuerzo}`, 40, y + 10);
+      doc.text(`Cena: ${cena}`, 40, y + 20);
+      y += 40;
+    });
+
+    doc.save("menu-semanal.pdf");
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+  function descargarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Título
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("🍴 Menú semanal", 14, 20);
+
+    // Armar la tabla
+    const cabecera = [["Día", "Almuerzo", "Cena"]];
+    const filas = dias.map(dia => [
+      dia,
+      calendario[dia].almuerzo || "-",
+      calendario[dia].cena || "-"
+    ]);
+
+    doc.autoTable({
+      head: cabecera,
+      body: filas,
+      startY: 30,
+      theme: "grid",
+      headStyles: { fillColor: [143, 157, 104] }, // verde oliva del diseño
+      styles: { halign: "center" }
+    });
+
+    // Guardar el PDF
+    doc.save("menu-semanal.pdf");
+  }
+</script>
 </body>
 </html>
+
