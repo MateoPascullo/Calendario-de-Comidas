@@ -58,6 +58,33 @@
   margin: 0;         /* quita márgenes por defecto del navegador */
   transform: translateY(0); /* evita desalineación vertical */
 }
+    .opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.opciones-ensalada .chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 👇 forzamos el checkbox a mostrarse igual en iOS */
+.opciones-ensalada .chip input[type="checkbox"] {
+  appearance: auto;       /* asegura que Safari no los oculte */
+  -webkit-appearance: checkbox; /* compatibilidad Safari */
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
 
   </style>
 </head>
@@ -431,5 +458,6 @@ function contarRepeticiones(plato) {
 </script>
 </body>
 </html>
+
 
 
