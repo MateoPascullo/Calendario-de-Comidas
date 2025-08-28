@@ -44,7 +44,7 @@
     <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
   </div>
 
-  <h3>Elegí los alimentos para tu plato</h3>
+  <h3 id="form-plato">Armá tu plato equilibrado</h3>
 
   <!-- Selector de Verduras y Ensaladas -->
    <select id="verdura">
@@ -125,19 +125,63 @@
 
     function limpiarSelects(){ ['verdura','proteina','hidrato','completo'].forEach(id=>document.getElementById(id).value=''); document.getElementById('ensalada').style.display='none'; }
 
-    function validarPlato(){
-      const s=getSeleccionados(); let valido=false, platoFinal='';
-      if(s.completo && !s.verdura && !s.proteina && !s.hidrato){ valido=true; platoFinal=s.completo; }
-      else if(s.verdura && s.proteina && s.hidrato && !s.completo){ valido=true; platoFinal=`${s.verdura}, ${s.proteina}, ${s.hidrato}`; }
+    function validarPlato() {
+  const s = getSeleccionados();
+  let valido = false, platoFinal = '';
 
-      if(valido){
-        const ok=asignarAcalendario(platoFinal);
-        if(ok){ mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.','exito'); limpiarSelects(); }
-        else { mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`,'error'); limpiarSelects(); }
-      } else {
-        mostrarMensaje('❌ Combinación no válida. Volvé a intentarlo.','error');
+  // ✅ Reglas originales del vegetariano
+  if (s.completo && !s.verdura && !s.proteina && !s.hidrato) {
+    valido = true;
+    platoFinal = s.completo;
+  } 
+  else if (s.verdura && s.proteina && s.hidrato && !s.completo) {
+    valido = true;
+    platoFinal = `${s.verdura}, ${s.proteina}, ${s.hidrato}`;
+  }
+
+  if (valido) {
+    if (seleccion) {
+      // 👉 Asignar directamente a la celda seleccionada
+      const { dia, tipo } = seleccion;
+      const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
+
+      if (calendario[dia][otroTipo] === platoFinal) {
+        mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
       }
+      else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
+        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+      }
+      else {
+        calendario[dia][tipo] = platoFinal;
+        actualizarCalendario();
+        mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+      }
+      seleccion = null;
+      limpiarSelects();
+    } else {
+      // 👉 Si no hay celda seleccionada, usar tu lógica original (azar + máximo 2 veces)
+      const ok = asignarAcalendario(platoFinal);
+      if (ok) {
+        mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
+      } else {
+        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+      }
+      limpiarSelects();
     }
+  } else {
+    mostrarMensaje('❌ Combinación no válida. Volvé a intentarlo.', 'error');
+  }
+}
+
+function contarRepeticiones(plato) {
+  let rep = 0;
+  dias.forEach(d => {
+    if (calendario[d].almuerzo === plato) rep++;
+    if (calendario[d].cena === plato) rep++;
+  });
+  return rep;
+}
+
 
     function asignarAcalendario(plato){
       let rep=0; dias.forEach(d=>{ if(calendario[d].almuerzo===plato) rep++; if(calendario[d].cena===plato) rep++; });
@@ -174,24 +218,69 @@
       });
     }
 
-    function crearContenidoCelda(dia,tipo){
-      const plato=calendario[dia][tipo];
-      if(!plato) return '-';
-      return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
-    }
+    function crearContenidoCelda(dia, tipo) {
+  const plato = calendario[dia][tipo];
+  if (!plato) {
+    return '<span style="font-size:12px; color:#999;">Haga click para agregar un plato</span>';
+  }
+  return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
+}
+
 
     function eliminarPlato(e,dia,tipo){ e.stopPropagation(); calendario[dia][tipo]=null; actualizarCalendario(); }
 
-    function seleccionarCelda(dia,tipo){
-      document.querySelectorAll('td').forEach(td=>td.classList.remove('selected'));
-      if(!seleccion){ if(!calendario[dia][tipo]) return; seleccion={dia,tipo}; marcarCeldaSeleccionada(dia,tipo); return; }
-      const o=seleccion; const pO=calendario[o.dia][o.tipo]; const pD=calendario[dia][tipo];
-      if(o.dia===dia&&o.tipo===tipo){ seleccion=null; actualizarCalendario(); return; }
-      let tmp=JSON.parse(JSON.stringify(calendario)); tmp[dia][tipo]=pO; tmp[o.dia][o.tipo]=pD;
-      const ok=d=>{ const a=tmp[d].almuerzo,c=tmp[d].cena; return !(a&&c&&a===c); };
-      if(!ok(dia)||!ok(o.dia)){ mostrarMensaje('❌ No se puede repetir el mismo plato en el mismo día.','error'); seleccion=null; actualizarCalendario(); return; }
-      calendario=tmp; seleccion=null; actualizarCalendario();
+    function seleccionarCelda(dia, tipo) {
+  document.querySelectorAll('#calendario-body td').forEach(td => td.classList.remove('selected'));
+
+  if (!seleccion) {
+    seleccion = { dia, tipo };
+    marcarCeldaSeleccionada(dia, tipo);
+    if (!calendario[dia][tipo]) {
+      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
     }
+    return;
+  }
+
+  const o = seleccion;
+  const pO = calendario[o.dia][o.tipo];
+  const pD = calendario[dia][tipo];
+
+  if (o.dia === dia && o.tipo === tipo) {
+    seleccion = null;
+    actualizarCalendario();
+    return;
+  }
+
+  if (!pO) {
+    seleccion = { dia, tipo };
+    marcarCeldaSeleccionada(dia, tipo);
+    if (!pD) {
+      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
+    }
+    return;
+  }
+
+  const tmp = JSON.parse(JSON.stringify(calendario));
+  tmp[dia][tipo] = pO;
+  tmp[o.dia][o.tipo] = pD;
+
+  const noDupMismoDia = d => {
+    const a = tmp[d].almuerzo, c = tmp[d].cena;
+    return !(a && c && a === c);
+  };
+
+  if (!noDupMismoDia(dia) || !noDupMismoDia(o.dia)) {
+    mostrarMensaje('❌ No se puede repetir el mismo plato en el mismo día.', 'error');
+    seleccion = null;
+    actualizarCalendario();
+    return;
+  }
+
+  calendario = tmp;
+  seleccion = null;
+  actualizarCalendario();
+}
+
 
     function marcarCeldaSeleccionada(dia,tipo){ document.querySelectorAll('#calendario-body tr').forEach(f=>{ const c=f.children; if(c[0].innerText===dia){ if(tipo==='almuerzo') c[1].classList.add('selected'); if(tipo==='cena') c[2].classList.add('selected'); } }); }
 
@@ -207,7 +296,8 @@
 
   <div id="mensaje" class="mensaje-toast"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   async function descargarPDF() {
     const { jsPDF } = window.jspdf;
@@ -270,4 +360,6 @@
 </script>
 </body>
 </html>
+
+
 
