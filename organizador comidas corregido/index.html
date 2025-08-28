@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Organizador de Comidas Semanales - Vegetariano</title>
+  <title>Organizador de Comidas Semanales</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
@@ -37,17 +37,18 @@
 </head>
 <body>
 
-  <h1>¿¡Qué comemos!? - Vegetariano</h1>
+  <h1>¿¡Qué comemos!?</h1>
   <h2>Organizador de comidas semanal</h2>
 
   <div style="text-align:center; margin:20px 0;">
     <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
   </div>
 
-  <h3 id="form-plato">Armá tu plato equilibrado</h3>
+  <h3 id="form-plato">Elegí los alimentos para tu plato</h3>
+
 
   <!-- Selector de Verduras y Ensaladas -->
-   <select id="verdura">
+  <select id="verdura">
     <option value="">-- Verduras y hortalizas --</option>
      <option value="ensaladas">🥗 Ensaladas</option>
      <option value="lechuga">Lechuga</option>
@@ -73,25 +74,38 @@
   </select>
 
   <select id="proteina">
-    <option value="">-- Proteínas vegetarianas --</option>
-    <option value="huevo">Huevo</option>
-    <option value="tofu">Tofu</option>
-    <option value="milanesas de soja">Milanesas de soja</option>
-    <option value="legumbres">Legumbres</option>
+    <option value="">-- Proteínas --</option>  
+     <option value="milanesa-vacuna">Milanesa vacuna</option>
+     <option value="milanesa-pollo">Milanesa pollo</option>
+     <option value="milanesa-cerdo">Milanesa cerdo</option>
+     <option value="hamburguesa-vacuna">Hamburguesa vacuna</option>
+     <option value="medallones-pollo">Medallones pollo</option>
+     <option value="bife-vacuno">Bife vacuno</option>
+     <option value="filete-pollo">Filete pollo</option>
+     <option value="costeleta-vacua">Costeleta vacua</option>
+     <option value="costeleta-cerdo">Costeleta cerdo</option>
+     <option value="patamuslo-pollo">Patamuslo pollo</option>
+     <option value="cola-cuadril">Cola cuadril</option>
+     <option value="lomo-vacuno">Lomo vacuno</option>
+     <option value="entrecot">Entrecot</option>
+     <option value="bife-de-chorizo">Bife de chorizo</option>
   </select>
 
   <select id="hidrato">
     <option value="">-- Hidratos de carbono --</option>
-    <option value="arroz">Arroz</option>
-    <option value="papa">Papa</option>
-    <option value="fideos">Fideos</option>
+      <option value="fideos">Fideos</option>
+         <option value="papa">Papa</option>
+         <option value="batata">Batata</option>
+         <option value="mandioca">Mandioca</option>
+         <option value="arroz">Arroz</option>
+         <option value="polenta">Polenta</option>
+         <option value="quinoa">Quínoa</option>
   </select>
 
   <select id="completo">
     <option value="">-- Plato completo (opcional) --</option>
-    <option value="lasagna vegetariana">Lasagna vegetariana</option>
-    <option value="ensalada completa">Ensalada completa</option>
-    <option value="tarta de verduras">Tarta de verduras</option>
+    <option value="lasagna">Lasagna</option>
+    <option value="ensaladaCompleta">Ensalada completa</option>
   </select>
 
   <button onclick="validarPlato()">Validar y asignar</button>
@@ -108,7 +122,7 @@
     <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
     <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
-    <button onclick="window.open('index.html','_blank')">Opción calendario Tradicional</button>
+    <button onclick="window.open('index-vegetariano.html','_blank')">Opción calendario Vegetariano</button>
   </div>
 
   <script>
@@ -129,14 +143,26 @@
   const s = getSeleccionados();
   let valido = false, platoFinal = '';
 
-  // ✅ Reglas originales del vegetariano
+  // ✅ Reglas de combinación
   if (s.completo && !s.verdura && !s.proteina && !s.hidrato) {
+    // Plato completo solo
     valido = true;
     platoFinal = s.completo;
   } 
   else if (s.verdura && s.proteina && s.hidrato && !s.completo) {
+    // Verdura + Proteína + Hidrato
     valido = true;
     platoFinal = `${s.verdura}, ${s.proteina}, ${s.hidrato}`;
+  } 
+  else if (s.verdura && s.proteina && !s.hidrato && !s.completo) {
+    // Verdura + Proteína
+    valido = true;
+    platoFinal = `${s.verdura}, ${s.proteina}`;
+  } 
+  else if (s.verdura && s.hidrato && !s.proteina && !s.completo) {
+    // Verdura + Hidrato
+    valido = true;
+    platoFinal = `${s.verdura}, ${s.hidrato}`;
   }
 
   if (valido) {
@@ -145,9 +171,11 @@
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
 
+      // No repetir almuerzo = cena en el mismo día
       if (calendario[dia][otroTipo] === platoFinal) {
         mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
       }
+      // No más de 2 veces por semana
       else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       }
@@ -159,7 +187,7 @@
       seleccion = null;
       limpiarSelects();
     } else {
-      // 👉 Si no hay celda seleccionada, usar tu lógica original (azar + máximo 2 veces)
+      // 👉 Si no hay celda seleccionada, usar asignación aleatoria con límite de 2
       const ok = asignarAcalendario(platoFinal);
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
@@ -169,10 +197,14 @@
       limpiarSelects();
     }
   } else {
-    mostrarMensaje('❌ Combinación no válida. Volvé a intentarlo.', 'error');
+    // Mensaje específico si eligieron proteína + hidrato sin verdura
+    if (!s.verdura && s.proteina && s.hidrato) {
+      mostrarMensaje('❌ Faltan verduras u hortalizas en el plato.', 'error');
+    } else {
+      mostrarMensaje('❌ Combinación no válida. Volvé a intentarlo.', 'error');
+    }
   }
 }
-
 function contarRepeticiones(plato) {
   let rep = 0;
   dias.forEach(d => {
@@ -181,6 +213,7 @@ function contarRepeticiones(plato) {
   });
   return rep;
 }
+
 
 
     function asignarAcalendario(plato){
@@ -226,12 +259,13 @@ function contarRepeticiones(plato) {
   return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
 }
 
-
     function eliminarPlato(e,dia,tipo){ e.stopPropagation(); calendario[dia][tipo]=null; actualizarCalendario(); }
 
-    function seleccionarCelda(dia, tipo) {
+  function seleccionarCelda(dia, tipo) {
+  // Quitar resaltado previo
   document.querySelectorAll('#calendario-body td').forEach(td => td.classList.remove('selected'));
 
+  // Si todavía no hay selección, marcar esta y (si está vacía) scrollear al formulario
   if (!seleccion) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
@@ -241,16 +275,20 @@ function contarRepeticiones(plato) {
     return;
   }
 
-  const o = seleccion;
-  const pO = calendario[o.dia][o.tipo];
-  const pD = calendario[dia][tipo];
+  // Ya había una selección previa (origen)
+  const o = seleccion;                // { dia, tipo } seleccionado antes
+  const pO = calendario[o.dia][o.tipo]; // plato en origen
+  const pD = calendario[dia][tipo];     // plato en destino
 
+  // Si clickeaste la misma celda, cancelar selección
   if (o.dia === dia && o.tipo === tipo) {
     seleccion = null;
     actualizarCalendario();
     return;
   }
 
+  // Si el origen estaba vacío (seleccionaste una celda vacía primero),
+  // simplemente mover la selección a la nueva celda
   if (!pO) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
@@ -260,9 +298,10 @@ function contarRepeticiones(plato) {
     return;
   }
 
+  // Probar movimiento/intercambio en una copia para validar duplicado dentro del día
   const tmp = JSON.parse(JSON.stringify(calendario));
-  tmp[dia][tipo] = pO;
-  tmp[o.dia][o.tipo] = pD;
+  tmp[dia][tipo] = pO;           // mover plato de origen a destino
+  tmp[o.dia][o.tipo] = pD;       // y lo que había en destino (o nada) pasa al origen
 
   const noDupMismoDia = d => {
     const a = tmp[d].almuerzo, c = tmp[d].cena;
@@ -276,16 +315,19 @@ function contarRepeticiones(plato) {
     return;
   }
 
+  // Aplicar cambio (move/swap) y limpiar selección
   calendario = tmp;
   seleccion = null;
   actualizarCalendario();
 }
 
 
+
+
     function marcarCeldaSeleccionada(dia,tipo){ document.querySelectorAll('#calendario-body tr').forEach(f=>{ const c=f.children; if(c[0].innerText===dia){ if(tipo==='almuerzo') c[1].classList.add('selected'); if(tipo==='cena') c[2].classList.add('selected'); } }); }
 
-    function guardarCalendario(){ localStorage.setItem('calendario_veg',JSON.stringify(calendario)); }
-    function cargarCalendario(){ const g=localStorage.getItem('calendario_veg'); if(g){ try{ calendario=JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} } }
+    function guardarCalendario(){ localStorage.setItem('calendario',JSON.stringify(calendario)); }
+    function cargarCalendario(){ const g=localStorage.getItem('calendario'); if(g){ try{ calendario=JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} } }
 
     window.onload=()=>{ cargarCalendario(); actualizarCalendario(); };
 
@@ -296,8 +338,9 @@ function contarRepeticiones(plato) {
 
   <div id="mensaje" class="mensaje-toast"></div>
 
+  
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   async function descargarPDF() {
     const { jsPDF } = window.jspdf;
