@@ -33,6 +33,32 @@
     .mensaje-toast.error{ background:#f44336; }
     @keyframes fadein { from{opacity:0; transform:translate(-50%,20px);} to{opacity:1; transform:translate(-50%,0);} }
     @keyframes fadeout { from{opacity:1;} to{opacity:0;} }
+
+    /* Checkbox pegado al texto y con sombreadito */
+.opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.opciones-ensalada .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;          /* separa solo 6px entre tilde y texto */
+  margin: 0;
+  padding: 6px 10px; /* “pill” */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f6f6f6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.opciones-ensalada .chip input[type="checkbox"] {
+  margin: 0;         /* quita márgenes por defecto del navegador */
+  transform: translateY(0); /* evita desalineación vertical */
+}
+
   </style>
 </head>
 <body>
@@ -50,7 +76,7 @@
   <!-- Selector de Verduras y Ensaladas -->
   <select id="verdura">
     <option value="">-- Verduras y hortalizas --</option>
-     <option value="ensaladas">🥗 Ensaladas</option>
+     
      <option value="lechuga">Lechuga</option>
      <option value="acelga">Acelga</option>
      <option value="espinaca">Espinaca</option>
@@ -64,14 +90,30 @@
      <option value="choclo">Choclo</option>
      <option value="cebolla">Cebolla</option>
      <option value="palta">Palta</option>
+
+       <option value="ensaladas">🥗 Armá tu ensalada</option>
+  <!-- 👇 opción “custom” para inyectar la ensalada armada -->
+  <option id="verduraCustom" value="" style="display:none;"></option>
+</select>
   </select>
 
-  <select id="ensalada" style="display:none;">
-    <option value="">-- 🥗 Elegí una ensalada --</option>
-    <option value="ensalada mixta">Ensalada mixta</option>
-    <option value="ensalada rusa">Ensalada rusa</option>
-    <option value="ensalada de lentejas">Ensalada de lentejas</option>
-  </select>
+ <div id="ensalada" class="subgrilla" style="display:none;">
+  <h4>Armá tu ensalada</h4>
+  <p>Seleccioná las verduras:</p>
+  <div class="opciones-ensalada">
+    <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
+    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
+    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
+    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
+    <label class="chip"><input type="checkbox" value="Palta">Palta</label>
+    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
+    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
+    <label class="chip"><input type="checkbox" value="Rúcula">Rúcula</label>
+    <label class="chip"><input type="checkbox" value="Espinaca">Espinaca</label>
+  </div>
+  <button type="button" onclick="copiarEnsalada()">Agregar ensalada</button>
+</div>
+
 
   <select id="proteina">
     <option value="">-- Proteínas --</option>  
@@ -126,6 +168,33 @@
   </div>
 
   <script>
+
+    document.getElementById('verdura').addEventListener('change', function () {
+  const isSalad = this.value === 'ensaladas';
+  document.getElementById('ensalada').style.display = isSalad ? 'block' : 'none';
+});
+
+function copiarEnsalada() {
+  const checks = document.querySelectorAll('#ensalada input[type="checkbox"]:checked');
+  const seleccion = Array.from(checks).map(c => c.value).join(', ');
+
+  // Si no eligieron nada, no hacemos nada (ni mostramos mensajes)
+  if (!seleccion) return;
+
+  const verdSel = document.getElementById('verdura');
+  const optCustom = document.getElementById('verduraCustom');
+
+  // Cargar/mostrar el option custom con la ensalada armada
+  optCustom.value = seleccion;
+  optCustom.textContent = '🥗 Ensalada: ' + seleccion;
+  optCustom.style.display = '';     // dejar de ocultar
+  optCustom.selected = true;        // seleccionar ese option
+
+  // Ocultar subgrilla y limpiar tildes
+  document.getElementById('ensalada').style.display = 'none';
+  document.querySelectorAll('#ensalada input[type="checkbox"]').forEach(c => c.checked = false);
+}
+
     const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes']; // ✅ solo lunes a viernes
     let calendario = {}; let seleccion = null;
     dias.forEach(dia => calendario[dia] = { almuerzo:null, cena:null });
@@ -403,5 +472,6 @@ function contarRepeticiones(plato) {
 </script>
 </body>
 </html>
+
 
 
