@@ -58,7 +58,7 @@
   margin: 0;         /* quita márgenes por defecto del navegador */
   transform: translateY(0); /* evita desalineación vertical */
 }
-    .opciones-ensalada {
+.opciones-ensalada {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
@@ -85,6 +85,53 @@
   margin: 0;
 }
 
+.opciones-coccion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.opciones-coccion label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;   /* 👈 fuerza que todas las columnas se adapten */
+  word-wrap: break-word; /* 👈 permite cortar palabras largas */
+}
+
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; /* 👈 corte de palabras si no entran */
+  white-space: normal;       /* 👈 permite salto de línea */
+}
+button {
+  background: var(--primario); /* Verde base (#8f9d68) */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 10px;
+  transition: background .3s;
+}
+
+button:hover,
+button:focus {
+  background: #6f8632; /* un tono apenas más oscuro que el base */
+  outline: none;       /* saca el borde azul de focus */
+}
+
+.verduras-paren {    /*aca se puede achicar la letra de adentro de los paerentesis*/
+  font-size: 12px;
+  color: #555;
+}
+
+
 
   </style>
 </head>
@@ -104,19 +151,20 @@
   <select id="verdura">
     <option value="">-- Verduras y hortalizas --</option>
      
-     <option value="lechuga">Lechuga</option>
-     <option value="acelga">Acelga</option>
-     <option value="espinaca">Espinaca</option>
-     <option value="rucula">Rúcula</option>
-     <option value="pimiento">Pimiento</option>
-     <option value="zapallo">Zapallo</option>
-     <option value="zapallito">Zapallito</option>
-     <option value="zucchini">Zucchini</option>
-     <option value="berenjena">Berenjena</option>
-     <option value="calabaza">Calabaza</option>
-     <option value="choclo">Choclo</option>
-     <option value="cebolla">Cebolla</option>
-     <option value="palta">Palta</option>
+     <option value="Ens.(tomate,lechuga,cebolla)">Ens.(tomate,lechuga,cebolla)</option>
+     <option value="Ens.(lechuga,tomate,cebolla,palta)">Ens.(lechuga,tomate,cebolla,palta)</option>
+     <option value="Ens.(lechuga,zanahoria,repollo)">Ens.(lechuga,zanahoria,repollo)</option>
+     <option value="Ens.(rúcula,zanahoria,repollo)">Ens.(rúcula,zanahoria,repollo)</option>
+     <option value="Ens.(achicoria,zanahoria,repollo)">Ens.(achicoria,zanahoria,repollo)</option>
+     <option value="Ens.(rúcula,t.cherry,palta)">Ens.(rúcula,t.cherry,palta)</option>
+     <option value="Ens.(zanahoria,remolacha,repollo)">Ens.(zanahoria,remolacha,repollo)</option>
+     <option value="Ens.(Apio,manzana verde, nueces)">Ens.(Apio,manzana verde, nueces)</option>
+     <option value="Salteado(cebolla,pimiento,zanahoria)">Salteado(cebolla,pimiento,zanahoria)</option>
+     <option value="Salteado(zucchini,berenjena,cebolla)">Salteado(zucchini,berenjena,cebolla)</option>
+     <option value="Horno(cebolla,zanahoria,pimiento,calabaza)">Horno(cebolla,zanahoria,pimiento,calabaza)</option>
+     <option value="Puré zapallo/calabaza">Puré zapallo/calabaza</option>
+
+     
 
        <option value="ensaladas">🥗 Armá tu ensalada</option>
   <!-- 👇 opción “custom” para inyectar la ensalada armada -->
@@ -126,55 +174,108 @@
 
  <div id="ensalada" class="subgrilla" style="display:none;">
   <h4>Armá tu ensalada</h4>
+
+  <p>Elegí el tipo de cocción:</p>
+  <div class="opciones-coccion">
+    <label><input type="radio" name="coccion" value="Crudo"> Crudo</label>
+    <label><input type="radio" name="coccion" value="Salteado"> Salteado</label>
+    <label><input type="radio" name="coccion" value="Horno"> Horno</label>
+    <label><input type="radio" name="coccion" value="Hervido"> Hervido</label>
+  </div>
+
   <p>Seleccioná las verduras:</p>
   <div class="opciones-ensalada">
     <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
-    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
-    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
-    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
-    <label class="chip"><input type="checkbox" value="Palta">Palta</label>
-    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
-    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
     <label class="chip"><input type="checkbox" value="Rúcula">Rúcula</label>
+    <label class="chip"><input type="checkbox" value="Achicoria">Achicoria</label>
     <label class="chip"><input type="checkbox" value="Espinaca">Espinaca</label>
+    <label class="chip"><input type="checkbox" value="Acelga">Acelga</label>
+    <label class="chip"><input type="checkbox" value="Repollo">Repollo</label>
+    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
+    <label class="chip"><input type="checkbox" value="Tomate cherry">Tomate cherry</label>
+    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
+    <label class="chip"><input type="checkbox" value="Cebolla verdeo">Cebolla verdeo</label>
+    <label class="chip"><input type="checkbox" value="Puerro">Puerro</label>
+    <label class="chip"><input type="checkbox" value="Ajo">Ajo</label>
+    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
+    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
+    <label class="chip"><input type="checkbox" value="Remolacha">Remolacha</label>
+    <label class="chip"><input type="checkbox" value="Zapallito">Zapallito</label>
+    <label class="chip"><input type="checkbox" value="Zucchini">Zucchini</label>
+    <label class="chip"><input type="checkbox" value="Berenjena">Berenjena</label>
+    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
+    <label class="chip"><input type="checkbox" value="Calabaza">Calabaza</label>
+    <label class="chip"><input type="checkbox" value="Zapallo">Zapallo</label>
+    <label class="chip"><input type="checkbox" value="Arvejas">Arvejas</label>
+    <label class="chip"><input type="checkbox" value="Chaucha">Chaucha</label>
+    <label class="chip"><input type="checkbox" value="Brocoli">Brocoli</label>
+    <label class="chip"><input type="checkbox" value="Coliflor">Coliflor</label>
+    <label class="chip"><input type="checkbox" value="Alcaucil">Alcaucil</label>
+    <label class="chip"><input type="checkbox" value="Apio">Apio</label>
   </div>
+
   <button type="button" onclick="copiarEnsalada()">Agregar ensalada</button>
 </div>
 
 
+
   <select id="proteina">
     <option value="">-- Proteínas --</option>  
-     <option value="milanesa-vacuna">Milanesa vacuna</option>
-     <option value="milanesa-pollo">Milanesa pollo</option>
-     <option value="milanesa-cerdo">Milanesa cerdo</option>
-     <option value="hamburguesa-vacuna">Hamburguesa vacuna</option>
-     <option value="medallones-pollo">Medallones pollo</option>
+     <option value="Milanesa vaca">Milanesa vaca</option>
+     <option value="Milanesa pollo">Milanesa pollo</option>
+     <option value="Milanesa cerdo">Milanesa cerdo</option>
+     <option value="Milanesa pescado">Milanesa pescado</option>
+     <option value="Milanesa de soja">Milanesa de soja</option>
+     <option value="Hamburguesa vacuna">Hamburguesa vacuna</option>
+     <option value="Medallon de pollo">Medallon de pollo</option>
+     <option value="medallon-de-legumbre">Medallon de legumbre</option>
+     <option value="nugget-de-pollo">Nugget de Pollo</option>
      <option value="bife-vacuno">Bife vacuno</option>
-     <option value="filete-pollo">Filete pollo</option>
-     <option value="costeleta-vacua">Costeleta vacua</option>
-     <option value="costeleta-cerdo">Costeleta cerdo</option>
-     <option value="patamuslo-pollo">Patamuslo pollo</option>
-     <option value="cola-cuadril">Cola cuadril</option>
-     <option value="lomo-vacuno">Lomo vacuno</option>
-     <option value="entrecot">Entrecot</option>
-     <option value="bife-de-chorizo">Bife de chorizo</option>
+     <option value="pollo-al-horno">Pollo al horno</option>
+     <option value="Pollo asado">Pollo asado</option>
+     <option value="Filet pollo">Filet pollo</option>
+     <option value="Filet pescado">Filet pescado</option>
+     <option value="Costeleta vaca">Costeleta vaca</option>
+     <option value="Costeleta cerdo">Costeleta cerdo</option>
+     <option value="Huevo duro">Huevo duro</option>
+     <option value="huevo revuelto">Huevo revuelto</option>
+     <option value="huevo a la plancha">Huevo a la plancha</option>
+     <option value="jamon cocido crudo">Jamon cocido/crudo</option>
   </select>
 
   <select id="hidrato">
     <option value="">-- Hidratos de carbono --</option>
-      <option value="fideos">Fideos</option>
-         <option value="papa">Papa</option>
-         <option value="batata">Batata</option>
-         <option value="mandioca">Mandioca</option>
-         <option value="arroz">Arroz</option>
-         <option value="polenta">Polenta</option>
-         <option value="quinoa">Quínoa</option>
+      <option value="Arroz blanco">Arroz blanco</option>
+      <option value="Arroz integral yamani">Arroz integral/yamaní</option>
+      <option value="Fideos">Fideos</option>
+      <option value="Medallon de legumbre">Medallon de legumbre</option>
+     <option value="Pure de papa">Pure de papa</option>
+     <option value="Papa al horno">Papa al horno</option>
+     <option value="Batata al horno">Batata al horno</option>
+     <option value="Choclo">Choclo</option>
+     <option value="Quinoa">Quínoa</option>
+     <option value="Cuscus">Cuscús</option>
+     <option value="Trigo-burgol">Trigo burgol</option>
+     <option value="Lentejas">Lentejas</option>
+     <option value="Garbanzos">Garbanzos</option>
+     <option value="Porotos">Porotos</option>
   </select>
 
   <select id="completo">
     <option value="">-- Plato completo (opcional) --</option>
-    <option value="lasagna">Lasagna</option>
-    <option value="ensaladaCompleta">Ensalada completa</option>
+      <option value="Tarta de espinaca,queso,cebolla,puerro">Tarta de espinaca,queso,cebolla,puerro</option>
+     <option value="tarta capresse">Tarta capresse</option>
+    <option value="Tarta de zapallito,queso,huevo, cebolla">Tarta de zapallito,queso,huevo, cebolla</option>
+     <option value="tarta de atun">Tarta de atún</option>
+     <option value="Pastel de papa,zapallo,carne picada">Pastel de papa,zapallo,carne picada</option>
+     <option value="guiso de lentejas">Guiso de lentejas</option>
+     <option value="pata muslo + verduras al horno">Pata muslo + verduras al horno</option>
+     <option value="Pescado al paquete con verduras">Pescado al paquete con verduras</option>
+     <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
+     <option value="Pasta rellena con salsa( tomate, bolognesa o mixta)">Pasta rellena con salsa( tomate, bolognesa o mixta)</option>
+     <option value="Wok de verduras y fideos">Wok de verduras y fideos</option>
+     <option value="Wok de verduras y pollo">Wok de verduras y pollo</option>
+     <option value="Fajitas de pollo y verdura">Fajitas de pollo y verdura</option>
   </select>
 
   <button onclick="validarPlato()">Validar y asignar</button>
@@ -202,25 +303,38 @@
 });
 
 function copiarEnsalada() {
+  // Obtener cocción seleccionada
+  const coccion = document.querySelector('input[name="coccion"]:checked');
+  if (!coccion) {
+    mostrarMensaje('❌ Falta elegir método de cocción.','error');
+    return;
+  }
+
+  // Obtener verduras seleccionadas
   const checks = document.querySelectorAll('#ensalada input[type="checkbox"]:checked');
-  const seleccion = Array.from(checks).map(c => c.value).join(', ');
+  const seleccion = Array.from(checks).map(c => c.value);
+  if (!seleccion.length) {
+    mostrarMensaje('❌ Seleccioná al menos una verdura.','error');
+    return;
+  }
 
-  // Si no eligieron nada, no hacemos nada (ni mostramos mensajes)
-  if (!seleccion) return;
+  // Armar string final con cocción + verduras en paréntesis
+  const finalStr = `${coccion.value} (<span class="verduras-paren">${seleccion.join(', ')}</span>)`;
 
-  const verdSel = document.getElementById('verdura');
+  // Inyectar en opción custom
   const optCustom = document.getElementById('verduraCustom');
+  optCustom.value = `${coccion.value} (${seleccion.join(', ')})`; // valor plano
+  optCustom.innerHTML = `🥗 Ensalada: ${finalStr}`;
+  optCustom.style.display = '';
+  optCustom.selected = true;
 
-  // Cargar/mostrar el option custom con la ensalada armada
-  optCustom.value = seleccion;
-  optCustom.textContent = '🥗 Ensalada: ' + seleccion;
-  optCustom.style.display = '';     // dejar de ocultar
-  optCustom.selected = true;        // seleccionar ese option
-
-  // Ocultar subgrilla y limpiar tildes
+  // Limpiar selección
   document.getElementById('ensalada').style.display = 'none';
   document.querySelectorAll('#ensalada input[type="checkbox"]').forEach(c => c.checked = false);
+  document.querySelectorAll('#ensalada input[name="coccion"]').forEach(r => r.checked = false);
 }
+
+
 
     const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes']; // ✅ solo lunes a viernes
     let calendario = {}; let seleccion = null;
@@ -499,6 +613,7 @@ function contarRepeticiones(plato) {
 </script>
 </body>
 </html>
+
 
 
 
