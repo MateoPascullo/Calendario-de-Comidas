@@ -134,10 +134,19 @@ button:focus {
 
 
   </style>
+
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8f9d68">
+
+<!-- Para iPhone -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
 </head>
 <body>
 
-  <h1>¿¡Qué comemos!?</h1>
+  <h1>¿Qué comemos!?</h1>
   <h2>Organizador de comidas semanal</h2>
 
   <div style="text-align:center; margin:20px 0;">
@@ -289,10 +298,16 @@ button:focus {
   </table>
 
   <div class="top-buttons">
-    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
+    
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
-    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
     <button onclick="window.open('index-vegetariano.html','_blank')">Opción calendario Vegetariano</button>
+    <button id="addToHome" style="display:none; margin-bottom:10px;">
+  📲 Agregar a mi pantalla de inicio
+    </button>
+
+    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
+    
   </div>
 
   <script>
@@ -610,9 +625,29 @@ function contarRepeticiones(plato) {
     // Guardar el PDF
     doc.save("menu-semanal.pdf");
   }
+
+  let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('addToHome').style.display = 'inline-block';
+});
+
+document.getElementById('addToHome').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+    });
+  } else {
+    alert("👉 En Safari tocá Compartir → 'Agregar a pantalla de inicio'.");
+  }
+});
 </script>
 </body>
 </html>
+
 
 
 
