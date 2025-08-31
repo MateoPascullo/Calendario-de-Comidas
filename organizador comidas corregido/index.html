@@ -362,17 +362,17 @@ function copiarEnsalada() {
   else if (s.verdura && s.proteina && s.hidrato && !s.completo) {
     // Verdura + Proteína + Hidrato
     valido = true;
-    platoFinal = `${s.verdura}, ${s.proteina}, ${s.hidrato}`;
+    platoFinal = `${s.verdura}+ ${s.proteina}+ ${s.hidrato}`;
   } 
   else if (s.verdura && s.proteina && !s.hidrato && !s.completo) {
     // Verdura + Proteína
     valido = true;
-    platoFinal = `${s.verdura}, ${s.proteina}`;
+    platoFinal = `${s.verdura}+ ${s.proteina}`;
   } 
   else if (s.verdura && s.hidrato && !s.proteina && !s.completo) {
     // Verdura + Hidrato
     valido = true;
-    platoFinal = `${s.verdura}, ${s.hidrato}`;
+    platoFinal = `${s.verdura}+ ${s.hidrato}`;
   }
 
   if (valido) {
@@ -613,6 +613,7 @@ function contarRepeticiones(plato) {
 </script>
 </body>
 </html>
+
 
 
 
