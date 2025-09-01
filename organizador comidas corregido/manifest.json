@@ -1,5 +1,5 @@
 {
-  "name": "¿¡Qué comemos!?",
+  "name": "¡Qué comemos?",
   "short_name": "Calendario de comidas",
   "start_url": "index.html",
   "display": "standalone",
@@ -20,6 +20,7 @@
     }
   ]
 }
+
 
 
 
