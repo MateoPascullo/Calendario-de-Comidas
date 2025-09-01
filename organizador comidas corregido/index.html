@@ -301,7 +301,14 @@ button:focus {
     
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
     <button onclick="window.open('index-vegetariano.html','_blank')">Opción calendario Vegetariano</button>
-    <button id="addToHome" style="display:none; margin-bottom:10px;">
+   
+
+    
+
+    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
+
+     <button id="addToHome" style="display:none; margin-bottom:10px;">
   📲 Agregar a mi pantalla de inicio
     </button>
 
@@ -310,9 +317,6 @@ button:focus {
   1. Tocá <strong>Compartir</strong> (cuadrado con flecha ↑)<br>
   2. Elegí <strong>Agregar a pantalla de inicio</strong>
 </div>
-
-    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
-    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
     
   </div>
 
@@ -667,6 +671,7 @@ document.getElementById('addToHome').addEventListener('click', () => {
 
 </body>
 </html>
+
 
 
 
