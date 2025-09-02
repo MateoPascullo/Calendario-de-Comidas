@@ -1,0 +1,161 @@
+
+    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
+    h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
+    select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
+    button { background:var(--primario); color:#fff; border:none; cursor:pointer; transition:background .3s; }
+    button:hover { background:#0088cc; }
+    #mensaje { margin:20px; font-weight:bold; }
+    table { width:100%; max-width:800px; margin:30px auto 0; border-collapse:collapse; }
+    th,td { border:1px solid var(--borde); padding:12px; text-align:center; }
+    td:hover { background:#f0f0f0; }
+    td.selected { border:2px solid var(--primario); background:#e6f7ff; }
+    .menu-eliminar { display:inline-block; margin-top:5px; background:#bbb; color:#fff; font-size:11px; padding:3px 6px; border-radius:3px; cursor:pointer; }
+    .top-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:30px; }
+    .top-buttons button { padding:8px 12px; font-size:14px; width:auto; }
+    @media (max-width:600px){
+      table, thead, tbody, th, td, tr { display:block; }
+      thead{ display:none; }
+      tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
+      td{ text-align:left; border:none; border-bottom:1px solid var(--borde); position:relative; padding-left:50%; }
+      td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
+      td:last-child{ border-bottom:none; }
+    }
+    .plato-saludable{ width:400px; max-width:100%; height:auto; }
+    .mensaje-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); min-width:280px; max-width:90%; padding:12px 18px; border-radius:8px; font-size:15px; font-weight:500; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.2); display:none; z-index:1000; animation:fadein .3s ease, fadeout .3s ease 3.7s; }
+    .mensaje-toast.exito{ background:#4CAF50; }
+    .mensaje-toast.error{ background:#f44336; }
+    @keyframes fadein { from{opacity:0; transform:translate(-50%,20px);} to{opacity:1; transform:translate(-50%,0);} }
+    @keyframes fadeout { from{opacity:1;} to{opacity:0;} }
+
+    /* Checkbox pegado al texto y con sombreadito */
+.opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.opciones-ensalada .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;          /* separa solo 6px entre tilde y texto */
+  margin: 0;
+  padding: 6px 10px; /* “pill” */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f6f6f6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.opciones-ensalada .chip input[type="checkbox"] {
+  margin: 0;         /* quita márgenes por defecto del navegador */
+  transform: translateY(0); /* evita desalineación vertical */
+}
+.opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.opciones-ensalada .chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 👇 forzamos el checkbox a mostrarse igual en iOS */
+.opciones-ensalada .chip input[type="checkbox"] {
+  appearance: auto;       /* asegura que Safari no los oculte */
+  -webkit-appearance: checkbox; /* compatibilidad Safari */
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.opciones-coccion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.opciones-coccion label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;   /* 👈 fuerza que todas las columnas se adapten */
+  word-wrap: break-word; /* 👈 permite cortar palabras largas */
+}
+
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; /* 👈 corte de palabras si no entran */
+  white-space: normal;       /* 👈 permite salto de línea */
+}
+button {
+  background: var(--primario); /* Verde base (#8f9d68) */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 10px;
+  transition: background .3s;
+}
+
+button:hover,
+button:focus {
+  background: #6f8632; /* un tono apenas más oscuro que el base */
+  outline: none;       /* saca el borde azul de focus */
+}
+
+.verduras-paren {    /*aca se puede achicar la letra de adentro de los paerentesis*/
+  font-size: 12px;
+  color: #555;
+}
+
+h1 {
+  font-family: 'Courgette', cursive;
+  font-size: 3rem;
+  text-align: center;
+  color: var(--primario);
+  margin-bottom: 15px;
+}
+h2 {
+  font-size: 1rem;     /* más chico, igual al texto normal */
+  font-weight: 500;    /* medio, para que se note pero no grite */
+  text-align: center;  /* opcional si querés centrarlo */
+  margin-bottom: 15px; /* separación abajo */
+}
+
+
+.btn-calendario-container {
+  text-align: right;   /* alinea a la derecha */
+  margin: 5px 0 15px 0;
+}
+
+.btn-calendario {
+  background: var(--primario);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s ease;
+}
+
+.btn-calendario:hover {
+  background: #5a6b3c; /* verde más oscuro al pasar el mouse */
+}
