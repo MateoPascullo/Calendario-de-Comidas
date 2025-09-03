@@ -17,10 +17,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 </head>
+
+<a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
+
+
 <body>
 
   <h1>¡Qué comemos?</h1>
-  <h2>Organizador de comidas semanal</h2>
+  <h2>Organizá tus comidas de la semana</h2>
 
   
 
@@ -28,11 +32,10 @@
     <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
   </div>
 
-  <h3 id="form-plato">Elegí los alimentos para tu plato</h3>
+  <h3 id="form-plato">Cargá el plato al calendario</h3>
 
-<div class="btn-calendario-container">
-  <a href="index-vegetariano.html" class="btn-calendario">Ir a calendario vegetariano</a>
-</div>
+  
+
   <!-- Selector de Verduras y Ensaladas -->
   <select id="verdura">
     <option value="">-- Verduras y hortalizas --</option>
@@ -169,6 +172,10 @@
   <h2>🗓️ Calendario semanal</h2>
   <p>Hacé click en una comida para seleccionarla y después click en otra celda para intercambiarla o moverla. Tocá en "Eliminar" para borrar un alimento.</p>
 
+  <div class="btn-calendario-container">
+   <a href="index-vegetariano.html" class="btn-calendario">Ir a calendario vegetariano</a>
+  </div>
+
   <table id="calendario">
     <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
     <tbody id="calendario-body"></tbody>
@@ -177,26 +184,28 @@
   <div class="top-buttons">
     
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
-    
- 
 
-   
+    <button onclick="generarCalendarioAleatorio()">🎲 Generar semana aleatoria</button>
 
-    
-
-    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
-    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
-
-     <button id="addToHome" style="display:none; margin-bottom:10px;">
+    <button onclick="descargarPDF()">📥 Descargá tu menú semanal (PDF)</button>
+     
+    <button id="addToHome" style="display:none; margin-bottom:10px;">
   📲 Agregar a mi pantalla de inicio
     </button>
-
+    
+    
     <div id="ios-install-hint" style="display:none; margin:10px; padding:10px; background:#fefae0; border:1px solid #ccc; border-radius:8px; font-size:0.9rem;">
   📲 Para agregar esta app a tu pantalla de inicio:<br>
   1. Tocá <strong>Compartir</strong> (cuadrado con flecha ↑)<br>
   2. Elegí <strong>Agregar a pantalla de inicio</strong>
 </div>
     
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
+
+    <div class="btn-calendario-container">
+      <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
+    </div>
+  
   </div>
 <script src="js/compartido.js" defer></script>
 <script src="js/tradicional.js" defer></script>
@@ -210,3 +219,4 @@
 
 </body>
 </html>
+
