@@ -125,7 +125,7 @@ function actualizarCalendario(){
 function crearContenidoCelda(dia, tipo) {
   const plato = calendario[dia][tipo];
   if (!plato) {
-    return '<span style="font-size:12px; color:#999;">Haga click para agregar un plato</span>';
+    return '<span style="font-size:12px; color:#999;">Click para agregar un plato</span>';
   }
   return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
 }
@@ -247,3 +247,47 @@ window.onload=()=>{
   cargarCalendario(); // esta función se define en app-normal o app-veg
   actualizarCalendario(); 
 };
+
+
+
+
+
+
+
+//CALENDARIO ALEATORIO
+
+// ===== Helpers globales =====
+window.getOpciones = function getOpciones(idSelect) {
+  const select = document.getElementById(idSelect);
+  if (!select) {
+    console.warn(`⚠️ No encontré el <select> #${idSelect}.`);
+    return [];
+  }
+  return Array.from(select.options)
+    .map(opt => (opt.value ?? "").trim())
+    .filter(val => val !== "");
+};
+
+
+//BOTON FLOTANTE
+// Botón flotante: ir al día de hoy
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnHoy");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const hoy = new Date();
+      let indiceHoy = hoy.getDay() - 1; // Lunes=0
+      if (indiceHoy < 0 || indiceHoy > 4) {
+        mostrarMensaje("📅 Hoy no es un día de semana configurado (Lun-Vie).", "error");
+        return;
+      }
+      const fila = document.querySelectorAll("#calendario-body tr")[indiceHoy];
+      if (fila) {
+        fila.scrollIntoView({ behavior: "smooth", block: "center" });
+        fila.classList.add("selected");
+        setTimeout(() => fila.classList.remove("selected"), 3000);
+      }
+    });
+  }
+});
+
