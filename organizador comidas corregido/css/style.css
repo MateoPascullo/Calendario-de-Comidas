@@ -159,3 +159,22 @@ h2 {
 .btn-calendario:hover {
   background: #5a6b3c; /* verde más oscuro al pasar el mouse */
 }
+
+/* FLOTANTE ya elegiste tu menu de hoy?*/
+.btn-flotante {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+}
+
+#btnHoy {
+  background: #bd8531;   /* naranja */
+  color: #fff;
+}
+
+#btnHoy:hover {
+  background: #704c16;   /* más oscuro al pasar el mouse */
+}
+
+
