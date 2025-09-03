@@ -9,21 +9,21 @@
   <link rel="stylesheet" href="css/style.css">
 
 </head>
+
+ <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya elegiste tu menú de hoy?</a>
+
 <body>
 
   <h1>¡Qué comemos?</h1>
   <h2>Vegetariano</h2>
-  <h2>Organizador de comidas semanal</h2>
+  <h2>Organizá tus comidas de la semana</h2>
 
   <div style="text-align:center; margin:20px 0;">
     <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
   </div>
 
- <h3 id="form-plato">Elegí los alimentos para tu plato</h3>
+ <h3 id="form-plato">Cargá el plato al calendario</h3>
 
-<div class="btn-calendario-container">
-  <a href="index.html" class="btn-calendario">Ir a calendario tradicional</a>
-</div>
 
 
 
@@ -120,8 +120,7 @@
     <option value="Pastel de papa y zapallo">Pastel de papa y zapallo</option>
     <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
     <option value="Wok de verduras y fideos">Wok de verduras y fideos</option>
-    <option value="Wok de verduras y pollo">Wok de verduras y pollo</option>
-    <option value="Fajitas de pollo y verdura">Fajitas de pollo y verdura</option>
+    <option value="Fajitas de verduras varias">Fajitas de verduras varias</option>
     <option value="Pasta rellena con salsa ( tomate o mixta)">Pasta rellena con salsa ( tomate o mixta)</option>
   </select>
 
@@ -129,6 +128,11 @@
 
   <h2>🗓️ Calendario semanal</h2>
   <p>Hacé click en una comida para seleccionarla y después click en otra celda para intercambiarla o moverla. Tocá en "Eliminar" para borrar un alimento.</p>
+
+  <div class="btn-calendario-container">
+  <a href="index.html" class="btn-calendario">Ir a calendario tradicional</a>
+</div>
+
 
   <table id="calendario">
     <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
@@ -138,9 +142,17 @@
   <div class="top-buttons">
     
     <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
+
+    <button onclick="generarCalendarioAleatorioVeg()">🎲 Generar semana aleatoria</button>
     
-    <button onclick="descargarPDF()">📥 Descargar menú semanal (PDF)</button>
-    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Validar nuevo Alimento o Receta</button>
+    <button onclick="descargarPDF()">📥 Descargá tu menú semanal (PDF)</button>
+    
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
+
+     <div class="btn-calendario-container">
+      <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
+     </div>
+    
   </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -155,3 +167,4 @@
 
 </body>
 </html>
+
