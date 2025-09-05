@@ -291,3 +291,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// =========================
+// scroll mas preciso para boton
+// =========================
+const filaHoy = document.querySelectorAll("#calendario-body tr")[indiceHoy];
+if (filaHoy) {
+  const y = filaHoy.getBoundingClientRect().top + window.scrollY - 60; // 👈 offset 60px
+  window.scrollTo({ top: y, behavior: "smooth" });
+}
+
+
