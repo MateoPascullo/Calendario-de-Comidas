@@ -294,10 +294,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // =========================
 // scroll mas preciso para boton
 // =========================
-const filaHoy = document.querySelectorAll("#calendario-body tr")[indiceHoy];
-if (filaHoy) {
-  const y = filaHoy.getBoundingClientRect().top + window.scrollY - 60; // 👈 offset 60px
-  window.scrollTo({ top: y, behavior: "smooth" });
-}
+
+document.getElementById("btnHoy").addEventListener("click", function (e) {
+  e.preventDefault();
+  const hoy = new Date();
+  const indiceHoy = hoy.getDay() - 1; // Lunes=0
+  if (indiceHoy >= 0 && indiceHoy <= 4) {
+    const filaHoy = document.querySelectorAll("#calendario-body tr")[indiceHoy];
+    if (filaHoy) {
+      filaHoy.scrollIntoView({
+        behavior: "smooth",
+        block: "center"  // 👈 lo centra en pantalla (mejor en móvil)
+      });
+    }
+  }
+});
 
 
