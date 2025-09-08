@@ -143,14 +143,7 @@ function seleccionarCelda(dia, tipo) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
     if (!calendario[dia][tipo]) {
-      // centramos directamente el primer select (más preciso que el h3)
-  const target = document.getElementById('verdura') || document.getElementById('form-plato');
-  scrollAlCentro(target, 80);
-  // opcional: foco para abrir el selector luego del scroll
-  setTimeout(() => target?.focus?.(), 700);
-}
-
-
+      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
     }
     return;
   }
@@ -317,13 +310,7 @@ document.getElementById("btnHoy").addEventListener("click", function (e) {
   }
 });
 
-// Centra un elemento en pantalla con un pequeño offset para móviles
-function scrollAlCentro(el, offset = 0) {
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const y = rect.top + window.scrollY - (window.innerHeight / 2) + (rect.height / 2) - offset;
-  window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-}
+
 
 
 
