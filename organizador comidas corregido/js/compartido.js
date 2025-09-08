@@ -143,7 +143,11 @@ function seleccionarCelda(dia, tipo) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
     if (!calendario[dia][tipo]) {
-      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('form-plato').scrollIntoView({
+  behavior: 'smooth',
+  block: 'center'   // 👈 centra el elemento en la pantalla
+});
+
     }
     return;
   }
@@ -309,5 +313,6 @@ document.getElementById("btnHoy").addEventListener("click", function (e) {
     }
   }
 });
+
 
 
