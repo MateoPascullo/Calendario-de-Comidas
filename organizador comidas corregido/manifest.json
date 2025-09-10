@@ -7,19 +7,20 @@
   "theme_color": "#8f9d68",
   "icons": [
     {
-      "src": "logo_192.png",
+      "src": "logo_nuevo_192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo_512.png",
+      "src": "logo_nuevo_512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ]
 }
+
 
 
 
