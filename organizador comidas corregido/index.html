@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#8f9d68">
 
 <!-- Para iPhone -->
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="logo_192x192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
@@ -23,22 +23,23 @@
 
 <body>
 
-  <h1>¡Qué comemos?</h1>
-  <h2>Organizá tus comidas de la semana</h2>
+  <h1>PlatoResuelto!</h1>
+  <h2>Organizá tus comidas</h2>
 
+  
   
 
   <div style="text-align:center; margin:20px 0;">
-    <img src="plato-buen-comer.png" alt="Plato saludable" class="plato-saludable">
+    <img src="plato-buen-comer-bis.jpg" alt="Plato saludable" class="plato-saludable">
   </div>
 
-  <h3 id="form-plato">Agregá un plato al calendario</h3>
+  <h3 id="form-plato">Armá un plato para la semana</h3>
 
   
 
   <!-- Selector de Verduras y Ensaladas -->
   <select id="verdura">
-    <option value="">-- Verduras y hortalizas --</option>
+    <option value=""> Verduras y hortalizas </option>
      
      <option value="Ens.(tomate,lechuga,cebolla)">Ens.(tomate,lechuga,cebolla)</option>
      <option value="Ens.(lechuga,tomate,cebolla,palta)">Ens.(lechuga,tomate,cebolla,palta)</option>
@@ -109,7 +110,7 @@
 
 
   <select id="proteina">
-    <option value="">-- Proteínas --</option>  
+    <option value=""> Proteínas </option>  
      <option value="Milanesa vaca">Milanesa vaca</option>
      <option value="Milanesa pollo">Milanesa pollo</option>
      <option value="Milanesa cerdo">Milanesa cerdo</option>
@@ -117,25 +118,27 @@
      <option value="Milanesa de soja">Milanesa de soja</option>
      <option value="Hamburguesa vacuna">Hamburguesa vacuna</option>
      <option value="Medallon de pollo">Medallon de pollo</option>
-     <option value="medallon-de-legumbre">Medallon de legumbre</option>
-     <option value="nugget-de-pollo">Nugget de Pollo</option>
-     <option value="bife-vacuno">Bife vacuno</option>
-     <option value="pollo-al-horno">Pollo al horno</option>
-     <option value="Pollo asado">Pollo asado</option>
+     <option value="nugget de pollo">Nugget de Pollo</option>
+     <option value="bife vacuno">Bife vacuno</option>
      <option value="Filet pollo">Filet pollo</option>
+     <option value="Pata muslo pollo">Pata muslo pollo</option>
+     <option value="Pechuga pollo">Pechuga pollo</option>
      <option value="Filet pescado">Filet pescado</option>
+     <option value="pollo al horno">Pollo al horno</option>
+     <option value="Pollo asado">Pollo asado</option>
+     <option value="Atún">Atún</option>
      <option value="Costeleta vaca">Costeleta vaca</option>
      <option value="Costeleta cerdo">Costeleta cerdo</option>
      <option value="Huevo duro">Huevo duro</option>
      <option value="huevo revuelto">Huevo revuelto</option>
      <option value="huevo a la plancha">Huevo a la plancha</option>
-     <option value="jamon cocido crudo">Jamon cocido/crudo</option>
+     <option value="jamon cocido/crudo">Jamon cocido/crudo</option>
   </select>
 
   <select id="hidrato">
-    <option value="">-- Hidratos de carbono --</option>
+    <option value=""> Hidratos de carbono </option>
       <option value="Arroz blanco">Arroz blanco</option>
-      <option value="Arroz integral yamani">Arroz integral/yamaní</option>
+      <option value="Arroz integral/yamani">Arroz integral/yamaní</option>
       <option value="Fideos">Fideos</option>
       <option value="Medallon de legumbre">Medallon de legumbre</option>
      <option value="Pure de papa">Pure de papa</option>
@@ -144,37 +147,53 @@
      <option value="Choclo">Choclo</option>
      <option value="Quinoa">Quínoa</option>
      <option value="Cuscus">Cuscús</option>
-     <option value="Trigo-burgol">Trigo burgol</option>
+     <option value="Trigo burgol">Trigo burgol</option>
      <option value="Lentejas">Lentejas</option>
      <option value="Garbanzos">Garbanzos</option>
      <option value="Porotos">Porotos</option>
   </select>
 
   <select id="completo">
-    <option value="">-- Plato completo (opcional) --</option>
+    <option value=""> Plato completo </option>
       <option value="Tarta de espinaca,queso,cebolla,puerro">Tarta de espinaca,queso,cebolla,puerro</option>
-     <option value="tarta capresse">Tarta capresse</option>
+     <option value="Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)">Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)</option>
     <option value="Tarta de zapallito,queso,huevo, cebolla">Tarta de zapallito,queso,huevo, cebolla</option>
-     <option value="tarta de atun">Tarta de atún</option>
+     <option value="Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo">Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo</option>
      <option value="Pastel de papa,zapallo,carne picada">Pastel de papa,zapallo,carne picada</option>
-     <option value="guiso de lentejas">Guiso de lentejas</option>
-     <option value="pata muslo + verduras al horno">Pata muslo + verduras al horno</option>
+     <option value="Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)">Pata muslo + verduras al horno (cebolla,pimiento,zanahoria,papa)</option>
      <option value="Pescado al paquete con verduras">Pescado al paquete con verduras</option>
      <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
-     <option value="Pasta rellena con salsa( tomate, bolognesa o mixta)">Pasta rellena con salsa( tomate, bolognesa o mixta)</option>
-     <option value="Wok de verduras y fideos">Wok de verduras y fideos</option>
-     <option value="Wok de verduras y pollo">Wok de verduras y pollo</option>
-     <option value="Fajitas de pollo y verdura">Fajitas de pollo y verdura</option>
+      <option value="Milanesas de berenjena gratinadas + guacamole">Milanesas de berenjena gratinadas + guacamole</option>
+     <option value="Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de carne + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)">Fajitas de pollo y verduras salteadas (cebolla,pimiento,zanahoria)</option>
+     <option value="Ens. de  atún, huevo, cebolla, tomate, arroz">Ens. de  atún, huevo, cebolla, tomate, arroz</option>
+     <option value="Carne +verduras al horno(calabaza,cebolla, papa)">Carne +verduras al horno(calabaza,cebolla, papa)</option>
+     <option value="Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)">Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)</option>
+     <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
+     <option value="Ravioles con salsa de tomate">Ravioles con salsa de tomate</option>
+     <option value="Ravioles con salsa mixta">Ravioles con salsa mixta</option>
+     <option value="Ravioles con salsa bolognesa">Ravioles con salsa bolognesa</option>
+     <option value="Ñoquis con salsa de tomate">Ñoquis con salsa de tomate</option>
+     <option value="Ñoquis con salsa mixta">Ñoquis con salsa mixta</option>
+     <option value="Ñoquis con salsa bolognesa">Ñoquis con salsa bolognesa</option>
+
+
+
   </select>
 
-  <button onclick="validarPlato()">Validar y asignar</button>
-
-  <h2>🗓️ Calendario semanal</h2>
-  <p>Hacé click en una comida para seleccionarla y después click en otra celda para intercambiarla o moverla. Tocá en "Eliminar" para borrar un alimento.</p>
+  <button onclick="validarPlato()">Agregá el plato al calendario</button>
 
   <div class="btn-calendario-container">
    <a href="index-vegetariano.html" class="btn-calendario">Ir a calendario vegetariano</a>
   </div>
+
+  <h2>🗓️ Calendario semanal</h2>
+  
+
+  
 
   <table id="calendario">
     <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
@@ -188,7 +207,8 @@
     <button onclick="generarCalendarioAleatorio()">🎲 Generar semana aleatoria</button>
 
     <button onclick="descargarPDF()">📥 Descargá tu menú semanal (PDF)</button>
-     
+
+
     <button id="addToHome" style="display:none; margin-bottom:10px;">
   📲 Agregar a mi pantalla de inicio
     </button>
