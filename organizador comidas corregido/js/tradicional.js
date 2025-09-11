@@ -1,5 +1,4 @@
 
-
 // =========================
 // VALIDACIÓN DE PLATOS (versión tradicional)
 // =========================
@@ -64,20 +63,21 @@ function validarPlato() {
     return;
   }
 
-  // ----- Motivos específicos de invalidez -----
-  if (!hasV && !hasP && !hasH && !hasC) {
-    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-  } else if (hasC && (hasV || hasP || hasH)) {
-    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-  } else if (!hasV && (hasP || hasH)) {
-    mostrarMensaje('❌ Falta elegir una verdura u hortaliza.', 'error');
-  } else if (!hasP && (hasV || hasH)) {
-    mostrarMensaje('❌ Falta elegir una proteína.', 'error');
-  } else if (!hasH && (hasV || hasP)) {
-    mostrarMensaje('❌ Falta elegir un hidrato.', 'error');
-  } else {
-    mostrarMensaje('❌ Combinación no válida. Verificá tu selección.', 'error');
-  }
+  // ----- Motivos específicos de invalidez (mejorados) -----
+if (!hasV && !hasP && !hasH && !hasC) {
+  mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+} else if (hasC && (hasV || hasP || hasH)) {
+  mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+} else if (hasV && !hasP && !hasH) {
+  mostrarMensaje('❌ Faltan más opciones: agregá proteína o hidrato.', 'error');
+} else if (!hasV && (hasP || hasH)) {
+  mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+} else if (hasV && hasP && hasH) {
+  mostrarMensaje('❌ Esta combinación no es válida. Probá con: verdura+proteína, verdura+hidrato o las tres juntas.', 'error');
+} else {
+  mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+}
+
 }
 
 
@@ -211,3 +211,4 @@ window.generarCalendarioAleatorio = function () {
     console.log("✅ Calendario generado:", calendario);
   }
 };
+
