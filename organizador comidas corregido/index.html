@@ -20,13 +20,31 @@
 
 <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
 
+<!-- Tutorial inicial -->
+<div id="tutorial" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-box">
+    <div id="tutorial-indicator" class="tutorial-step-indicator"></div>
+    <div id="tutorial-step"></div>
+    <div class="tutorial-buttons">
+      <button id="tutorial-prev" style="display:none;"></button>
+      <button id="tutorial-next"></button>
+    </div>
+  </div>
+</div>
+
+<script src="js/tutorial.js" defer></script>
+
+
 
 <body>
 
   <h1>PlatoResuelto!</h1>
   <h2>Organizá tus comidas</h2>
 
-  
+   <button id="loginBtn">Login con Google</button>
+   <button id="logoutBtn">Cerrar sesión</button>
+   <p id="status">No logueado</p>
+
   
 
   <div style="text-align:center; margin:20px 0;">
@@ -138,10 +156,11 @@
 
   <select id="hidrato">
     <option value=""> Hidratos de carbono </option>
-      <option value="Arroz blanco">Arroz blanco</option>
+      <option value="Arroz">Arroz</option>
       <option value="Arroz integral/yamani">Arroz integral/yamaní</option>
       <option value="Fideos">Fideos</option>
-      <option value="Pure de papa">Pure de papa</option>
+      
+     <option value="Pure de papa">Pure de papa</option>
      <option value="Papa al horno">Papa al horno</option>
      <option value="Batata al horno">Batata al horno</option>
      <option value="Choclo">Choclo</option>
@@ -159,7 +178,7 @@
      <option value="Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)">Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)</option>
     <option value="Tarta de zapallito,queso,huevo, cebolla">Tarta de zapallito,queso,huevo, cebolla</option>
      <option value="Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo">Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo</option>
-     <option value="Pastel de papa,zapallo,carne picada">Pastel de papa,zapallo,carne picada</option>
+     <option value="Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)">Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)</option>
      <option value="Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)">Pata muslo + verduras al horno (cebolla,pimiento,zanahoria,papa)</option>
      <option value="Pescado al paquete con verduras">Pescado al paquete con verduras</option>
      <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
@@ -170,6 +189,7 @@
      <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
      <option value="Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)">Fajitas de pollo y verduras salteadas (cebolla,pimiento,zanahoria)</option>
      <option value="Ens. de  atún, huevo, cebolla, tomate, arroz">Ens. de  atún, huevo, cebolla, tomate, arroz</option>
+      <option value="Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
      <option value="Carne +verduras al horno(calabaza,cebolla, papa)">Carne +verduras al horno(calabaza,cebolla, papa)</option>
      <option value="Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)">Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)</option>
      <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
@@ -222,6 +242,9 @@
     
     <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
 
+    <button onclick="mostrarTutorial()">📘 Ver tutorial</button>
+
+
     <div class="btn-calendario-container">
       <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
     </div>
@@ -237,8 +260,67 @@
 <div id="mensaje" class="mensaje-toast"></div>
 
 
+
+
+
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
+    authDomain: "plato-resuelto.firebaseapp.com",
+    projectId: "plato-resuelto",
+    storageBucket: "plato-resuelto.firebasestorage.app",
+    messagingSenderId: "11080746612",
+    appId: "1:11080746612:web:22f488078f01def94ff321",
+    measurementId: "G-16RQJ5KB0H"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+
+  // === Agregar debajo de initializeApp(firebaseConfig) ===
+
+// Inicializar Authentication
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } 
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// Evento Login
+document.getElementById("loginBtn").addEventListener("click", () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      const user = result.user;
+      document.getElementById("status").innerText = `Hola, ${user.displayName}`;
+      console.log("Usuario logueado:", user);
+    })
+    .catch((error) => {
+      console.error("Error en login:", error);
+    });
+});
+
+// Evento Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  signOut(auth).then(() => {
+    document.getElementById("status").innerText = "Sesión cerrada";
+  });
+});
+
+</script>
 </body>
 </html>
+
 
 
 
