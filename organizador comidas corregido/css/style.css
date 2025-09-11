@@ -1,5 +1,5 @@
 
-    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+   :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -175,6 +175,92 @@ h2 {
 
 #btnHoy:hover {
   background: #704c16;   /* más oscuro al pasar el mouse */
+}
+
+
+
+/* Tutorial modal moderno */
+.tutorial-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s ease;
+}
+
+.tutorial-box {
+  background: #fff;
+  padding: 30px 24px;
+  max-width: 420px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  animation: slideUp 0.4s ease;
+  position: relative;
+}
+
+/* Paso actual en top */
+.tutorial-step-indicator {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primario);
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+.tutorial-buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tutorial-buttons button {
+  flex: 1;
+  background: var(--primario);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tutorial-buttons button:hover {
+  background: #6f8632;
+  transform: translateY(-2px);
+}
+
+.tutorial-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
 
