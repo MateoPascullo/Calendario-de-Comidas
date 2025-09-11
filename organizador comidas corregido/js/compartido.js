@@ -259,14 +259,13 @@ window.onload=()=>{
 // ===== Helpers globales =====
 window.getOpciones = function getOpciones(idSelect) {
   const select = document.getElementById(idSelect);
-  if (!select) {
-    console.warn(`⚠️ No encontré el <select> #${idSelect}.`);
-    return [];
-  }
+  if (!select) return [];
   return Array.from(select.options)
     .map(opt => (opt.value ?? "").trim())
-    .filter(val => val !== "");
+    // 👇 filtramos vacíos, "ensaladas" y lo que esté oculto
+    .filter(val => val !== "" && val !== "ensaladas");
 };
+
 
 
 //BOTON FLOTANTE
@@ -291,10 +290,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+
 // =========================
 // scroll mas preciso para boton
 // =========================
-
 document.getElementById("btnHoy").addEventListener("click", function (e) {
   e.preventDefault();
   const hoy = new Date();
@@ -309,6 +308,73 @@ document.getElementById("btnHoy").addEventListener("click", function (e) {
     }
   }
 });
+
+
+
+
+// tutorial.js
+const pasos = [
+  "👋 Bienvenido a <strong>Plato Resuelto!</strong><br>Acá organizás tu menú de la semana o de un solo día de forma fácil y rápida.",
+  " Armá tu plato eligiendo <em>verduras</em>, <em>proteínas</em>, <em>hidratos</em> o un <em>plato completo</em>.",
+  " Hacé clic en <strong>“Agregá el plato al calendario”</strong> y se asignará automáticamente a un día.",
+  " También podés hacer clic en cualquier celda del calendario para <em> agregar, mover, rotar, o eliminar</em> un plato.",
+  "⚡ Usá las funciones rápidas: <br> - 🎲 Generar semana aleatoria <br> - 🔄 Resetear calendario <br> - 📥 Descargar PDF",
+  "📲 ¡Tip! Podés agregar esta app a tu pantalla de inicio como si fuera una aplicación."
+];
+
+let pasoActual = 0;
+
+function mostrarPaso() {
+  const stepEl = document.getElementById("tutorial-step");
+  const indicator = document.getElementById("tutorial-indicator");
+
+  stepEl.innerHTML = pasos[pasoActual];
+  indicator.textContent = `Paso ${pasoActual + 1} de ${pasos.length}`;
+
+  // Botón "Atrás"
+  const prevBtn = document.getElementById("tutorial-prev");
+  prevBtn.style.display = pasoActual > 0 ? "inline-flex" : "none";
+  prevBtn.innerHTML = "← Atrás";
+
+  // Botón "Continuar / Empezar"
+  const nextBtn = document.getElementById("tutorial-next");
+  nextBtn.innerHTML = (pasoActual === pasos.length - 1) ? "Empezar →" : "Continuar →";
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const tutorial = document.getElementById("tutorial");
+  if (!localStorage.getItem("tutorialVisto")) {
+    tutorial.style.display = "flex";
+    mostrarPaso();
+  }
+
+  document.getElementById("tutorial-prev").addEventListener("click", () => {
+    if (pasoActual > 0) {
+      pasoActual--;
+      mostrarPaso();
+    }
+  });
+
+  document.getElementById("tutorial-next").addEventListener("click", () => {
+    if (pasoActual < pasos.length - 1) {
+      pasoActual++;
+      mostrarPaso();
+    } else {
+      localStorage.setItem("tutorialVisto", "true");
+      tutorial.style.display = "none";
+    }
+  });
+});
+
+window.mostrarTutorial = function() {
+  pasoActual = 0;
+  document.getElementById("tutorial").style.display = "flex";
+  mostrarPaso();
+};
+
+
+
+
 
 
 
