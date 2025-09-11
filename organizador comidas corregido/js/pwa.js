@@ -1,4 +1,3 @@
-
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -26,3 +25,6 @@ document.getElementById('addToHome').addEventListener('click', () => {
       document.getElementById('ios-install-hint').style.display = 'block';
     }
   });
+
+
+
