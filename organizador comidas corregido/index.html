@@ -43,6 +43,10 @@
   <p id="status">No logueado</p>
   
   
+
+
+    <!-- 🔒 contenido que quiero proteger -->
+  <div id="contenido" style="display:none;">
   <h1>PlatoResuelto!</h1>
   <h2>Organizá tus comidas</h2>
 
@@ -263,7 +267,7 @@
 <div id="mensaje" class="mensaje-toast"></div>
 
 
-
+</div>
 
 <!--CODIGO COPIADO DEL FIREBASE CDN (sin modificaciones) -->
 <script type="module">
@@ -329,11 +333,59 @@
       status.textContent = "No logueado";
     }
   });
+
+
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
+// Botones
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const status = document.getElementById("status");
+
+// Login
+loginBtn.addEventListener("click", () => {
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      const user = result.user;
+      console.log("Logueado:", user.email);
+    })
+    .catch((error) => {
+      console.error("Error en login:", error);
+    });
+});
+
+// Logout
+logoutBtn.addEventListener("click", () => {
+  signOut(auth);
+});
+
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Usuario logueado
+    status.textContent = `Bienvenido, ${user.displayName}`;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "inline";
+    document.getElementById("contenido").style.display = "block"; // 🔹 muestra tu app
+  } else {
+    // Usuario NO logueado
+    status.textContent = "No logueado";
+    loginBtn.style.display = "inline";
+    logoutBtn.style.display = "none";
+    document.getElementById("contenido").style.display = "none"; // 🔹 oculta tu app
+  }
+});
+
 </script>
 
 
 </body>
 </html>
+
 
 
 
