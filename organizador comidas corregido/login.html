@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Login - Plato Resuelto</title>
-</head>
+<head><meta charset="utf-8"><title>Login - Plato Resuelto</title></head>
 <body>
   <h1>Iniciá sesión</h1>
   <button id="loginBtn">Login con Google</button>
@@ -11,10 +8,17 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import {
+      getAuth,
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      setPersistence,
+      browserLocalPersistence,
+      signInWithRedirect,
+      getRedirectResult
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-    // ✅ Config de tu proyecto
     const firebaseConfig = {
       apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
       authDomain: "plato-resuelto.firebaseapp.com",
@@ -28,22 +32,48 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
+    const loginBtn = document.getElementById("loginBtn");
+    const status = document.getElementById("status");
 
-    // 🔹 Si ya está logueado → redirigir
+    // Si ya vino de un redirect, procesalo (necesario si usamos signInWithRedirect)
+    getRedirectResult(auth).then((result) => {
+      if (result && result.user) {
+        // onAuthStateChanged también lo detectará; opcional redirección directa
+        window.location.href = "index.html";
+      }
+    }).catch(err => {
+      console.warn("getRedirectResult:", err);
+    });
+
+    // onAuthStateChanged: redirige cuando el usuario esté presente
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        status.innerText = `Hola, ${user.displayName}`;
         window.location.href = "index.html";
       }
     });
 
-    // 🔹 Botón de login → solo abre el popup
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider).catch((error) => {
-        console.error("Error en login:", error);
-        alert("Error al iniciar sesión");
-      });
+    loginBtn.addEventListener("click", async () => {
+      // INTENTO 1: forzar persistencia en localStorage (menos propenso a perder estado)
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged hará la redirección
+      } catch (err) {
+        console.error("signInWithPopup error:", err);
+        // Si falla por storage/estado, hacer fallback a redirect (funciona mejor en browsers restrictivos)
+        try {
+          console.warn("Fallback a signInWithRedirect...");
+          await signInWithRedirect(auth, provider);
+          // con redirect la app se recargará y getRedirectResult / onAuthStateChanged lo manejarán
+        } catch (err2) {
+          console.error("signInWithRedirect también falló:", err2);
+          alert("Error al iniciar sesión. Mirá la consola para más detalles.");
+        }
+      }
     });
   </script>
 </body>
 </html>
+
 
