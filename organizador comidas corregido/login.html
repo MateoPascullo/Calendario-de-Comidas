@@ -14,6 +14,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } 
       from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
+    // ✅ Config de tu proyecto
     const firebaseConfig = {
       apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
       authDomain: "plato-resuelto.firebaseapp.com",
@@ -28,26 +29,21 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Si ya está logueado, redirigir directo al index
+    // 🔹 Si ya está logueado → redirigir
     onAuthStateChanged(auth, (user) => {
       if (user) {
         window.location.href = "index.html";
       }
     });
 
-    // Botón de login
+    // 🔹 Botón de login → solo abre el popup
     document.getElementById("loginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          document.getElementById("status").innerText = `Hola, ${result.user.displayName}`;
-          // Redirigir al index
-          window.location.href = "index.html";
-        })
-        .catch((error) => {
-          console.error("Error en login:", error);
-          alert("Error al iniciar sesión");
-        });
+      signInWithPopup(auth, provider).catch((error) => {
+        console.error("Error en login:", error);
+        alert("Error al iniciar sesión");
+      });
     });
   </script>
 </body>
 </html>
+
