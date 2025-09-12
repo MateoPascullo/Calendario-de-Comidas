@@ -43,6 +43,9 @@
   <p id="status">No logueado</p>
   
   
+  <!-- 🔒 contenido que quiero proteger -->
+  <div id="contenido" style="display:none;">
+
   <h1>PlatoResuelto!</h1>
   <h2>Organizá tus comidas</h2>
 
@@ -263,18 +266,15 @@
 <div id="mensaje" class="mensaje-toast"></div>
 
 
+</div>
 
-
-<!--CODIGO COPIADO DEL FIREBASE CDN (sin modificaciones) -->
 <script type="module">
-  // Import the functions you need from the SDKs you need
+  // 🔹 Importar Firebase (usar misma versión para todo)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  // 🔹 Configuración de Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
     authDomain: "plato-resuelto.firebaseapp.com",
@@ -285,102 +285,52 @@
     measurementId: "G-16RQJ5KB0H"
   };
 
-  // Initialize Firebase
+  // 🔹 Inicializar Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
-
-
-  // PEGADO DE CODIGO QUE ME DIO CHATGPT A PARTIR PASO 4
-  // Inicializar Auth
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // Elementos del DOM
+  // 🔹 Elementos del DOM
   const loginBtn = document.getElementById("loginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
   const status = document.getElementById("status");
+  const contenido = document.getElementById("contenido");
 
-  // Login con Google
+  // 🔹 Eventos
   loginBtn.addEventListener("click", async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("Usuario logueado:", user);
+      console.log("Usuario logueado:", result.user.email);
     } catch (error) {
       console.error("Error en login:", error);
     }
   });
 
-  // Logout
   logoutBtn.addEventListener("click", async () => {
     await signOut(auth);
   });
 
-  // Actualizar UI según estado
+  // 🔹 Cambios de estado de sesión
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      status.textContent = `Hola, ${user.displayName}`;
       loginBtn.style.display = "none";
       logoutBtn.style.display = "inline-block";
-      status.textContent = `Hola, ${user.displayName}`;
+      contenido.style.display = "block";   // 👈 muestra la app
     } else {
+      status.textContent = "No logueado";
       loginBtn.style.display = "inline-block";
       logoutBtn.style.display = "none";
-      status.textContent = "No logueado";
+      contenido.style.display = "none";    // 👈 oculta la app
     }
   });
-
-
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-const auth = getAuth();
-const provider = new GoogleAuthProvider();
-
-// Botones
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const status = document.getElementById("status");
-
-// Login
-loginBtn.addEventListener("click", () => {
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      const user = result.user;
-      console.log("Logueado:", user.email);
-    })
-    .catch((error) => {
-      console.error("Error en login:", error);
-    });
-});
-
-// Logout
-logoutBtn.addEventListener("click", () => {
-  signOut(auth);
-});
-
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // Usuario logueado
-    status.textContent = `Bienvenido, ${user.displayName}`;
-    loginBtn.style.display = "none";
-    logoutBtn.style.display = "inline";
-    document.getElementById("contenido").style.display = "block"; // 🔹 muestra tu app
-  } else {
-    // Usuario NO logueado
-    status.textContent = "No logueado";
-    loginBtn.style.display = "inline";
-    logoutBtn.style.display = "none";
-    document.getElementById("contenido").style.display = "none"; // 🔹 oculta tu app
-  }
-});
-
 </script>
+
 
 
 </body>
 </html>
+
 
 
 
