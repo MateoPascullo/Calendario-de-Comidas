@@ -38,13 +38,15 @@
 
 
 <body>
-
+  <button id="loginBtn">Entrar con Google</button>
+  <button id="logoutBtn" style="display:none">Cerrar sesión</button>
+  <p id="status">No logueado</p>
+  
+  
   <h1>PlatoResuelto!</h1>
   <h2>Organizá tus comidas</h2>
 
-   <button id="loginBtn">Login con Google</button>
-   <button id="logoutBtn">Cerrar sesión</button>
-   <p id="status">No logueado</p>
+
 
   
 
@@ -286,11 +288,53 @@
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+
+
+
+  // PEGADO DE CODIGO QUE ME DIO CHATGPT A PARTIR PASO 4
+  // Inicializar Auth
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // Elementos del DOM
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const status = document.getElementById("status");
+
+  // Login con Google
+  loginBtn.addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Usuario logueado:", user);
+    } catch (error) {
+      console.error("Error en login:", error);
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+  });
+
+  // Actualizar UI según estado
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginBtn.style.display = "none";
+      logoutBtn.style.display = "inline-block";
+      status.textContent = `Hola, ${user.displayName}`;
+    } else {
+      loginBtn.style.display = "inline-block";
+      logoutBtn.style.display = "none";
+      status.textContent = "No logueado";
+    }
+  });
 </script>
 
 
 </body>
 </html>
+
 
 
 
