@@ -18,7 +18,7 @@
 
 </head>
 
-<a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
+
 
 
 <!-- Tutorial inicial -->
@@ -44,6 +44,11 @@
   
   
   <!-- 🔒 contenido que quiero proteger -->
+    
+  <button onclick="mostrarTutorial()">📘 Ver tutorial</button>
+  
+  <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
+  
   <div id="contenido" style="display:none;">
 
   <h1>PlatoResuelto!</h1>
@@ -248,7 +253,7 @@
     
     <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
 
-    <button onclick="mostrarTutorial()">📘 Ver tutorial</button>
+  
 
 
     <div class="btn-calendario-container">
@@ -266,8 +271,10 @@
 <div id="mensaje" class="mensaje-toast"></div>
 
 
-</div>
+</div> <!-- 🔒 aca cierra el contenido que quiero proteger con el login -->
 
+
+<!-- ESTE ES EL CODIGO QUE ME DIO FIREBASE MODIFICADO POR CHAGPT PARA QUE FUNCIONES EL LOGIN -->
 <script type="module">
   // 🔹 Importar Firebase (usar misma versión para todo)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
@@ -330,6 +337,7 @@
 
 </body>
 </html>
+
 
 
 
