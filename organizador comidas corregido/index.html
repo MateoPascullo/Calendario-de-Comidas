@@ -2,55 +2,295 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Plato Resuelto</title>
+  <title>Organizador de Comidas Semanales</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Courgette&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+
+ <link rel="stylesheet" href="css/style.css">
+
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8f9d68">
+
+<!-- Para iPhone -->
+<link rel="apple-touch-icon" href="logo_new_192x192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
 </head>
+
+<a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
+
+<!-- Tutorial inicial -->
+<div id="tutorial" class="tutorial-overlay" style="display:none;">
+  <div class="tutorial-box">
+    <div id="tutorial-indicator" class="tutorial-step-indicator"></div>
+    <div id="tutorial-step"></div>
+    <div class="tutorial-buttons">
+      <button id="tutorial-prev" style="display:none;"></button>
+      <button id="tutorial-next"></button>
+    </div>
+  </div>
+</div>
+
+<script src="js/tutorial.js" defer></script>
+
+
+
 <body>
-  <h1>Iniciá sesión</h1>
-  <button id="loginBtn">Login con Google</button>
-  <p id="status">Esperando login...</p>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } 
-      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  <h1>PlatoResuelto!</h1>
+  <h2>Organizá tus comidas</h2>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
-      authDomain: "plato-resuelto.firebaseapp.com",
-      projectId: "plato-resuelto",
-      storageBucket: "plato-resuelto.firebasestorage.app",
-      messagingSenderId: "11080746612",
-      appId: "1:11080746612:web:22f488078f01def94ff321",
-      measurementId: "G-16RQJ5KB0H"
-    };
+   <button id="loginBtn">Login con Google</button>
+   <button id="logoutBtn">Cerrar sesión</button>
+   <p id="status">No logueado</p>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+  
 
-    // Si ya está logueado, redirigir directo al index
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "index.html";
-      }
-    });
+  <div style="text-align:center; margin:20px 0;">
+    <img src="plato-buen-comer-bis.jpg" alt="Plato saludable" class="plato-saludable">
+  </div>
 
-    // Botón de login
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          document.getElementById("status").innerText = `Hola, ${result.user.displayName}`;
-          // Redirigir al index
-          window.location.href = "index.html";
-        })
-        .catch((error) => {
-          console.error("Error en login:", error);
-          alert("Error al iniciar sesión");
-        });
-    });
-  </script>
+  <h3 id="form-plato">Armá un plato para la semana</h3>
+
+  
+
+  <!-- Selector de Verduras y Ensaladas -->
+  <select id="verdura">
+    <option value=""> Verduras y hortalizas </option>
+     
+     <option value="Ens.(tomate,lechuga,cebolla)">Ens.(tomate,lechuga,cebolla)</option>
+     <option value="Ens.(lechuga,tomate,cebolla,palta)">Ens.(lechuga,tomate,cebolla,palta)</option>
+     <option value="Ens.(lechuga,zanahoria,repollo)">Ens.(lechuga,zanahoria,repollo)</option>
+     <option value="Ens.(rúcula,zanahoria,repollo)">Ens.(rúcula,zanahoria,repollo)</option>
+     <option value="Ens.(achicoria,zanahoria,repollo)">Ens.(achicoria,zanahoria,repollo)</option>
+     <option value="Ens.(rúcula,t.cherry,palta)">Ens.(rúcula,t.cherry,palta)</option>
+     <option value="Ens.(zanahoria,remolacha,repollo)">Ens.(zanahoria,remolacha,repollo)</option>
+     <option value="Ens.(Apio,manzana verde, nueces)">Ens.(Apio,manzana verde, nueces)</option>
+     <option value="Salteado(cebolla,pimiento,zanahoria)">Salteado(cebolla,pimiento,zanahoria)</option>
+     <option value="Salteado(zucchini,berenjena,cebolla)">Salteado(zucchini,berenjena,cebolla)</option>
+     <option value="Horno(cebolla,zanahoria,pimiento,calabaza)">Horno(cebolla,zanahoria,pimiento,calabaza)</option>
+     <option value="Puré zapallo/calabaza">Puré zapallo/calabaza</option>
+
+     
+
+       <option value="ensaladas">🥗 Armá tu ensalada</option>
+  <!-- 👇 opción “custom” para inyectar la ensalada armada -->
+  <option id="verduraCustom" value="" style="display:none;"></option>
+</select>
+  </select>
+
+ <div id="ensalada" class="subgrilla" style="display:none;">
+  <h4>Armá tu ensalada</h4>
+
+  <p>Elegí el tipo de cocción:</p>
+  <div class="opciones-coccion">
+    <label><input type="radio" name="coccion" value="Crudo"> Crudo</label>
+    <label><input type="radio" name="coccion" value="Salteado"> Salteado</label>
+    <label><input type="radio" name="coccion" value="Horno"> Horno</label>
+    <label><input type="radio" name="coccion" value="Hervido"> Hervido</label>
+  </div>
+
+  <p>Seleccioná las verduras:</p>
+  <div class="opciones-ensalada">
+    <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
+    <label class="chip"><input type="checkbox" value="Rúcula">Rúcula</label>
+    <label class="chip"><input type="checkbox" value="Achicoria">Achicoria</label>
+    <label class="chip"><input type="checkbox" value="Espinaca">Espinaca</label>
+    <label class="chip"><input type="checkbox" value="Acelga">Acelga</label>
+    <label class="chip"><input type="checkbox" value="Repollo">Repollo</label>
+    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
+    <label class="chip"><input type="checkbox" value="Tomate cherry">Tomate cherry</label>
+    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
+    <label class="chip"><input type="checkbox" value="Cebolla verdeo">Cebolla verdeo</label>
+    <label class="chip"><input type="checkbox" value="Puerro">Puerro</label>
+    <label class="chip"><input type="checkbox" value="Ajo">Ajo</label>
+    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
+    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
+    <label class="chip"><input type="checkbox" value="Remolacha">Remolacha</label>
+    <label class="chip"><input type="checkbox" value="Zapallito">Zapallito</label>
+    <label class="chip"><input type="checkbox" value="Zucchini">Zucchini</label>
+    <label class="chip"><input type="checkbox" value="Berenjena">Berenjena</label>
+    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
+    <label class="chip"><input type="checkbox" value="Calabaza">Calabaza</label>
+    <label class="chip"><input type="checkbox" value="Zapallo">Zapallo</label>
+    <label class="chip"><input type="checkbox" value="Arvejas">Arvejas</label>
+    <label class="chip"><input type="checkbox" value="Chaucha">Chaucha</label>
+    <label class="chip"><input type="checkbox" value="Brocoli">Brocoli</label>
+    <label class="chip"><input type="checkbox" value="Coliflor">Coliflor</label>
+    <label class="chip"><input type="checkbox" value="Alcaucil">Alcaucil</label>
+    <label class="chip"><input type="checkbox" value="Apio">Apio</label>
+  </div>
+
+  <button type="button" onclick="copiarEnsalada()">Agregar ensalada</button>
+</div>
+
+
+
+  <select id="proteina">
+    <option value=""> Proteínas </option>  
+     <option value="Milanesa vaca">Milanesa vaca</option>
+     <option value="Milanesa pollo">Milanesa pollo</option>
+     <option value="Milanesa cerdo">Milanesa cerdo</option>
+     <option value="Milanesa pescado">Milanesa pescado</option>
+     <option value="Milanesa de soja">Milanesa de soja</option>
+     <option value="Medallon de legumbre">Medallon de legumbre</option>
+     <option value="Hamburguesa vacuna">Hamburguesa vacuna</option>
+     <option value="Medallon de pollo">Medallon de pollo</option>
+     <option value="nugget de pollo">Nugget de Pollo</option>
+     <option value="bife vacuno">Bife vacuno</option>
+     <option value="Filet pollo">Filet pollo</option>
+     <option value="Pata muslo pollo">Pata muslo pollo</option>
+     <option value="Pechuga pollo">Pechuga pollo</option>
+     <option value="Filet pescado">Filet pescado</option>
+     <option value="pollo al horno">Pollo al horno</option>
+     <option value="Pollo asado">Pollo asado</option>
+     <option value="Atún">Atún</option>
+     <option value="Costeleta vaca">Costeleta vaca</option>
+     <option value="Costeleta cerdo">Costeleta cerdo</option>
+     <option value="Huevo duro">Huevo duro</option>
+     <option value="huevo revuelto">Huevo revuelto</option>
+     <option value="huevo a la plancha">Huevo a la plancha</option>
+     <option value="jamon cocido/crudo">Jamon cocido/crudo</option>
+  </select>
+
+  <select id="hidrato">
+    <option value=""> Hidratos de carbono </option>
+      <option value="Arroz">Arroz</option>
+      <option value="Arroz integral/yamani">Arroz integral/yamaní</option>
+      <option value="Fideos">Fideos</option>
+      
+     <option value="Pure de papa">Pure de papa</option>
+     <option value="Papa al horno">Papa al horno</option>
+     <option value="Batata al horno">Batata al horno</option>
+     <option value="Choclo">Choclo</option>
+     <option value="Quinoa">Quínoa</option>
+     <option value="Cuscus">Cuscús</option>
+     <option value="Trigo burgol">Trigo burgol</option>
+     <option value="Lentejas">Lentejas</option>
+     <option value="Garbanzos">Garbanzos</option>
+     <option value="Porotos">Porotos</option>
+  </select>
+
+  <select id="completo">
+    <option value=""> Plato completo </option>
+      <option value="Tarta de espinaca,queso,cebolla,puerro">Tarta de espinaca,queso,cebolla,puerro</option>
+     <option value="Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)">Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)</option>
+    <option value="Tarta de zapallito,queso,huevo, cebolla">Tarta de zapallito,queso,huevo, cebolla</option>
+     <option value="Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo">Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo</option>
+     <option value="Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)">Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)</option>
+     <option value="Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)">Pata muslo + verduras al horno (cebolla,pimiento,zanahoria,papa)</option>
+     <option value="Pescado al paquete con verduras">Pescado al paquete con verduras</option>
+     <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
+      <option value="Milanesas de berenjena gratinadas + guacamole">Milanesas de berenjena gratinadas + guacamole</option>
+     <option value="Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de carne + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
+     <option value="Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)">Fajitas de pollo y verduras salteadas (cebolla,pimiento,zanahoria)</option>
+     <option value="Ens. de  atún, huevo, cebolla, tomate, arroz">Ens. de  atún, huevo, cebolla, tomate, arroz</option>
+      <option value="Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
+     <option value="Carne +verduras al horno(calabaza,cebolla, papa)">Carne +verduras al horno(calabaza,cebolla, papa)</option>
+     <option value="Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)">Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)</option>
+     <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
+     <option value="Ravioles con salsa de tomate">Ravioles con salsa de tomate</option>
+     <option value="Ravioles con salsa mixta">Ravioles con salsa mixta</option>
+     <option value="Ravioles con salsa bolognesa">Ravioles con salsa bolognesa</option>
+     <option value="Ñoquis con salsa de tomate">Ñoquis con salsa de tomate</option>
+     <option value="Ñoquis con salsa mixta">Ñoquis con salsa mixta</option>
+     <option value="Ñoquis con salsa bolognesa">Ñoquis con salsa bolognesa</option>
+
+
+
+  </select>
+
+  <button onclick="validarPlato()">Agregá el plato al calendario</button>
+
+  <div class="btn-calendario-container">
+   <a href="index-vegetariano.html" class="btn-calendario">Ir a calendario vegetariano</a>
+  </div>
+
+  <h2>🗓️ Calendario semanal</h2>
+  
+
+  
+
+  <table id="calendario">
+    <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
+    <tbody id="calendario-body"></tbody>
+  </table>
+
+  <div class="top-buttons">
+    
+    <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
+
+    <button onclick="generarCalendarioAleatorio()">🎲 Generar semana aleatoria</button>
+
+    <button onclick="descargarPDF()">📥 Descargá tu menú semanal (PDF)</button>
+
+
+    <button id="addToHome" style="display:none; margin-bottom:10px;">
+  📲 Agregar a mi pantalla de inicio
+    </button>
+    
+    
+    <div id="ios-install-hint" style="display:none; margin:10px; padding:10px; background:#fefae0; border:1px solid #ccc; border-radius:8px; font-size:0.9rem;">
+  📲 Para agregar esta app a tu pantalla de inicio:<br>
+  1. Tocá <strong>Compartir</strong> (cuadrado con flecha ↑)<br>
+  2. Elegí <strong>Agregar a pantalla de inicio</strong>
+</div>
+    
+    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
+
+    <button onclick="mostrarTutorial()">📘 Ver tutorial</button>
+
+
+    <div class="btn-calendario-container">
+      <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
+    </div>
+  
+  </div>
+<script src="js/compartido.js" defer></script>
+<script src="js/tradicional.js" defer></script>
+<script src="js/pwa.js" defer></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<div id="mensaje" class="mensaje-toast"></div>
+
+
+
+
+<!--CODIGO COPIADO DEL FIREBASE CDN (sin modificaciones) -->
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
+    authDomain: "plato-resuelto.firebaseapp.com",
+    projectId: "plato-resuelto",
+    storageBucket: "plato-resuelto.firebasestorage.app",
+    messagingSenderId: "11080746612",
+    appId: "1:11080746612:web:22f488078f01def94ff321",
+    measurementId: "G-16RQJ5KB0H"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+
 </body>
 </html>
+
 
 
 
