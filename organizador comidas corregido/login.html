@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Plato Resuelto</title>
+</head>
+<body>
+  <h1>Iniciá sesión</h1>
+  <button id="loginBtn">Login con Google</button>
+  <p id="status">Esperando login...</p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
+      authDomain: "plato-resuelto.firebaseapp.com",
+      projectId: "plato-resuelto",
+      storageBucket: "plato-resuelto.firebasestorage.app",
+      messagingSenderId: "11080746612",
+      appId: "1:11080746612:web:22f488078f01def94ff321",
+      measurementId: "G-16RQJ5KB0H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Si ya está logueado, redirigir directo al index
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    // Botón de login
+    document.getElementById("loginBtn").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          document.getElementById("status").innerText = `Hola, ${result.user.displayName}`;
+          // Redirigir al index
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          console.error("Error en login:", error);
+          alert("Error al iniciar sesión");
+        });
+    });
+  </script>
+</body>
+</html>
