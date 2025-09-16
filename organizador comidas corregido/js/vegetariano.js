@@ -78,17 +78,15 @@ if (!hasV && !hasP && !hasH && !hasC) {
 
 
 // =========================
-// STORAGE
+// FIRESTORE
 // =========================
-function guardarCalendario(){ 
-  localStorage.setItem('calendario_veg', JSON.stringify(calendario)); 
+if (window.currentUser) {
+  // no hace falta await; podemos manejar errores con .catch
+  guardarCalendarioActual(window.currentUser, "vegetariano").catch(console.error);
+} else {
+  // opcional: mostrar mensaje o almacenar temporalmente si querés permitir uso offline
 }
-function cargarCalendario(){ 
-  const g = localStorage.getItem('calendario_veg'); 
-  if(g){ 
-    try{ calendario = JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} 
-  } 
-}
+
 
 
 // =========================
@@ -178,6 +176,7 @@ window.generarCalendarioAleatorioVeg = function () {
     console.log("✅ Calendario vegetariano generado:", calendario);
   }
 };
+
 
 
 
