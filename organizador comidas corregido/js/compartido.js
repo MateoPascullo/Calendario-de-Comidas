@@ -71,7 +71,7 @@ function asignarAcalendario(plato){
   let rep=0; 
   dias.forEach(d=>{ 
     if(calendario[d].almuerzo===plato) rep++; 
-    if(calendario[d].cena===plato) rep++; 
+    if(calendario[d].cena===plato) rep++;
   });
   if(rep>=2) return false;
 
@@ -100,7 +100,12 @@ function resetearCalendario(){
 // RENDER DEL CALENDARIO
 // =========================
 function actualizarCalendario(){
-  guardarCalendario(); // 👉 definida en cada main
+  guardarCalendario(); // sigue guardando localmente
+  if (window.currentUser) {
+    // 🔹 persistencia Firestore
+    guardarCalendarioActual(window.currentUser, "compartido").catch(console.error);
+  }
+
   const cuerpo=document.getElementById('calendario-body'); 
   cuerpo.innerHTML='';
   const hoy=new Date(); 
@@ -127,7 +132,7 @@ function crearContenidoCelda(dia, tipo) {
 function eliminarPlato(e,dia,tipo){ 
   e.stopPropagation(); 
   calendario[dia][tipo]=null; 
-  actualizarCalendario(); 
+  actualizarCalendario(); // 🔹 Firestore se guarda desde aquí
 }
 
 function seleccionarCelda(dia, tipo) {
@@ -324,18 +329,17 @@ window.mostrarTutorial = function() {
   mostrarPaso();
 };
 
-
-// en compartido.js (pegá cerca del resto de funciones)
+// =========================
+// RECONSTRUIR CALENDARIO DESDE DOM
+// =========================
 function reconstruirCalendarioDesdeDOM() {
   const cuerpo = document.getElementById('calendario-body');
   if (!cuerpo) return;
   const filas = Array.from(cuerpo.querySelectorAll('tr'));
-  // asumimos el array `dias` existe y el objeto `calendario` también (como en tu código)
   filas.forEach((fila, idx) => {
     const dia = dias[idx];
     if (!dia) return;
     const celdas = fila.querySelectorAll('td');
-    // celdas[1] -> almuerzo, celdas[2] -> cena
     const textSinEliminar = (cel) => {
       if (!cel) return null;
       const clone = cel.cloneNode(true);
@@ -349,9 +353,12 @@ function reconstruirCalendarioDesdeDOM() {
       cena: textSinEliminar(celdas[2])
     };
   });
+
+  // 🔹 guardar en Firestore
+  if (window.currentUser) {
+    guardarCalendarioActual(window.currentUser, "compartido").catch(console.error);
+  }
 }
-
-
 
 
 
