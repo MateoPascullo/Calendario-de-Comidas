@@ -1,17 +1,32 @@
-// js/auth.js
-import { auth, provider } from "./firebase.js";
-import { signInWithPopup, signOut, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+// auth.js → SOLO login/logout
 
-export function login() {
-  return signInWithPopup(auth, provider);
+import { auth, provider } from "./firebase.js";
+import {
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+// Inicia login con redirect
+export function loginWithRedirect() {
+  return signInWithRedirect(auth, provider);
 }
 
+// Finaliza login luego del redirect
+export async function finalizeRedirect() {
+  return await getRedirectResult(auth);
+}
+
+// Logout
 export function logout() {
   return signOut(auth);
 }
 
+// Escuchar cambios de sesión
 export function escucharAuth(callback) {
   return onAuthStateChanged(auth, callback);
 }
+
+
 
