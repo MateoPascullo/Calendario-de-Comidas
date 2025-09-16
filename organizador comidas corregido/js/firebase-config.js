@@ -1,4 +1,3 @@
-// js/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import { getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
@@ -19,3 +18,5 @@ const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
 export { auth, provider, db, serverTimestamp };
+
+
