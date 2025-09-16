@@ -271,12 +271,13 @@
 
 
 <script type="module">
-  import { loginWithRedirect } from './auth.js';
+  import { auth, provider } from "./firebase.js";
+  import { signInWithPopup } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
   const loginBtn = document.getElementById("loginBtn");
 
-  loginBtn.addEventListener("click", () => {
-    loginWithRedirect();
+  loginBtn.addEventListener("click", async () => {
+    await signInWithPopup(auth, provider);
   });
 </script>
 
@@ -285,8 +286,10 @@
 
 
 
+
 </body>
 </html>
+
 
 
 
