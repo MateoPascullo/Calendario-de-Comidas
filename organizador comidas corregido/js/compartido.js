@@ -9,18 +9,24 @@ dias.forEach(dia => calendario[dia] = { almuerzo:null, cena:null });
 // =========================
 // ENSALADA CUSTOM
 // =========================
-document.getElementById('verdura')?.addEventListener('change', function () {
+document.getElementById('verdura').addEventListener('change', function () {
   const isSalad = this.value === 'ensaladas';
   document.getElementById('ensalada').style.display = isSalad ? 'block' : 'none';
 });
 
 function copiarEnsalada() {
   const coccion = document.querySelector('input[name="coccion"]:checked');
-  if (!coccion) return mostrarMensaje('❌ Falta elegir método de cocción.','error');
+  if (!coccion) {
+    mostrarMensaje('❌ Falta elegir método de cocción.','error');
+    return;
+  }
 
   const checks = document.querySelectorAll('#ensalada input[type="checkbox"]:checked');
   const seleccion = Array.from(checks).map(c => c.value);
-  if (!seleccion.length) return mostrarMensaje('❌ Seleccioná al menos una verdura.','error');
+  if (!seleccion.length) {
+    mostrarMensaje('❌ Seleccioná al menos una verdura.','error');
+    return;
+  }
 
   const finalStr = `${coccion.value} (<span class="verduras-paren">${seleccion.join(', ')}</span>)`;
 
@@ -71,10 +77,9 @@ function asignarAcalendario(plato){
   let rep=0; 
   dias.forEach(d=>{ 
     if(calendario[d].almuerzo===plato) rep++; 
-    if(calendario[d].cena===plato) rep++;
+    if(calendario[d].cena===plato) rep++; 
   });
   if(rep>=2) return false;
-
   let disp=[...dias];
   while(disp.length){
     let dia=disp[Math.floor(Math.random()*disp.length)];
@@ -100,18 +105,12 @@ function resetearCalendario(){
 // RENDER DEL CALENDARIO
 // =========================
 function actualizarCalendario(){
-  guardarCalendario(); // sigue guardando localmente
-  if (window.currentUser) {
-    // 🔹 persistencia Firestore
-    guardarCalendarioActual(window.currentUser, "compartido").catch(console.error);
-  }
-
+  guardarCalendario(); // esta función se define en app-normal o app-veg
   const cuerpo=document.getElementById('calendario-body'); 
   cuerpo.innerHTML='';
   const hoy=new Date(); 
   let indiceHoy=hoy.getDay()-1; 
   if(indiceHoy<0||indiceHoy>4) indiceHoy=null;
-
   dias.forEach((dia,i)=>{
     const esHoy = i===indiceHoy;
     cuerpo.innerHTML+=`
@@ -125,14 +124,16 @@ function actualizarCalendario(){
 
 function crearContenidoCelda(dia, tipo) {
   const plato = calendario[dia][tipo];
-  if (!plato) return '<span style="font-size:12px; color:#999;">Click para agregar un plato</span>';
+  if (!plato) {
+    return '<span style="font-size:12px; color:#999;">Click para agregar un plato</span>';
+  }
   return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
 }
 
 function eliminarPlato(e,dia,tipo){ 
   e.stopPropagation(); 
   calendario[dia][tipo]=null; 
-  actualizarCalendario(); // 🔹 Firestore se guarda desde aquí
+  actualizarCalendario(); 
 }
 
 function seleccionarCelda(dia, tipo) {
@@ -160,7 +161,9 @@ function seleccionarCelda(dia, tipo) {
   if (!pO) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
-    if (!pD) document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
+    if (!pD) {
+      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
+    }
     return;
   }
 
@@ -238,19 +241,35 @@ function descargarPDF() {
 }
 
 // =========================
-// HELPERS
+// INICIO
 // =========================
+window.onload=()=>{ 
+  cargarCalendario(); // esta función se define en app-normal o app-veg
+  actualizarCalendario(); 
+};
+
+
+
+
+
+
+
+//CALENDARIO ALEATORIO
+
+// ===== Helpers globales =====
 window.getOpciones = function getOpciones(idSelect) {
   const select = document.getElementById(idSelect);
   if (!select) return [];
   return Array.from(select.options)
     .map(opt => (opt.value ?? "").trim())
+    // 👇 filtramos vacíos, "ensaladas" y lo que esté oculto
     .filter(val => val !== "" && val !== "ensaladas");
 };
 
-// =========================
-// BOTÓN HOY
-// =========================
+
+
+//BOTON FLOTANTE
+// Botón flotante: ir al día de hoy
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btnHoy");
   if (btn) {
@@ -271,9 +290,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+
 // =========================
-// TUTORIAL
+// scroll mas preciso para boton
 // =========================
+document.getElementById("btnHoy").addEventListener("click", function (e) {
+  e.preventDefault();
+  const hoy = new Date();
+  const indiceHoy = hoy.getDay() - 1; // Lunes=0
+  if (indiceHoy >= 0 && indiceHoy <= 4) {
+    const filaHoy = document.querySelectorAll("#calendario-body tr")[indiceHoy];
+    if (filaHoy) {
+      filaHoy.scrollIntoView({
+        behavior: "smooth",
+        block: "center"  // 👈 lo centra en pantalla (mejor en móvil)
+      });
+    }
+  }
+});
+
+
+
+
+// tutorial.js
 const pasos = [
   "👋 Bienvenido a <strong>Plato Resuelto!</strong><br>Acá organizás tu menú de la semana o de un solo día de forma fácil y rápida.",
   " Armá tu plato eligiendo <em>verduras</em>, <em>proteínas</em>, <em>hidratos</em> o un <em>plato completo</em>.",
@@ -292,10 +331,14 @@ function mostrarPaso() {
   stepEl.innerHTML = pasos[pasoActual];
   indicator.textContent = `Paso ${pasoActual + 1} de ${pasos.length}`;
 
-  document.getElementById("tutorial-prev").style.display = pasoActual > 0 ? "inline-flex" : "none";
-  document.getElementById("tutorial-prev").innerHTML = "← Atrás";
+  // Botón "Atrás"
+  const prevBtn = document.getElementById("tutorial-prev");
+  prevBtn.style.display = pasoActual > 0 ? "inline-flex" : "none";
+  prevBtn.innerHTML = "← Atrás";
 
-  document.getElementById("tutorial-next").innerHTML = (pasoActual === pasos.length - 1) ? "Empezar →" : "Continuar →";
+  // Botón "Continuar / Empezar"
+  const nextBtn = document.getElementById("tutorial-next");
+  nextBtn.innerHTML = (pasoActual === pasos.length - 1) ? "Empezar →" : "Continuar →";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -329,36 +372,7 @@ window.mostrarTutorial = function() {
   mostrarPaso();
 };
 
-// =========================
-// RECONSTRUIR CALENDARIO DESDE DOM
-// =========================
-function reconstruirCalendarioDesdeDOM() {
-  const cuerpo = document.getElementById('calendario-body');
-  if (!cuerpo) return;
-  const filas = Array.from(cuerpo.querySelectorAll('tr'));
-  filas.forEach((fila, idx) => {
-    const dia = dias[idx];
-    if (!dia) return;
-    const celdas = fila.querySelectorAll('td');
-    const textSinEliminar = (cel) => {
-      if (!cel) return null;
-      const clone = cel.cloneNode(true);
-      const el = clone.querySelector('.menu-eliminar');
-      if (el) el.remove();
-      const txt = clone.innerText.trim();
-      return txt === '' ? null : txt;
-    };
-    calendario[dia] = {
-      almuerzo: textSinEliminar(celdas[1]),
-      cena: textSinEliminar(celdas[2])
-    };
-  });
 
-  // 🔹 guardar en Firestore
-  if (window.currentUser) {
-    guardarCalendarioActual(window.currentUser, "compartido").catch(console.error);
-  }
-}
 
 
 
