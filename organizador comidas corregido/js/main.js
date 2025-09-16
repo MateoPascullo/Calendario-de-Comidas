@@ -115,9 +115,21 @@ document.addEventListener("DOMContentLoaded", () => {
 // =========================
 // INICIO
 // =========================
-window.onload = () => {
-  cargarCalendario(); // 👉 cada main trae su versión (normal o vegetariano)
-  actualizarCalendario();
-};
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  const contenido = document.getElementById("contenido");
+  if (user) {
+    await cargarCalendarioJSON(user, "normal"); // o "vegetariano"
+    if (contenido) contenido.style.display = "block";
+
+    // SOLO ahora iniciar el calendario
+    cargarCalendario();
+    actualizarCalendario();
+  } else {
+    window.location.href = "login.html";
+  }
+});
+
+
 
 
