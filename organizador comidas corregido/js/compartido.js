@@ -325,6 +325,32 @@ window.mostrarTutorial = function() {
 };
 
 
+// en compartido.js (pegá cerca del resto de funciones)
+function reconstruirCalendarioDesdeDOM() {
+  const cuerpo = document.getElementById('calendario-body');
+  if (!cuerpo) return;
+  const filas = Array.from(cuerpo.querySelectorAll('tr'));
+  // asumimos el array `dias` existe y el objeto `calendario` también (como en tu código)
+  filas.forEach((fila, idx) => {
+    const dia = dias[idx];
+    if (!dia) return;
+    const celdas = fila.querySelectorAll('td');
+    // celdas[1] -> almuerzo, celdas[2] -> cena
+    const textSinEliminar = (cel) => {
+      if (!cel) return null;
+      const clone = cel.cloneNode(true);
+      const el = clone.querySelector('.menu-eliminar');
+      if (el) el.remove();
+      const txt = clone.innerText.trim();
+      return txt === '' ? null : txt;
+    };
+    calendario[dia] = {
+      almuerzo: textSinEliminar(celdas[1]),
+      cena: textSinEliminar(celdas[2])
+    };
+  });
+}
+
 
 
 
