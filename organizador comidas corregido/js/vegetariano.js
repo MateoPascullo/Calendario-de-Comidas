@@ -45,6 +45,7 @@ function validarPlato() {
       } else {
         calendario[dia][tipo] = platoFinal;
         actualizarCalendario();
+        if (window.currentUser) guardarCalendarioActual(window.currentUser, "vegetariano").catch(console.error);
         mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
       }
       seleccion = null;
@@ -52,6 +53,8 @@ function validarPlato() {
     } else {
       const ok = asignarAcalendario(platoFinal);
       if (ok) {
+        actualizarCalendario();
+        if (window.currentUser) guardarCalendarioActual(window.currentUser, "vegetariano").catch(console.error);
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
@@ -62,59 +65,29 @@ function validarPlato() {
   }
 
   // ----- Motivos específicos de invalidez (veg mejorados) -----
-if (!hasV && !hasP && !hasH && !hasC) {
-  mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-} else if (hasC && (hasV || hasP || hasH)) {
-  mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-} else if (hasV && (!hasP || !hasH)) {
-  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
-} else if (!hasV && (hasP || hasH)) {
-  mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
-} else {
-  mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  if (!hasV && !hasP && !hasH && !hasC) {
+    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  } else if (hasC && (hasV || hasP || hasH)) {
+    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  } else if (hasV && (!hasP || !hasH)) {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  } else if (!hasV && (hasP || hasH)) {
+    mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+  } else {
+    mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  }
 }
-
-}
-
-
-// =========================
-// FIRESTORE
-// =========================
-if (window.currentUser) {
-  // no hace falta await; podemos manejar errores con .catch
-  guardarCalendarioActual(window.currentUser, "vegetariano").catch(console.error);
-} else {
-  // opcional: mostrar mensaje o almacenar temporalmente si querés permitir uso offline
-}
-
 
 
 // =========================
 // GENERADOR ALEATORIO (Vegetariano)
 // =========================
-
-// Lee las opciones desde los <select> del HTML
-window.getOpciones = window.getOpciones || function (idSelect) {
-  const select = document.getElementById(idSelect);
-  if (!select) {
-    console.warn(`⚠️ No encontré el <select> #${idSelect}.`);
-    return [];
-  }
-  return Array.from(select.options)
-    .map(opt => (opt.value ?? "").trim())
-    .filter(val => val !== "");
-};
-
-// Genera un plato aleatorio vegetariano
 window.generarPlatoAleatorioVeg = function () {
   const verduras  = window.getOpciones("verdura");
   const proteinas = window.getOpciones("proteina");
   const hidratos  = window.getOpciones("hidrato");
   const completos = window.getOpciones("completo");
 
-  // En vegetariano solo se permite: 
-  // 1) un completo, o 
-  // 2) Verdura + Proteína + Hidrato
   const modo = (completos.length > 0 && Math.random() < 0.5) ? "completo" : "combo";
 
   if (modo === "completo") {
@@ -132,8 +105,6 @@ window.generarPlatoAleatorioVeg = function () {
   return `${v}+ ${p}+ ${h}`;
 };
 
-
-// Genera la semana Lun–Vie en almuerzo y cena (vegetariano)
 window.generarCalendarioAleatorioVeg = function () {
   const dias  = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const tipos = ["almuerzo", "cena"];
@@ -152,9 +123,7 @@ window.generarCalendarioAleatorioVeg = function () {
         if (!candidato) break;
 
         const otroTipo = (tipo === "almuerzo") ? "cena" : "almuerzo";
-        // no repetir mismo plato en el mismo día
         if (calendario[dia][otroTipo] === candidato) continue;
-        // máximo 2 veces por semana
         if (typeof contarRepeticiones === "function" && contarRepeticiones(candidato) >= 2) continue;
 
         platoValido = candidato;
@@ -162,20 +131,20 @@ window.generarCalendarioAleatorioVeg = function () {
 
       if (platoValido) {
         calendario[dia][tipo] = platoValido;
-      } else {
-        console.warn(`⚠️ No se pudo asignar plato para ${dia} (${tipo})`);
       }
     });
   });
 
   if (typeof actualizarCalendario === "function") actualizarCalendario();
-  if (typeof guardarCalendario === "function") guardarCalendario();
+  if (window.currentUser) guardarCalendarioActual(window.currentUser, "vegetariano").catch(console.error);
   if (typeof mostrarMensaje === "function") {
     mostrarMensaje("✅ Calendario vegetariano generado aleatoriamente.", "exito");
   } else {
     console.log("✅ Calendario vegetariano generado:", calendario);
   }
 };
+
+
 
 
 
