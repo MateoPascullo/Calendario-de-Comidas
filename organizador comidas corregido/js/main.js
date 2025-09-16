@@ -1,6 +1,6 @@
 // js/main.js
+import { auth } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-import { auth } from "./firebase.js"; // 👈 corregido: no firebase-config.js
 import { cargarCalendarioJSON, guardarCalendarioActual } from "./firestore.js";
 
 let currentUser = null;
@@ -8,9 +8,10 @@ let currentUser = null;
 // ========================
 // VALIDAR PLATO (normal)
 // ========================
-function validarPlato() {
-  const s = getSeleccionados();
+async function validarPlato() {
+  if (!currentUser) return;
 
+  const s = getSeleccionados();
   const v = (s.verdura ?? '').trim();
   const p = (s.proteina ?? '').trim();
   const h = (s.hidrato ?? '').trim();
@@ -21,32 +22,23 @@ function validarPlato() {
   const hasH = h.length > 0;
   const hasC = c.length > 0;
 
-  console.log('validarPlato (normal) -> seleccionados:', { v, p, h, c, hasV, hasP, hasH, hasC });
-
   let valido = false;
   let platoFinal = '';
 
-  // Reglas válidas: completo OR V+P+H
   if (hasC && !hasV && !hasP && !hasH) {
     valido = true; platoFinal = c;
-    console.log('Razon: Plato completo solo (normal)');
   } else if (hasV && hasP && hasH && !hasC) {
     valido = true; platoFinal = `${v}+ ${p}+ ${h}`;
-    console.log('Razon: Verdura + Proteína + Hidrato (normal)');
-  } else {
-    console.log('Razon: NO cumple reglas válidas (normal)');
   }
 
   if (valido) {
     if (seleccion) {
       const { dia, tipo } = seleccion;
-      const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
+      const otroTipo = tipo === 'almuerzo' ? 'cena' : 'almuerzo';
 
       if (calendario[dia][otroTipo] === platoFinal) {
-        console.log('Error: repetido mismo día (normal)');
         mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
       } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
-        console.log('Error: ya asignado 2 veces en la semana (normal)');
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       } else {
         calendario[dia][tipo] = platoFinal;
@@ -57,34 +49,27 @@ function validarPlato() {
       limpiarSelects();
     } else {
       const ok = asignarAcalendario(platoFinal);
-      if (ok) {
-        mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
-      } else {
-        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
-      }
+      if (ok) mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
+      else mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       limpiarSelects();
     }
 
-    // 👇 Guardamos automáticamente en Firestore
-    if (currentUser) {
-      guardarCalendarioActual(currentUser, "normal");
+    // Guardar automáticamente en Firestore
+    try {
+      await guardarCalendarioActual(currentUser, "normal");
+    } catch (e) {
+      console.error("❌ Error guardando calendario:", e);
     }
 
     return;
   }
 
-  // ----- Motivos específicos de invalidez -----
-  if (!hasV && !hasP && !hasH && !hasC) {
-    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-  } else if (hasC && (hasV || hasP || hasH)) {
-    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-  } else if (hasV && (!hasP || !hasH)) {
-    mostrarMensaje('❌ Necesitás verdura + proteína + hidrato para un plato válido.', 'error');
-  } else if (!hasV && (hasP || hasH)) {
-    mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
-  } else {
-    mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
-  }
+  // Mensajes de error por selección inválida
+  if (!hasV && !hasP && !hasH && !hasC) mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  else if (hasC && (hasV || hasP || hasH)) mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  else if (hasV && (!hasP || !hasH)) mostrarMensaje('❌ Necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  else if (!hasV && (hasP || hasH)) mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+  else mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
 }
 
 // ========================
@@ -92,12 +77,20 @@ function validarPlato() {
 // ========================
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
+  const contenido = document.getElementById("contenido");
+
   if (user) {
-    console.log("Usuario logueado:", user.email);
+    console.log("✅ Usuario logueado:", user.uid);
     await cargarCalendarioJSON(user, "normal");
-    document.getElementById("contenido").style.display = "block";
+
+    if (contenido) contenido.style.display = "block";
+
+    // Inicializar calendario
+    if (typeof cargarCalendario === "function") cargarCalendario();
+    if (typeof actualizarCalendario === "function") actualizarCalendario();
+
   } else {
-    console.log("Usuario NO logueado");
+    console.log("⚠️ Usuario no autenticado. Redirigiendo a login...");
     window.location.href = "login.html";
   }
 });
@@ -107,28 +100,9 @@ onAuthStateChanged(auth, async (user) => {
 // ========================
 document.addEventListener("DOMContentLoaded", () => {
   const btnAgregar = document.getElementById("btnAgregar");
-  if (btnAgregar) {
-    btnAgregar.addEventListener("click", validarPlato);
-  }
+  if (btnAgregar) btnAgregar.addEventListener("click", validarPlato);
 });
 
-// =========================
-// INICIO
-// =========================
-onAuthStateChanged(auth, async (user) => {
-  currentUser = user;
-  const contenido = document.getElementById("contenido");
-  if (user) {
-    await cargarCalendarioJSON(user, "normal"); // o "vegetariano"
-    if (contenido) contenido.style.display = "block";
-
-    // SOLO ahora iniciar el calendario
-    cargarCalendario();
-    actualizarCalendario();
-  } else {
-    window.location.href = "login.html";
-  }
-});
 
 
 
