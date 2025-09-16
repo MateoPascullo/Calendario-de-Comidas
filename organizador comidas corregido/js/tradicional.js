@@ -35,7 +35,7 @@ function validarPlato() {
   }
 
   if (valido) {
-    // Asignación al calendario (igual que antes)
+    // Asignación al calendario
     if (seleccion) {
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
@@ -47,6 +47,12 @@ function validarPlato() {
       } else {
         calendario[dia][tipo] = platoFinal;
         actualizarCalendario();
+
+        // 👇 Guardar en Firestore
+        if (window.currentUser) {
+          guardarCalendarioActual(window.currentUser, "tradicional").catch(console.error);
+        }
+
         mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
       }
       seleccion = null;
@@ -54,6 +60,13 @@ function validarPlato() {
     } else {
       const ok = asignarAcalendario(platoFinal);
       if (ok) {
+        actualizarCalendario();
+
+        // 👇 Guardar en Firestore
+        if (window.currentUser) {
+          guardarCalendarioActual(window.currentUser, "tradicional").catch(console.error);
+        }
+
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
@@ -63,78 +76,25 @@ function validarPlato() {
     return;
   }
 
-  // ----- Motivos específicos de invalidez (mejorados) -----
-if (!hasV && !hasP && !hasH && !hasC) {
-  mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-} else if (hasC && (hasV || hasP || hasH)) {
-  mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-} else if (hasV && !hasP && !hasH) {
-  mostrarMensaje('❌ Faltan más opciones: agregá proteína o hidrato.', 'error');
-} else if (!hasV && (hasP || hasH)) {
-  mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
-} else if (hasV && hasP && hasH) {
-  mostrarMensaje('❌ Esta combinación no es válida. Probá con: verdura+proteína, verdura+hidrato o las tres juntas.', 'error');
-} else {
-  mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  // ----- Motivos específicos de invalidez -----
+  if (!hasV && !hasP && !hasH && !hasC) {
+    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  } else if (hasC && (hasV || hasP || hasH)) {
+    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  } else if (hasV && !hasP && !hasH) {
+    mostrarMensaje('❌ Faltan más opciones: agregá proteína o hidrato.', 'error');
+  } else if (!hasV && (hasP || hasH)) {
+    mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+  } else if (hasV && hasP && hasH) {
+    mostrarMensaje('❌ Esta combinación no es válida. Probá con: verdura+proteína, verdura+hidrato o las tres juntas.', 'error');
+  } else {
+    mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  }
 }
-
-}
-
-
 
 // =========================
-// FIRESTORE
+// CALENDARIO ALEATORIO
 // =========================
-if (window.currentUser) {
-  // no hace falta await; podemos manejar errores con .catch
-  guardarCalendarioActual(window.currentUser, "tradicional").catch(console.error);
-} else {
-  // opcional: mostrar mensaje o almacenar temporalmente si querés permitir uso offline
-}
-
-
-
-
-window.generarCalendarioAleatorio = function () {
-  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-  const tipos = ["almuerzo", "cena"];
-
-  calendario = {};
-  dias.forEach(dia => {
-    calendario[dia] = { almuerzo: "", cena: "" };
-  });
-
-  dias.forEach(dia => {
-    tipos.forEach(tipo => {
-      let platoValido = null;
-      let intentos = 0;
-
-      while (!platoValido && intentos < 50) {
-        intentos++;
-        const candidato = generarPlatoAleatorio();
-        if (!candidato) break;
-
-        const otroTipo = tipo === "almuerzo" ? "cena" : "almuerzo";
-        if (calendario[dia][otroTipo] === candidato) continue;
-        if (contarRepeticiones(candidato) >= 2) continue;
-
-        platoValido = candidato;
-      }
-
-      if (platoValido) {
-        calendario[dia][tipo] = platoValido;
-      }
-    });
-  });
-
-  actualizarCalendario();
-  guardarCalendario();
-  mostrarMensaje("✅ Calendario generado aleatoriamente.", "exito");
-};
-
-
-
-//CALENDARIO ALEATORIO
 
 // Genera 1 plato aleatorio usando las <option> del HTML
 window.generarPlatoAleatorio = function () {
@@ -160,7 +120,6 @@ window.generarPlatoAleatorio = function () {
   const h = hidratos[Math.floor(Math.random() * hidratos.length)];
   return `${v}+ ${p}+ ${h}`;
 };
-
 
 // Genera semana Lun–Vie en almuerzo y cena
 window.generarCalendarioAleatorio = function () {
@@ -199,12 +158,18 @@ window.generarCalendarioAleatorio = function () {
   });
 
   if (typeof actualizarCalendario === "function") actualizarCalendario();
-  if (typeof guardarCalendario === "function") guardarCalendario();
+
+  // 👇 Guardar en Firestore
+  if (window.currentUser) {
+    guardarCalendarioActual(window.currentUser, "tradicional").catch(console.error);
+  }
+
   if (typeof mostrarMensaje === "function") {
     mostrarMensaje("✅ Calendario generado aleatoriamente.", "exito");
   } else {
     console.log("✅ Calendario generado:", calendario);
   }
 };
+
 
 
