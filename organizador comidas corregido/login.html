@@ -1,0 +1,19 @@
+<!-- login.html -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Login</title></head>
+<body>
+  <button id="loginBtn">Ingresar con Google</button>
+  <script type="module">
+    import { loginWithRedirect, finalizeRedirect } from "./js/auth.js";
+    document.getElementById("loginBtn").addEventListener("click", () => loginWithRedirect());
+    // opcional: cuando vuelve del redirect, redirigir a index
+    window.addEventListener("load", async () => {
+      try {
+        const res = await finalizeRedirect();
+        if (res && res.user) window.location.href = "index.html";
+      } catch(e) { console.warn(e); }
+    });
+  </script>
+</body>
+</html>
