@@ -83,19 +83,14 @@ if (!hasV && !hasP && !hasH && !hasC) {
 
 
 // =========================
-// STORAGE
+// FIRESTORE
 // =========================
-function guardarCalendario(){ 
-  localStorage.setItem('calendario', JSON.stringify(calendario)); 
+if (window.currentUser) {
+  // no hace falta await; podemos manejar errores con .catch
+  guardarCalendarioActual(window.currentUser, "tradicional").catch(console.error);
+} else {
+  // opcional: mostrar mensaje o almacenar temporalmente si querés permitir uso offline
 }
-function cargarCalendario(){ 
-  const g = localStorage.getItem('calendario'); 
-  if(g){ 
-    try{ calendario = JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} 
-  } 
-}
-
-
 
 
 
@@ -211,4 +206,5 @@ window.generarCalendarioAleatorio = function () {
     console.log("✅ Calendario generado:", calendario);
   }
 };
+
 
