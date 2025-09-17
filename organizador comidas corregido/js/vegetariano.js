@@ -61,7 +61,7 @@ function validarPlato() {
     return;
   }
 
-  // ----- Motivos específicos de invalidez (veg mejorados) -----
+ // ----- Motivos específicos de invalidez (veg mejorados) -----
 if (!hasV && !hasP && !hasH && !hasC) {
   mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
 } else if (hasC && (hasV || hasP || hasH)) {
@@ -69,9 +69,9 @@ if (!hasV && !hasP && !hasH && !hasC) {
 } else if (hasV && (!hasP || !hasH)) {
   mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
 } else if (!hasV && (hasP || hasH)) {
-  mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
 } else {
-  mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
 }
 
 }
@@ -178,6 +178,7 @@ window.generarCalendarioAleatorioVeg = function () {
     console.log("✅ Calendario vegetariano generado:", calendario);
   }
 };
+
 
 
 
