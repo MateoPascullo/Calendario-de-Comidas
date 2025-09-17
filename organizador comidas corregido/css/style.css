@@ -91,6 +91,16 @@
   gap: 4px;
 }
 
+.opciones-coccion input[type="radio"] {
+  -webkit-appearance: radio; /* asegura que se vean normales en Safari */
+  appearance: radio;
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0; /* espacio a la derecha del circulito */
+  flex-shrink: 0;    /* evita que se encoja y empuje el texto */
+}
+
+
 table {
   border-collapse: collapse;
   width: 100%;
@@ -307,6 +317,7 @@ td {
   word-break: break-word; /* 👈 respaldo en navegadores viejos */
 }
   
+
 
 
 
