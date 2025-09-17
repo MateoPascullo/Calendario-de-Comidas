@@ -1,5 +1,4 @@
-
-   :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -141,9 +140,26 @@ h2 {
 
 
 .btn-calendario-container {
-  text-align: right;   /* alinea a la derecha */
+  display: flex;
+  flex-direction: column; /* uno debajo del otro */
+  align-items: flex-start; /* los alinea a la izquierda */
+  gap: 6px; /* espacio entre botones */
   margin: 5px 0 15px 0;
 }
+
+.btn-calendario {
+  display: inline-block; /* ocupa solo el ancho del texto */
+  width: auto;           /* asegura que no se estiren */
+  background: var(--primario);
+  color: #fff;
+  padding: 6px 12px;     /* igual que botón flotante */
+  font-size: 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s ease;
+}
+
 
 .btn-calendario {
   background: var(--primario);
@@ -262,5 +278,35 @@ h2 {
   from { transform: translateY(40px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
 }
+
+
+
+
+/* boton agregar ensalada */
+.btn-mini {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  background: #8f9d68;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-mini:hover {
+  background: #738254;
+}
+
+/* separar en silabas */
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; 
+  white-space: normal;
+  hyphens: auto;         /* 👈 separa por sílabas */
+  word-break: break-word; /* 👈 respaldo en navegadores viejos */
+}
+  
+
 
 
