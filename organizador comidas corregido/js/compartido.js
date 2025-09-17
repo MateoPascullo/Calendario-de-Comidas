@@ -399,5 +399,58 @@ window.mostrarTutorial = function() {
 
 
 
+                        
+// ... tus funciones existentes de compartido.js
+// por ejemplo: actualizarCalendario(), validarPlato(), etc.
+
+/* ============================================================
+   Inserta guiones suaves en palabras largas del calendario
+   ============================================================ */
+function addSoftHyphens(selector = '#calendario td', minLen = 10, chunk = 6) {
+  const SHY = '\u00AD'; // soft hyphen
+  document.querySelectorAll(selector).forEach(el => {
+    walkTextNodes(el, node => {
+      let txt = node.nodeValue.replace(/\u00AD/g, '');
+      if (!txt) return;
+      const parts = txt.split(/(\s+)/);
+      let changed = false;
+      for (let i = 0; i < parts.length; i++) {
+        if (/^\s*$/.test(parts[i])) continue;
+        const w = parts[i];
+        if (w.length >= minLen && !/[\u00AD]/.test(w)) {
+          parts[i] = w.replace(new RegExp('.{'+chunk+'}', 'g'), m => m + SHY);
+          changed = true;
+        }
+      }
+      if (changed) node.nodeValue = parts.join('');
+    });
+  });
+}
+
+function walkTextNodes(node, cb){
+  node = node.firstChild;
+  while(node){
+    if(node.nodeType === 3) cb(node);
+    else walkTextNodes(node);
+    node = node.nextSibling;
+  }
+}
+
+// Ejecutar una vez al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  addSoftHyphens('#calendario td', 10, 6);
+});
+
+// Reaplicar cada vez que se modifique el calendario
+const cal = document.getElementById('calendario');
+if (cal) {
+  const obs = new MutationObserver(() => addSoftHyphens('#calendario td', 10, 6));
+  obs.observe(cal, { childList: true, subtree: true });
+}
+
+
+
+
+
 
 
