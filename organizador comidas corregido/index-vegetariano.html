@@ -10,11 +10,19 @@
 
 </head>
 
- <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya elegiste tu menú de hoy?</a>
+
 
 <body>
+   <button id="loginBtn">Entrar con Google</button>
+   <button id="logoutBtn" style="display:none">Cerrar sesión</button>
+   <p id="status">No logueado</p>
 
-  <h1>PlatoResuelto!</h1>
+   <!-- 🔒 contenido protegido -->
+   <div id="contenido" style="display:none;">
+
+   <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya elegiste tu menú de hoy?</a>
+ 
+   <h1>PlatoResuelto!</h1>
   <h2>Vegetariano</h2>
   <h2>Organizá tus comidas</h2>
 
@@ -169,10 +177,15 @@
 
 <div id="mensaje" class="mensaje-toast"></div>
 
+</div> <!-- 🔒 cierra contenido protegido -->
+
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } 
+    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
   // 🔹 Configuración de Firebase (misma que en index.html)
   const firebaseConfig = {
@@ -189,12 +202,14 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Contenedor del contenido protegido
+  const contenido = document.getElementById("contenido");
+
   // ---------- FUNCIONES FIRESTORE ----------
   async function guardarCalendario(user) {
     await setDoc(doc(db, "calendarios", user.uid), {
-      vegetariano: calendario   // 👈 guardamos el objeto calendario
-    }, { merge: true });        // merge:true evita pisar el tradicional
-    console.log("Calendario vegetariano guardado en Firestore ✅");
+      vegetariano: calendario
+    }, { merge: true });
   }
 
   async function cargarCalendario(user) {
@@ -202,32 +217,27 @@
     if (docSnap.exists() && docSnap.data().vegetariano) {
       calendario = docSnap.data().vegetariano;
       actualizarCalendario();
-      console.log("Calendario vegetariano cargado ✅");
-    } else {
-      console.log("No había calendario vegetariano guardado todavía.");
     }
   }
 
   // ---------- DETECTAR SESIÓN ----------
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Cargar calendario vegetariano
+      contenido.style.display = "block";
+
       await cargarCalendario(user);
 
-      // Guardar cada vez que cambie algo
       document.addEventListener("change", () => guardarCalendario(user));
       document.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON") {
-          guardarCalendario(user);
-        }
+        if (e.target.tagName === "BUTTON") guardarCalendario(user);
       });
+    } else {
+      // 🚨 Si no está logueado → redirigimos al index.html
+      window.location.href = "index.html";
     }
   });
 </script>
 
-
-</body>
-</html>
 
 
 
