@@ -39,7 +39,15 @@ function copiarEnsalada() {
   document.getElementById('ensalada').style.display = 'none';
   document.querySelectorAll('#ensalada input[type="checkbox"]').forEach(c => c.checked = false);
   document.querySelectorAll('#ensalada input[name="coccion"]').forEach(r => r.checked = false);
+
+  // scroll de arma tu ensalada
+    // mover scroll arriba al título principal
+  irAPlatoSemana();
+
+
+
 }
+
 
 // =========================
 // SELECTORES Y RESET
@@ -143,8 +151,9 @@ function seleccionarCelda(dia, tipo) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
     if (!calendario[dia][tipo]) {
-      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
-    }
+  irAPlatoSemana();
+}
+
     return;
   }
 
@@ -161,9 +170,10 @@ function seleccionarCelda(dia, tipo) {
   if (!pO) {
     seleccion = { dia, tipo };
     marcarCeldaSeleccionada(dia, tipo);
-    if (!pD) {
-      document.getElementById('form-plato').scrollIntoView({ behavior: 'smooth' });
-    }
+   if (!pD) {
+  irAPlatoSemana();
+}
+
     return;
   }
 
@@ -240,6 +250,18 @@ function descargarPDF() {
   doc.save("menu-semanal.pdf");
 }
 
+
+
+// SCROLL HACIA ARMAR PLATO
+function irAPlatoSemana() {
+  const target = document.getElementById("plato-semana");
+  if (target) {
+    const y = target.getBoundingClientRect().top + window.scrollY - 100; // 👈 offset de 100px
+    window.scrollTo({ top: y, behavior: "smooth" });
+  }
+}
+
+
 // =========================
 // INICIO
 // =========================
@@ -247,9 +269,6 @@ window.onload=()=>{
   cargarCalendario(); // esta función se define en app-normal o app-veg
   actualizarCalendario(); 
 };
-
-
-
 
 
 
@@ -371,6 +390,8 @@ window.mostrarTutorial = function() {
   document.getElementById("tutorial").style.display = "flex";
   mostrarPaso();
 };
+
+
 
 
 
