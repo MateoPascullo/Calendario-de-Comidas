@@ -13,12 +13,16 @@
 
 
 <body>
-   <button id="loginBtn">Entrar con Google</button>
+   
    <button id="logoutBtn" style="display:none">Cerrar sesión</button>
-   <p id="status">No logueado</p>
+   
 
    <!-- 🔒 contenido protegido -->
    <div id="contenido" style="display:none;">
+     <div class="btn-calendario-container">
+    <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">📘 Ver tutorial</a>
+    <a href="index.html" class="btn-calendario">Volver a calendario tradicional</a>
+   </div>
 
    <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya elegiste tu menú de hoy?</a>
  
@@ -30,7 +34,8 @@
     <img src="plato-buen-comer-bis.jpg" alt="Plato saludable" class="plato-saludable">
   </div>
 
- <h3 id="form-plato">Armá un plato para la semana</h3>
+ <!-- scroll de arma tu ensalada-->
+  <h3 id="plato-semana">Armá un plato para la semana</h3>
 
 
 
@@ -59,8 +64,12 @@
   
 </select>
 
-<div id="ensalada" class="subgrilla" style="display:none;">
-  <h4>Armá tu ensalada</h4>
+ <div id="ensalada" class="subgrilla" style="display:none;">
+  <!-- 🔹 Nueva fila con título + botón chiquito -->
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <h4 style="margin:0;">Armá tu ensalada</h4>
+    
+  </div>
 
   <p>Elegí el tipo de cocción:</p>
   <div class="opciones-coccion">
@@ -72,18 +81,36 @@
 
   <p>Seleccioná las verduras:</p>
   <div class="opciones-ensalada">
-    <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
-    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
-    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
-    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
-    <label class="chip"><input type="checkbox" value="Palta">Palta</label>
-    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
-    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
+   <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
     <label class="chip"><input type="checkbox" value="Rúcula">Rúcula</label>
+    <label class="chip"><input type="checkbox" value="Achicoria">Achicoria</label>
     <label class="chip"><input type="checkbox" value="Espinaca">Espinaca</label>
+    <label class="chip"><input type="checkbox" value="Acelga">Acelga</label>
+    <label class="chip"><input type="checkbox" value="Repollo">Repollo</label>
+    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
+    <label class="chip"><input type="checkbox" value="Tomate cherry">Tomate cherry</label>
+    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
+    <label class="chip"><input type="checkbox" value="Cebolla verdeo">Cebolla verdeo</label>
+    <label class="chip"><input type="checkbox" value="Puerro">Puerro</label>
+    <label class="chip"><input type="checkbox" value="Ajo">Ajo</label>
+    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
+    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
+    <label class="chip"><input type="checkbox" value="Remolacha">Remolacha</label>
+    <label class="chip"><input type="checkbox" value="Zapallito">Zapallito</label>
+    <label class="chip"><input type="checkbox" value="Zucchini">Zucchini</label>
+    <label class="chip"><input type="checkbox" value="Berenjena">Berenjena</label>
+    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
+    <label class="chip"><input type="checkbox" value="Calabaza">Calabaza</label>
+    <label class="chip"><input type="checkbox" value="Zapallo">Zapallo</label>
+    <label class="chip"><input type="checkbox" value="Arvejas">Arvejas</label>
+    <label class="chip"><input type="checkbox" value="Chaucha">Chaucha</label>
+    <label class="chip"><input type="checkbox" value="Brocoli">Brocoli</label>
+    <label class="chip"><input type="checkbox" value="Coliflor">Coliflor</label>
+    <label class="chip"><input type="checkbox" value="Alcaucil">Alcaucil</label>
+    <label class="chip"><input type="checkbox" value="Apio">Apio</label>
   </div>
 
-  <button type="button" onclick="copiarEnsalada()">Agregar ensalada</button>
+  <button type="button" onclick="copiarEnsalada()" class="btn-mini">Agregar ensalada</button>
 </div>
 
 
@@ -140,9 +167,8 @@
   </select>
 
   <button onclick="validarPlato()">Agregá el plato al calendario</button>
-      <div class="btn-calendario-container">
-       <a href="index.html" class="btn-calendario">Ir a calendario tradicional</a>
-      </div>
+      
+      
       <h2>🗓️ Calendario semanal</h2>
   
 
@@ -237,6 +263,8 @@
     }
   });
 </script>
+
+
 
 
 
