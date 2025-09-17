@@ -125,6 +125,19 @@ td {
   -webkit-hyphens: auto; /* Safari/iOS */
   -ms-hyphens: auto;     /* Edge viejo */
 }
+/* prioridad: mantener el lang correcto en el HTML (lang="es") */
+td {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  /* opcionales, poco soportadas pero útiles donde vaya: */
+  hyphenate-limit-chars: 6 3;
+  hyphenate-limit-lines: 2;
+}
+
 
 button {
   background: var(--primario); /* Verde base (#8f9d68) */
@@ -330,6 +343,7 @@ td {
   word-break: break-word; /* 👈 respaldo en navegadores viejos */
 }
   
+
 
 
 
