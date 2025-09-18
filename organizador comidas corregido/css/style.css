@@ -334,11 +334,11 @@ td {
   gap: 6px;
   font-size: 0.6rem;
   padding: 5px 10px;
-  background: #25a554; /* verde WhatsApp */
+  background: #249b4f; /* verde WhatsApp */
 }
 
 .btn-whatsapp-top .btn-whatsapp:hover {
-  background: #138639;
+  background: #25a554;
 }
 
 .icono-whatsapp {
