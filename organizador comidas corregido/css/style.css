@@ -322,6 +322,7 @@ td {
 
 
 
+
 .btn-whatsapp-top {
   display: flex;
   justify-content: flex-start; /* alineado a la izquierda */
@@ -334,18 +335,14 @@ td {
   gap: 6px;
   font-size: 0.6rem;
   padding: 5px 10px;
-  background: #249b4f; /* verde WhatsApp */
+  background: #2cb960; /* verde WhatsApp */
 }
 
 .btn-whatsapp-top .btn-whatsapp:hover {
-  background: #25a554;
+  background: #29b35b;
 }
 
 .icono-whatsapp {
   width: 16px;
   height: 16px;
 }
-
-
-
-
