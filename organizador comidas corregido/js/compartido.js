@@ -338,7 +338,7 @@ const pasos = [
   " Hacé clic en <strong>“Agregá el plato al calendario”</strong> y se asignará automáticamente a un día.",
   " También podés hacer clic en cualquier celda del calendario para <em> agregar, mover, rotar, o eliminar</em> un plato.",
   "⚡ Usá las funciones rápidas: <br> - 🎲 Generar semana aleatoria <br> - 🔄 Resetear calendario <br> - 📥 Descargar PDF",
-  "📲 ¡Tip! Podés agregar esta app a tu pantalla de inicio como si fuera una aplicación."
+  "📲 ¡Tip! Agregá esta app web a tu pantalla de inicio."
 ];
 
 let pasoActual = 0;
@@ -406,6 +406,7 @@ window.mostrarTutorial = function() {
 
 
                         
+
 
 
 
