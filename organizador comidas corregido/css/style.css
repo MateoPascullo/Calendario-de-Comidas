@@ -1,4 +1,4 @@
-:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+ :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -16,14 +16,15 @@
       table, thead, tbody, th, td, tr { display:block; }
       thead{ display:none; }
       tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
-      td{ 
+      #calendario td{ 
         text-align:left; 
         border:none; 
         border-bottom:1px solid var(--borde); 
         position:relative; 
         padding-left:50%; 
-        word-break: normal !important;
-        overflow-wrap: anywhere !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
         hyphens: none !important;
         -webkit-hyphens: none !important;
         white-space: normal !important;
@@ -365,47 +366,33 @@ td {
 }
 
 
-/* ===== Ajustes de corte de palabras para evitar cortes feos ===== */
-/* Solución más agresiva para Android */
-td {
-  word-break: normal;
-  overflow-wrap: anywhere; /* más permisivo que break-word */
-  hyphens: none;
-  -webkit-hyphens: none;
-  white-space: normal;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* Contenido dentro de las celdas */
-td * {
-  word-break: normal !important;
-  overflow-wrap: anywhere !important;
+/* ===== SOLUCIÓN SIMPLE PARA WRAP DE TEXTO ===== */
+/* Regla básica que debería funcionar en todos lados */
+#calendario td {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: normal !important;
   hyphens: none !important;
   -webkit-hyphens: none !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
 }
 
-/* Reglas específicas para Android/WebKit */
-@supports (-webkit-appearance: none) {
-  td {
-    word-break: normal !important;
-    overflow-wrap: anywhere !important;
-    hyphens: none !important;
-    -webkit-hyphens: none !important;
-    -ms-word-break: normal !important;
-  }
-  
-  td * {
-    word-break: normal !important;
-    overflow-wrap: anywhere !important;
-    hyphens: none !important;
-    -webkit-hyphens: none !important;
-  }
+/* Para el contenido dentro de las celdas */
+#calendario td * {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
 }
 
 
 
     
+
 
 
 
