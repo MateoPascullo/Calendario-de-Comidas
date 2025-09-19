@@ -135,7 +135,18 @@ function crearContenidoCelda(dia, tipo) {
   if (!plato) {
     return '<span style="font-size:12px; color:#999;">Click para agregar un plato</span>';
   }
-  return `${plato} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
+  const contenido = insertarQuiebresLegibles(plato);
+  return `${contenido} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
+}
+
+// Inserta puntos de quiebre sin cortar palabras: tras comas y barras
+function insertarQuiebresLegibles(texto) {
+  if (texto == null) return '';
+  return String(texto)
+    .replace(/,/g, ',&nbsp;')
+    .replace(/\//g, '/&nbsp;')
+    .replace(/\(/g, '(&nbsp;')
+    .replace(/\)/g, '&nbsp;)');
 }
 
 function eliminarPlato(e,dia,tipo){ 
@@ -406,6 +417,7 @@ window.mostrarTutorial = function() {
 
 
                         
+
 
 
 
