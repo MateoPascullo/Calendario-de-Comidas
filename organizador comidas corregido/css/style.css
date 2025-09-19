@@ -16,30 +16,9 @@
       table, thead, tbody, th, td, tr { display:block; }
       thead{ display:none; }
       tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
-      #calendario td{ 
-        text-align:left; 
-        border:none; 
-        border-bottom:1px solid var(--borde); 
-        padding: 8px 0 8px 0;
-        word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
-        word-break: break-word !important;
-        hyphens: none !important;
-        -webkit-hyphens: none !important;
-        white-space: normal !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        display: block !important;
-        width: 100% !important;
-      }
-      #calendario td::before{ 
-        content: attr(data-label) ": "; 
-        font-weight:bold; 
-        color:var(--primario);
-        display: block;
-        margin-bottom: 4px;
-      }
-      #calendario td:last-child{ border-bottom:none; }
+      td{ text-align:left; border:none; border-bottom:1px solid var(--borde); position:relative; padding-left:50%; }
+      td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
+      td:last-child{ border-bottom:none; }
     }
     .plato-saludable{ width:400px; max-width:100%; height:auto; }
     .mensaje-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); min-width:280px; max-width:90%; padding:12px 18px; border-radius:8px; font-size:15px; font-weight:500; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.2); display:none; z-index:1000; animation:fadein .3s ease, fadeout .3s ease 3.7s; }
@@ -373,28 +352,15 @@ td {
 }
 
 
-/* ===== SOLUCIÓN SIMPLE PARA WRAP DE TEXTO ===== */
-/* Regla básica que debería funcionar en todos lados */
-#calendario td {
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-  white-space: normal !important;
-  hyphens: none !important;
-  -webkit-hyphens: none !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+/* Configuración de celdas de tabla */
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; 
+  white-space: normal;
+  word-break: normal;     /* evita cortes arbitrarios dentro de palabras */
+  hyphens: none;          /* sin guiones automáticos */
 }
 
-/* Para el contenido dentro de las celdas */
-#calendario td * {
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-  white-space: normal !important;
-  hyphens: none !important;
-  -webkit-hyphens: none !important;
-}
 
 
 
