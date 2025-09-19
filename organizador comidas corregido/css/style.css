@@ -1,5 +1,4 @@
-
-    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -24,9 +23,12 @@
         position:relative; 
         padding-left:50%; 
         word-break: normal !important;
-        overflow-wrap: break-word !important;
+        overflow-wrap: anywhere !important;
         hyphens: none !important;
+        -webkit-hyphens: none !important;
         white-space: normal !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
       td:last-child{ border-bottom:none; }
@@ -364,23 +366,47 @@ td {
 
 
 /* ===== Ajustes de corte de palabras para evitar cortes feos ===== */
-/* No partimos palabras arbitrariamente, pero permitimos que el contenido envuelva. */
+/* Solución más agresiva para Android */
 td {
-  word-break: normal;     /* evita cortes arbitrarios dentro de palabras */
-  overflow-wrap: break-word; /* permite envolver si hay cadenas largas */
-  hyphens: none;          /* sin guiones automáticos */
+  word-break: normal;
+  overflow-wrap: anywhere; /* más permisivo que break-word */
+  hyphens: none;
+  -webkit-hyphens: none;
+  white-space: normal;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Contenido dentro de las celdas */
+td * {
+  word-break: normal !important;
+  overflow-wrap: anywhere !important;
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
 }
 
 /* Reglas específicas para Android/WebKit */
 @supports (-webkit-appearance: none) {
   td {
     word-break: normal !important;
-    overflow-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
     hyphens: none !important;
     -webkit-hyphens: none !important;
     -ms-word-break: normal !important;
   }
+  
+  td * {
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+  }
 }
+
+
+
+    
+
 
 
 
