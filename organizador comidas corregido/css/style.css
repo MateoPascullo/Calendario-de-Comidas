@@ -17,7 +17,17 @@
       table, thead, tbody, th, td, tr { display:block; }
       thead{ display:none; }
       tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
-      td{ text-align:left; border:none; border-bottom:1px solid var(--borde); position:relative; padding-left:50%; }
+      td{ 
+        text-align:left; 
+        border:none; 
+        border-bottom:1px solid var(--borde); 
+        position:relative; 
+        padding-left:50%; 
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        hyphens: none !important;
+        white-space: normal !important;
+      }
       td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
       td:last-child{ border-bottom:none; }
     }
@@ -360,6 +370,18 @@ td {
   overflow-wrap: break-word; /* permite envolver si hay cadenas largas */
   hyphens: none;          /* sin guiones automáticos */
 }
+
+/* Reglas específicas para Android/WebKit */
+@supports (-webkit-appearance: none) {
+  td {
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: none !important;
+    -webkit-hyphens: none !important;
+    -ms-word-break: normal !important;
+  }
+}
+
 
 
 
