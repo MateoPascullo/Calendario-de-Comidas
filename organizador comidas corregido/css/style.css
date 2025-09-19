@@ -373,18 +373,21 @@ td {
 }
 
 
-/* ===== SOLUCIÓN SIMPLE PARA WRAP DE TEXTO ===== */
-/* Regla básica que debería funcionar en todos lados */
+/* ===== SOLUCIÓN DRÁSTICA PARA WRAP DE TEXTO ===== */
+/* Forzamos el wrap usando width y display */
 #calendario td {
+  background-color: #ffeb3b !important; /* PRUEBA: fondo amarillo para verificar que se carga */
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
   word-wrap: break-word !important;
   overflow-wrap: break-word !important;
   word-break: break-word !important;
   white-space: normal !important;
   hyphens: none !important;
   -webkit-hyphens: none !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
-  background-color: #ffeb3b !important; /* PRUEBA: fondo amarillo para verificar que se carga */
+  overflow: visible !important;
 }
 
 /* Para el contenido dentro de las celdas */
@@ -395,8 +398,21 @@ td {
   white-space: normal !important;
   hyphens: none !important;
   -webkit-hyphens: none !important;
+  max-width: 100% !important;
+  display: inline-block !important;
 }
 
+/* Regla específica para el texto largo */
+#calendario td span {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+  max-width: 100% !important;
+  display: inline-block !important;
+}
 
 
 
