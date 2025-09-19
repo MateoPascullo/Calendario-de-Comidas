@@ -351,15 +351,6 @@ td {
   height: 16px;
 }
 
-/* Reglas específicas para el contenido del calendario */
-#calendario td {
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-  white-space: normal !important;
-  hyphens: none !important;
-  -webkit-hyphens: none !important;
-}
 
 
 /* Configuración de celdas de tabla */
@@ -370,10 +361,6 @@ td {
   word-break: normal;     /* evita cortes arbitrarios dentro de palabras */
   hyphens: none;          /* sin guiones automáticos */
 }
-
-
-
-
 
 
 
