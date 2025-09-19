@@ -143,10 +143,8 @@ function crearContenidoCelda(dia, tipo) {
 function insertarQuiebresLegibles(texto) {
   if (texto == null) return '';
   return String(texto)
-    .replace(/,/g, ',&nbsp;')
-    .replace(/\//g, '/&nbsp;')
-    .replace(/\(/g, '(&nbsp;')
-    .replace(/\)/g, '&nbsp;)');
+    .replace(/,/g, ',<wbr>')
+    .replace(/\//g, '/<wbr>');
 }
 
 function eliminarPlato(e,dia,tipo){ 
@@ -403,10 +401,6 @@ window.mostrarTutorial = function() {
 };
 
 
-
-
-
-
     
 
 
@@ -417,6 +411,7 @@ window.mostrarTutorial = function() {
 
 
                         
+
 
 
 
