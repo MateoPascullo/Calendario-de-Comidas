@@ -1,5 +1,4 @@
 
-   
     :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
@@ -404,7 +403,7 @@ td {
 .top-buttons a.btn-calendario {
   all: unset;
   display: block;
-  text-align: center;         /* texto centrado */
+  text-align: center;         
   width: 100%;
   padding: 12px 0;
   font-size: 0.95rem;
@@ -413,6 +412,9 @@ td {
   cursor: pointer;
   border-bottom: 1px solid #eee;
   transition: color 0.2s ease, background 0.2s ease;
+
+  /* 🔹 saca sombreado azul en móviles */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .top-buttons button:last-child,
@@ -420,16 +422,17 @@ td {
   border-bottom: none;
 }
 
-/* Hover (PC) y focus/active (celu) */
+/* Hover (PC) y active (celu al tocar) */
 .top-buttons button:hover,
 .top-buttons a.btn-calendario:hover,
 .top-buttons button:active,
-.top-buttons a.btn-calendario:active,
-.top-buttons button:focus,
-.top-buttons a.btn-calendario:focus {
-  color: #000;                /* texto un poquito más oscuro */
-  background: #fafafa;        /* fondo muy clarito */
+.top-buttons a.btn-calendario:active {
+  color: #000;                
+  background: #f9f9f9;   /* gris muy clarito */
 }
+
+   
+   
 
 
 
