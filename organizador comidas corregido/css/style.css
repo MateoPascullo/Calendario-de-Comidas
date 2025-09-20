@@ -433,10 +433,11 @@ td {
 .top-buttons a.btn-calendario:active {
   color: #000;
   background: #f0f0f0;        /* un poco más oscuro */
-  transform: scale(0.98);     /* se “hunde” levemente */
+  transform: scale(0.95);     /* se “hunde” levemente */
 }
 
     
+
 
 
 
