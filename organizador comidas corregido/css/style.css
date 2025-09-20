@@ -1,4 +1,5 @@
 
+   
     :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
@@ -385,6 +386,52 @@ td {
 #loginBtn:hover {
   background: #7b8a59;
 }
+
+
+
+
+
+
+
+/* === Botones de abajo minimalistas, centrados === */
+.top-buttons {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+}
+
+.top-buttons button,
+.top-buttons a.btn-calendario {
+  all: unset;
+  display: block;
+  text-align: center;         /* texto centrado */
+  width: 100%;
+  padding: 12px 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.top-buttons button:last-child,
+.top-buttons a.btn-calendario:last-child {
+  border-bottom: none;
+}
+
+/* Hover (PC) y focus/active (celu) */
+.top-buttons button:hover,
+.top-buttons a.btn-calendario:hover,
+.top-buttons button:active,
+.top-buttons a.btn-calendario:active,
+.top-buttons button:focus,
+.top-buttons a.btn-calendario:focus {
+  color: #000;                /* texto un poquito más oscuro */
+  background: #fafafa;        /* fondo muy clarito */
+}
+
+
 
 
 
