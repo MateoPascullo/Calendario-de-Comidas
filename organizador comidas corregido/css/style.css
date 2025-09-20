@@ -413,8 +413,7 @@ td {
   border-bottom: 1px solid #eee;
   transition: color 0.2s ease, background 0.2s ease;
 
-  /* 🔹 saca sombreado azul en móviles */
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: transparent; /* saca el sombreado azul */
 }
 
 .top-buttons button:last-child,
@@ -422,20 +421,21 @@ td {
   border-bottom: none;
 }
 
-/* Hover (PC) y active (celu al tocar) */
+/* Hover (PC) */
 .top-buttons button:hover,
-.top-buttons a.btn-calendario:hover,
+.top-buttons a.btn-calendario:hover {
+  color: #000;
+  background: #f9f9f9;
+}
+
+/* Active (mientras hacés clic/tap) */
 .top-buttons button:active,
 .top-buttons a.btn-calendario:active {
-  color: #000;                
-  background: #f9f9f9;   /* gris muy clarito */
+  color: #000;
+  background: #f0f0f0;   /* un poco más oscuro que el hover */
 }
 
    
-   
-
-
-
 
 
 
