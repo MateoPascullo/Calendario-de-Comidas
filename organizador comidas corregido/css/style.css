@@ -1,5 +1,4 @@
-
-    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -411,9 +410,10 @@ td {
   color: #555;
   cursor: pointer;
   border-bottom: 1px solid #eee;
-  transition: color 0.2s ease, background 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.1s ease;
 
-  -webkit-tap-highlight-color: transparent; /* saca el sombreado azul */
+  -webkit-tap-highlight-color: transparent; /* saca sombreado azul */
+  touch-action: manipulation;                /* mejora tap en Safari */
 }
 
 .top-buttons button:last-child,
@@ -428,19 +428,15 @@ td {
   background: #f9f9f9;
 }
 
-/* Active (mientras hacés clic/tap) */
+/* Active (tap/click) */
 .top-buttons button:active,
 .top-buttons a.btn-calendario:active {
   color: #000;
-  background: #f0f0f0;   /* un poco más oscuro que el hover */
+  background: #f0f0f0;        /* un poco más oscuro */
+  transform: scale(0.98);     /* se “hunde” levemente */
 }
 
-   
-
-
-
-
-
+    
 
 
 
