@@ -1,4 +1,5 @@
-:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+
+    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
@@ -391,52 +392,51 @@ td {
 
 
 
-/* === Botones de abajo minimalistas, centrados === */
 .top-buttons {
   display: flex;
   flex-direction: column;
+  gap: 10px;
   margin: 20px 0;
+  padding: 0;          /* 🔹 eliminamos padding lateral */
 }
 
 .top-buttons button,
 .top-buttons a.btn-calendario {
   all: unset;
   display: block;
-  text-align: center;         
-  width: 100%;
-  padding: 12px 0;
+  text-align: center;
+  width: 100%;         /* 🔹 ocupa todo el ancho disponible */
+  box-sizing: border-box; /* 🔹 incluye borde en el ancho */
+  padding: 12px;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #555;
+  color: #444;
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
   cursor: pointer;
-  border-bottom: 1px solid #eee;
-  transition: color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 
-  -webkit-tap-highlight-color: transparent; /* saca sombreado azul */
-  touch-action: manipulation;                /* mejora tap en Safari */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
 }
 
-.top-buttons button:last-child,
-.top-buttons a.btn-calendario:last-child {
-  border-bottom: none;
-}
-
-/* Hover (PC) */
 .top-buttons button:hover,
 .top-buttons a.btn-calendario:hover {
+  background: #f2f2f2;
+  border-color: #d9d9d9;
   color: #000;
-  background: #f9f9f9;
 }
 
-/* Active (tap/click) */
 .top-buttons button:active,
 .top-buttons a.btn-calendario:active {
-  color: #000;
-  background: #f0f0f0;        /* un poco más oscuro */
-  transform: scale(0.90);     /* se “hunde” levemente */
+  background: #eaeaea;
+  transform: scale(0.97);
 }
 
-    
+
+
 
 
 
