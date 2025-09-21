@@ -1,4 +1,5 @@
 
+    
     :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
@@ -392,27 +393,19 @@ td {
 
 
 
-.top-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 20px 0;
-  padding: 0;          /* 🔹 eliminamos padding lateral */
-}
-
 .top-buttons button,
 .top-buttons a.btn-calendario {
   all: unset;
   display: block;
   text-align: center;
-  width: 100%;         /* 🔹 ocupa todo el ancho disponible */
-  box-sizing: border-box; /* 🔹 incluye borde en el ancho */
+  width: 100%;
+  box-sizing: border-box;
   padding: 12px;
   font-size: 0.95rem;
   font-weight: 400;
-  color: #444;
-  background: #fafafa;
-  border: 1px solid #e5e5e5;
+  color: #333;                   /* texto más fuerte */
+  background: #f0f0f0;           /* 🔹 más oscuro que antes (#fafafa) */
+  border: 1px solid #ddd;        /* borde más visible */
   border-radius: 8px;
   cursor: pointer;
   transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
@@ -424,17 +417,16 @@ td {
 
 .top-buttons button:hover,
 .top-buttons a.btn-calendario:hover {
-  background: #f2f2f2;
-  border-color: #d9d9d9;
+  background: #e4e4e4;           /* 🔹 un poco más oscuro */
+  border-color: #ccc;
   color: #000;
 }
 
 .top-buttons button:active,
 .top-buttons a.btn-calendario:active {
-  background: #eaeaea;
+  background: #dcdcdc;           /* 🔹 todavía más oscuro al presionar */
   transform: scale(0.97);
 }
-
 
 
 
