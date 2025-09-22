@@ -373,8 +373,8 @@
   // ---------- FUNCIONES FIRESTORE ----------
   async function guardarListaCompras(user) {
     try {
-      const raw = localStorage.getItem('listaCompras');
-      const lista = raw ? JSON.parse(raw) : [];
+      // Obtener la lista actual desde la variable global
+      const lista = window.listaComprasFirestore || [];
       await setDoc(doc(db, "calendarios", user.uid), {
         listaCompras: lista
       }, { merge: true });
@@ -386,7 +386,8 @@
     try {
       const docSnap = await getDoc(doc(db, "calendarios", user.uid));
       if (docSnap.exists() && Array.isArray(docSnap.data().listaCompras)) {
-        localStorage.setItem('listaCompras', JSON.stringify(docSnap.data().listaCompras));
+        // Actualizar la variable global en lugar de localStorage
+        window.listaComprasFirestore = docSnap.data().listaCompras;
         if (typeof cargarListaComprasADOMSiExiste === 'function') {
           cargarListaComprasADOMSiExiste();
         }
@@ -485,6 +486,8 @@
 
 </body>
 </html>
+
+
 
 
 
