@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -84,6 +82,8 @@
    </div>
 
    <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya elegiste tu menú de hoy?</a>
+   
+   <a href="javascript:void(0)" id="btnListaCompras" class="btn-calendario btn-flotante btn-lista-compras">🛒 Generá tu lista de compras!</a>
  
    <h1>PlatoResuelto!</h1>
   <h2>Vegetariano</h2>
@@ -110,9 +110,9 @@
      <option value="Ens.(rucula,t.cherry,palta)">Ens.(rúcula,t.cherry,palta)</option>
      <option value="Ens.(zanahoria,remolacha,repollo)">Ens.(zanahoria,remolacha,repollo)</option>
      <option value="Ens.(apio,manzana-verde,nueces)">Ens.(Apio,manzana verde, nueces)</option>
-     <option value="salteado (cebolla,pimiento,zanahoria)">Salteado(cebolla,pimiento,zanahoria)</option>
-     <option value="salteado (zucchini,berenjena,cebolla)">Salteado(zucchini,berenjena,cebolla)</option>
-     <option value="horno (cebolla,zanahoria,pimiento,calabaza)">Horno(cebolla,zanahoria,pimiento,calabaza)</option>
+     <option value="Salteado (cebolla,pimiento,zanahoria)">Salteado(cebolla,pimiento,zanahoria)</option>
+     <option value="Salteado (zucchini,berenjena,cebolla)">Salteado(zucchini,berenjena,cebolla)</option>
+     <option value="Al horno (cebolla,zanahoria,pimiento,calabaza)">Al horno(cebolla,zanahoria,pimiento,calabaza)</option>
      <option value="pure zapallo-calabaza">Puré zapallo/calabaza</option>
   
       <option value="ensaladas">🥗 Armá tu ensalada</option>
@@ -176,26 +176,24 @@
 
   <select id="proteina">
     <option value=""> Proteínas vegetarianas </option>
-       <option value="Huevo duro">Huevo duro</option>
-       <option value="Huevo revuelto">Huevo revuelto</option>
-       <option value="Huevo a la plancha">Huevo a la plancha</option>
+       
+       <option value="Huevo (Duro/ Revuelto/ a la plancha)">Huevo (Duro/ Revuelto/ a la plancha)</option>
        <option value="Medallon de legumbre">Medallon de legumbre</option>
        <option value="Milanesa de legumbre">Milanesa de legumbre</option>
        <option value="lentejas">Lentejas</option>
        <option value="garbanzos">Garbanzos</option>
        <option value="porotos">Porotos</option>
-       <option value="soja">Soja</option>
        <option value="Soja texturizada">Soja texturizada</option>
        <option value="tofu">Tofu</option>
        <option value="tempeh">Tempeh</option>
-       <option value="ricota">Ricota</option>
-       <option value="quesos">Quesos</option>
+       <option value="Ricota">Ricota</option>
+       <option value="Quesos">Quesos</option>
   </select>
 
   <select id="hidrato">
     <option value=""> Hidratos de carbono </option>
-      <option value="Arroz">Arroz</option>
-     <option value="Arroz integral/yamaní">Arroz integral/yamaní</option>
+     
+    <option value="Arroz(Blanco/ integral/ Yamani)">Arroz(Blanco/ integral/ Yamani)</option>
      <option value="Fideos">Fideos</option>
      <option value="Pure de papa">Pure de papa</option>
      <option value="Papa al horno">Papa al horno</option>
@@ -214,7 +212,7 @@
     <option value="Milanesas de berenjena gratinadas + guacamole">Milanesas de berenjena gratinadas + guacamole</option>
     <option value="Pastel de papa y zapallo">Pastel de papa y zapallo</option>
     <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
-    <option value="Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
+    <option value="Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
     <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)</option>
     <option value="Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)">Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)</option>
     < <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
@@ -247,7 +245,7 @@
     <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
 
      <div class="btn-calendario-container">
-       <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">Repasar tutorial</a>
+       <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">📘 Ver tutorial</a>
       <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
      </div>
     
@@ -262,6 +260,22 @@
 <script src="js/pwa.js" defer></script>
 
 <div id="mensaje" class="mensaje-toast"></div>
+
+<!-- Modal para Lista de Compras -->
+<div id="modalListaCompras" class="modal-lista-compras" style="display:none;">
+  <div class="modal-contenido">
+    <div class="modal-header">
+      <h2>🛒 Tu Lista de Compras</h2>
+      <button id="cerrarModal" class="btn-cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="listaComprasContenido"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="descargarLista" class="btn-descargar">📥 Descargar Lista</button>
+    </div>
+  </div>
+</div>
 
 </div> <!-- 🔒 cierra contenido protegido -->
 
@@ -298,6 +312,16 @@
     }, { merge: true });
   }
 
+  async function guardarListaCompras(user) {
+    try {
+      const raw = localStorage.getItem('listaCompras');
+      const lista = raw ? JSON.parse(raw) : [];
+      await setDoc(doc(db, "calendarios", user.uid), {
+        listaComprasVeg: lista
+      }, { merge: true });
+    } catch (e) { console.error('Error guardando listaComprasVeg:', e); }
+  }
+
   async function cargarCalendario(user) {
     const docSnap = await getDoc(doc(db, "calendarios", user.uid));
     if (docSnap.exists() && docSnap.data().vegetariano) {
@@ -306,23 +330,41 @@
     }
   }
 
+  async function cargarListaCompras(user) {
+    try {
+      const docSnap = await getDoc(doc(db, "calendarios", user.uid));
+      const arr = docSnap.exists() ? (docSnap.data().listaComprasVeg || null) : null;
+      if (Array.isArray(arr)) {
+        localStorage.setItem('listaCompras', JSON.stringify(arr));
+        if (typeof cargarListaComprasADOMSiExiste === 'function') {
+          cargarListaComprasADOMSiExiste();
+        }
+      }
+    } catch (e) { console.error('Error cargando listaComprasVeg:', e); }
+  }
+
   // ---------- DETECTAR SESIÓN ----------
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       contenido.style.display = "block";
 
       await cargarCalendario(user);
+      await cargarListaCompras(user);
 
       document.addEventListener("change", () => guardarCalendario(user));
       document.addEventListener("click", (e) => {
         if (e.target.tagName === "BUTTON") guardarCalendario(user);
       });
+
+      document.addEventListener('listaCompras:cambiada', () => guardarListaCompras(user));
     } else {
       // 🚨 Si no está logueado → redirigimos al index.html
       window.location.href = "index.html";
     }
   });
 </script>
+
+
 
 
 
