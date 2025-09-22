@@ -39,19 +39,38 @@ function validarPlato() {
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
 
-      if (calendario[dia][otroTipo] === platoFinal) {
-        mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
-      } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
-        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
-      } else {
-        calendario[dia][tipo] = platoFinal;
-        actualizarCalendario();
-        mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
-      }
+          if (calendario[dia][otroTipo] === platoFinal) {
+           mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
+           } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasTradicional)) {
+           mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} Ya hay otra comida o plato muy similar en el día.`, 'error');
+           } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
+           mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+           } else {
+             // 🔒 Validar ingredientes restringidos
+             const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
+             if (!validacionIngredientes.ok) {
+               mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+             } else {
+               calendario[dia][tipo] = platoFinal;
+               actualizarCalendario();
+               mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+             }
+           }
+           
+
       seleccion = null;
       limpiarSelects();
     } else {
-      const ok = asignarAcalendario(platoFinal);
+      // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
+      const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
+      if (!validacionIngredientes.ok) {
+        mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        limpiarSelects();
+        return;
+      }
+
+      const ok = asignarAcalendario(platoFinal, categoriasTradicional);
+
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
       } else {
@@ -210,6 +229,122 @@ window.generarCalendarioAleatorio = function () {
     console.log("✅ Calendario generado:", calendario);
   }
 };
+
+
+
+
+
+// =========================
+// LISTA PARA AGREGAR ALIMENTOS Y PLATOS QUE NO TIENEN QUE REPETIRSE EN EL MISMO DIA POR SER DE GRUPO SIMILAR
+// =========================
+//IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
+
+const categoriasTradicional = {
+  "Milanesa vaca": "milanesa",
+  "Milanesa pollo": "milanesa",
+  "Milanesa cerdo": "milanesa",
+  "Milanesa pescado": "milanesa",
+  "Nugget de pollo": "milanesa",
+  "Milanesas de berenjena gratinadas + guacamole": "milanesa",
+
+  
+  "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)":"papa",
+  "Pure de papa":"papa",
+  "Papa al horno":"papa",
+  
+  
+  "Costeleta vaca": "costeleta",
+  "Costeleta cerdo": "costeleta",
+  
+  "pollo al horno":"pollo",
+  "Pollo asado":"pollo",
+
+  "Ravioles con salsa de tomate": "pasta",
+  "Ravioles con salsa mixta": "pasta",
+  "Ravioles con salsa bolognesa": "pasta",
+  "Ñoquis con salsa de tomate": "pasta",
+  "Ñoquis con salsa mixta": "pasta",
+  "Ñoquis con salsa bolognesa": "pasta",
+  "Fideos": "pasta",
+
+  "Tarta de espinaca,queso,cebolla,puerro": "tarta",
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
+  "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
+
+};
+
+// =========================
+// ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
+// =========================
+const restringidosTradicional = {
+  
+  //PROTEINAS
+  "Milanesa vaca": 3,
+  "Milanesa pollo": 3,
+  "Milanesa cerdo": 3,
+  "Milanesa pescado": 3,
+  "Milanesa de soja":3,
+  "Hamburguesa vacuna":3,
+  "Medallon de pollo":3,
+  "Medallon de legumbre":3,
+  "Nugget de pollo":3,
+  "Bife vacuno":3,
+  "Filet pollo":3,
+  "Pata muslo pollo":3,
+  
+  "Pechuga pollo":3,
+  "Filet pescado":3,
+  "pollo al horno":3,
+  "Pollo asado":3,
+  "Atún":3,
+  "Costeleta vaca":3,
+  "Costeleta cerdo":3,
+  "jamon cocido/crudo":3,
+
+  //HIDRATOS:
+  "Arroz(Blanco/ integral/ Yamani)":3,
+  "Fideos":3,
+  "Pure de papa":3,
+  "Papa al horno":3,
+  "Batata al horno":3,
+  "Choclo":3,
+  "Quinoa":3,
+  "Cuscus":3,
+  "Trigo burgol":3,
+  "Lentejas":3,
+  "Garbanzos":3,
+  "Porotos":3,
+};
+
+// =========================
+// INGREDIENTES DE PLATOS COMPLETOS PARA LISTA DE COMPRAS
+// =========================
+const ingredientesPlatosCompletos = {
+  "Tarta de espinaca,queso,cebolla,puerro": ["Espinaca", "Queso", "Cebolla", "Puerro", "Masa de tarta"],
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
+  "Tarta de zapallito,queso,huevo, cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
+  "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": ["Atún", "Queso cremoso", "Tomate", "Cebolla", "Huevo", "Pimiento", "Ajo", "Masa de tarta"],
+  "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)": ["Papa", "Zapallo", "Carne picada", "Cebolla verdeo", "Pimiento", "Cebolla", "Queso rallado"],
+  "Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)": ["Pata muslo de pollo", "Cebolla", "Pimiento", "Zanahoria", "Papa"],
+  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
+  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
+  "Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Carne", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
+  "Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Pollo", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
+  "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
+  "Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)": ["Pollo", "Tortillas", "Cebolla", "Pimiento", "Zanahoria", "Aceite", "Especias"],
+  "Ens. de  atún, huevo, cebolla, tomate, arroz": ["Atún", "Huevo", "Cebolla", "Tomate", "Arroz"],
+  "Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
+  "Carne +verduras al horno(calabaza,cebolla, papa)": ["Carne", "Calabaza", "Cebolla", "Papa"],
+  "Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)": ["Pescado", "Cebolla", "Pimiento", "Cebolla verdeo", "Papel aluminio"],
+  "Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo": ["Arroz", "Huevo", "Pan rallado", "Zanahoria", "Rúcula", "Tomate", "Huevo"],
+  "Ravioles con salsa de tomate": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite"],
+  "Ravioles con salsa mixta": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
+  "Ravioles con salsa bolognesa": ["Ravioles", "Carne picada", "Tomate", "Cebolla", "Ajo"],
+  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo",],
+  "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
+  "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo",]
+};
+
 
 
 
