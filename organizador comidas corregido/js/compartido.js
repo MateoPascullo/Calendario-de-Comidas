@@ -757,8 +757,9 @@ function cargarListaComprasADOMSiExiste() {
       guardarListaComprasDesdeDOM();
     });
   });
-  if (modal) modal.style.display = 'flex';
-  return true;
+  // ❌ No abrir modal automáticamente, solo preparar contenido
+return true;
+
 }
 
 // =========================
@@ -774,8 +775,9 @@ window.onload=()=>{
   const btnCerrar = document.getElementById('cerrarModal');
   const btnDescargar = document.getElementById('descargarLista');
   
-  // Si hay una lista guardada, mostrarla al entrar
+  // Cargar lista si existe, pero sin abrir modal
   try { cargarListaComprasADOMSiExiste(); } catch(e) { /* no-op */ }
+
 
   if (btnListaCompras) {
     btnListaCompras.addEventListener('click', mostrarListaCompras);
@@ -1069,6 +1071,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
                         
+
 
 
 
