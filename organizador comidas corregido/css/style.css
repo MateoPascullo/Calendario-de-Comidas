@@ -1,1076 +1,637 @@
-// =========================
-// VARIABLES Y ESTADO COMÚN
-// =========================
-const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes']; 
-let calendario = {}; 
-let seleccion = null;
-dias.forEach(dia => calendario[dia] = { almuerzo:null, cena:null });
 
-// =========================
-// ENSALADA CUSTOM
-// =========================
-document.getElementById('verdura').addEventListener('change', function () {
-  const isSalad = this.value === 'ensaladas';
-  document.getElementById('ensalada').style.display = isSalad ? 'block' : 'none';
-});
-
-function copiarEnsalada() {
-  const coccion = document.querySelector('input[name="coccion"]:checked');
-  if (!coccion) {
-    mostrarMensaje('❌ Falta elegir método de cocción.','error');
-    return;
-  }
-
-  const checks = document.querySelectorAll('#ensalada input[type="checkbox"]:checked');
-  const seleccion = Array.from(checks).map(c => c.value);
-  if (!seleccion.length) {
-    mostrarMensaje('❌ Seleccioná al menos una verdura.','error');
-    return;
-  }
-
-  const finalStr = `${coccion.value} (<span class="verduras-paren">${seleccion.join(', ')}</span>)`;
-
-  const optCustom = document.getElementById('verduraCustom');
-  optCustom.value = `${coccion.value} (${seleccion.join(', ')})`;
-  optCustom.innerHTML = `🥗 Ensalada: ${finalStr}`;
-  optCustom.style.display = '';
-  optCustom.selected = true;
-
-  document.getElementById('ensalada').style.display = 'none';
-  document.querySelectorAll('#ensalada input[type="checkbox"]').forEach(c => c.checked = false);
-  document.querySelectorAll('#ensalada input[name="coccion"]').forEach(r => r.checked = false);
-
-  // scroll de arma tu ensalada
-    // mover scroll arriba al título principal
-  irAPlatoSemana();
-
-
-
-}
-
-
-// =========================
-// SELECTORES Y RESET
-// =========================
-function getSeleccionados(){
-  const vb=document.getElementById('verdura').value;
-  const sub=document.getElementById('ensalada').value;
-  const verdura=(vb==='ensaladas' && sub)?sub:vb;
-  return { 
-    verdura, 
-    proteina:document.getElementById('proteina').value, 
-    hidrato:document.getElementById('hidrato').value, 
-    completo:document.getElementById('completo').value 
-  };
-}
-
-function limpiarSelects(){ 
-  ['verdura','proteina','hidrato','completo'].forEach(id=>document.getElementById(id).value=''); 
-  document.getElementById('ensalada').style.display='none'; 
-}
-
-// =========================
-// VALIDACIONES DE FRECUENCIA
-// =========================
-function contarRepeticiones(plato) {
-  let rep = 0;
-  dias.forEach(d => {
-    if (calendario[d].almuerzo === plato) rep++;
-    if (calendario[d].cena === plato) rep++;
-  });
-  return rep;
-}
-
-
-// =========================
-// FUNCIONES PARA DETECTAR INGREDIENTES EN PLATOS COMBINADOS
-// =========================
-
-// Normaliza texto para comparaciones (quita acentos, espacios extra, etc.)
-function normalizarTexto(str) {
-  if (!str) return '';
-  return String(str)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
-}
-
-// Extrae todas las partes de un plato (ingredientes individuales)
-function plateToParts(plate) {
-  if (!plate) return [];
-  const raw = String(plate).trim();
-  const set = new Set();
-
-  // Agregar el plato completo
-  set.add(raw);
-  
-  // Dividir por "+" (combinaciones principales)
-  raw.split('+').forEach(p => { 
-    if (p && p.trim()) set.add(p.trim()); 
-  });
-  
-  // Extraer contenido de paréntesis
-  const parenRe = /\(([^)]+)\)/g;
-  let m;
-  while ((m = parenRe.exec(raw)) !== null) {
-    m[1].split(',').forEach(p => { 
-      if (p && p.trim()) set.add(p.trim()); 
-    });
-  }
-  
-  // Dividir por "/" (alternativas)
-  raw.split('/').forEach(p => { 
-    if (p && p.trim()) set.add(p.trim()); 
-  });
-  
-  // Dividir por "," (listas)
-  raw.split(',').forEach(p => { 
-    if (p && p.trim()) set.add(p.trim()); 
-  });
-
-  return Array.from(set)
-    .filter(Boolean)
-    .map(s => normalizarTexto(s));
-}
-
-// Verifica si un plato contiene un ingrediente específico
-function plateContainsIngredient(plate, ingredient) {
-  const ingNorm = normalizarTexto(ingredient);
-  const parts = plateToParts(plate);
-  
-  // Verificación exacta
-  if (parts.includes(ingNorm)) return true;
-  
-  // Verificación parcial (para ingredientes que pueden estar dentro de otros)
-  return parts.some(p => p.indexOf(ingNorm) !== -1);
-}
-
-// Cuenta cuántas veces aparece un ingrediente específico en el calendario
-function contarIngredienteEnCalendario(ingrediente, calendario) {
-  let contador = 0;
-  
-  dias.forEach(dia => {
-    if (calendario[dia].almuerzo && plateContainsIngredient(calendario[dia].almuerzo, ingrediente)) {
-      contador++;
+    :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+    body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
+    h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
+    select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
+    button { background:var(--primario); color:#fff; border:none; cursor:pointer; transition:background .3s; }
+    button:hover { background:#0088cc; }
+    #mensaje { margin:20px; font-weight:bold; }
+    table { width:100%; max-width:800px; margin:30px auto 0; border-collapse:collapse; }
+    th,td { border:1px solid var(--borde); padding:12px; text-align:center; }
+    td:hover { background:#f0f0f0; }
+    td.selected { border:2px solid var(--primario); background:#e6f7ff; }
+    .menu-eliminar { display:inline-block; margin-top:5px; background:#bbb; color:#fff; font-size:11px; padding:3px 6px; border-radius:3px; cursor:pointer; }
+    .top-buttons { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:30px; }
+    .top-buttons button { padding:8px 12px; font-size:14px; width:auto; }
+    @media (max-width:600px){
+      table, thead, tbody, th, td, tr { display:block; }
+      thead{ display:none; }
+      tr{ margin-bottom:15px; background:#fff; border:1px solid var(--borde); border-radius:6px; padding:10px; }
+      td{ text-align:left; border:none; border-bottom:1px solid var(--borde); position:relative; padding-left:50%; }
+      td::before{ position:absolute; top:10px; left:10px; width:45%; padding-right:10px; white-space:nowrap; content:attr(data-label); font-weight:bold; color:var(--primario); }
+      td:last-child{ border-bottom:none; }
     }
-    if (calendario[dia].cena && plateContainsIngredient(calendario[dia].cena, ingrediente)) {
-      contador++;
-    }
-  });
-  
-  return contador;
+    .plato-saludable{ width:400px; max-width:100%; height:auto; }
+    .mensaje-toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); min-width:280px; max-width:90%; padding:12px 18px; border-radius:8px; font-size:15px; font-weight:500; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,.2); display:none; z-index:1000; animation:fadein .3s ease, fadeout .3s ease 3.7s; }
+    .mensaje-toast.exito{ background:#4CAF50; }
+    .mensaje-toast.error{ background:#f44336; }
+    @keyframes fadein { from{opacity:0; transform:translate(-50%,20px);} to{opacity:1; transform:translate(-50%,0);} }
+    @keyframes fadeout { from{opacity:1;} to{opacity:0;} }
+
+    /* Checkbox pegado al texto y con sombreadito */
+.opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
-// Valida si un plato excede los límites de ingredientes restringidos
-function validarIngredientesRestringidos(plato, calendario, listaRestringidos) {
-  if (!listaRestringidos || !plato) return { ok: true };
-  
-  // Verificar cada ingrediente restringido
-  for (const [ingrediente, limite] of Object.entries(listaRestringidos)) {
-    if (plateContainsIngredient(plato, ingrediente)) {
-      const usoActual = contarIngredienteEnCalendario(ingrediente, calendario);
-      
-      if (usoActual >= limite) {
-        return { 
-          ok: false, 
-          ingrediente: ingrediente, 
-          limite: limite, 
-          usoActual: usoActual 
-        };
-      }
-    }
+.opciones-ensalada .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;          /* separa solo 6px entre tilde y texto */
+  margin: 0;
+  padding: 6px 10px; /* “pill” */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f6f6f6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.opciones-ensalada .chip input[type="checkbox"] {
+  margin: 0;         /* quita márgenes por defecto del navegador */
+  transform: translateY(0); /* evita desalineación vertical */
+}
+.opciones-ensalada {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.opciones-ensalada .chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* 👇 forzamos el checkbox a mostrarse igual en iOS */
+.opciones-ensalada .chip input[type="checkbox"] {
+  appearance: auto;       /* asegura que Safari no los oculte */
+  -webkit-appearance: checkbox; /* compatibilidad Safari */
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.opciones-coccion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.opciones-coccion label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.opciones-coccion input[type="radio"] {
+  -webkit-appearance: radio; /* asegura que se vean normales en Safari */
+  appearance: radio;
+  width: 18px;
+  height: 18px;
+  margin: 0 6px 0 0; /* espacio a la derecha del circulito */
+  flex-shrink: 0;    /* evita que se encoja y empuje el texto */
+}
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;   /* 👈 fuerza que todas las columnas se adapten */
+  word-wrap: break-word; /* 👈 permite cortar palabras largas */
+}
+
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; /* 👈 corte de palabras si no entran */
+  white-space: normal;       /* 👈 permite salto de línea */
+}
+
+
+
+
+button {
+  background: var(--primario); /* Verde base (#8f9d68) */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 10px;
+  transition: background .3s;
+}
+
+button:hover,
+button:focus {
+  background: #6f8632; /* un tono apenas más oscuro que el base */
+  outline: none;       /* saca el borde azul de focus */
+}
+
+.verduras-paren {    /*aca se puede achicar la letra de adentro de los paerentesis*/
+  font-size: 12px;
+  color: #555;
+}
+
+h1 {
+  font-family: 'Courgette', cursive;
+  font-size: 3rem;
+  text-align: center;
+  color: var(--primario);
+  margin-bottom: 15px;
+}
+h2 {
+  font-size: 1rem;     /* más chico, igual al texto normal */
+  font-weight: 500;    /* medio, para que se note pero no grite */
+  text-align: center;  /* opcional si querés centrarlo */
+  margin-bottom: 15px; /* separación abajo */
+}
+
+
+.btn-calendario-container {
+  display: flex;
+  flex-direction: column; /* uno debajo del otro */
+  align-items: flex-start; /* los alinea a la izquierda */
+  gap: 6px; /* espacio entre botones */
+  margin: 5px 0 15px 0;
+}
+
+.btn-calendario {
+  display: inline-block; /* ocupa solo el ancho del texto */
+  width: auto;           /* asegura que no se estiren */
+  background: var(--primario);
+  color: #fff;
+  padding: 6px 12px;     /* igual que botón flotante */
+  font-size: 0.9rem;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s ease;
+}
+
+
+.btn-calendario {
+  background: var(--primario);
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: background 0.2s ease;
+}
+
+.btn-calendario:hover {
+  background: #5a6b3c; /* verde más oscuro al pasar el mouse */
+}
+
+/* FLOTANTE ya elegiste tu menu de hoy?*/
+.btn-flotante {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+}
+
+#btnHoy {
+  background: #bd8531;   /* naranja */
+  color: #fff;
+}
+
+#btnHoy:hover {
+  background: #704c16;   /* más oscuro al pasar el mouse */
+}
+
+/* Botón de Lista de Compras (debajo del botón hoy) */
+#btnListaCompras {
+  background: #a8b87a !important;  /* verde más claro */
+  color: #fff;
+  top: 70px !important;  /* debajo del botón "¿Ya tenés el menú de hoy?" */
+}
+
+#btnListaCompras:hover {
+  background: #9aa86a !important;  /* más oscuro al pasar el mouse */
+}
+
+/* Botón de Lista de Compras */
+#btnListaCompras {
+  background: #a8b87a !important;  /* verde más claro */
+  color: #fff;
+  top: 70px !important;  /* debajo del botón "¿Ya tenés el menú de hoy?" */
+}
+
+#btnListaCompras:hover {
+  background: #9aa86a !important;  /* más oscuro al pasar el mouse */
+}
+
+/* Modal para Lista de Compras */
+.modal-lista-compras {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-contenido {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  background: var(--primario);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: white;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.3s;
+}
+
+.btn-cerrar:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.btn-descargar {
+  background: #a8b87a; /* tono verde del carrito */
+  color: #fff;
+  border: none;
+  padding: 6px 12px; /* ~mitad */
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px; /* ~mitad */
+  transition: background 0.3s;
+}
+
+.btn-descargar:hover {
+  background: #9aa86a; /* hover similar */
+}
+
+/* Tachado sutil para elementos de lista marcados */
+/* Tachado más visible para elementos de lista marcados */
+.tachado .ingrediente-nombre {
+  position: relative;
+  color: #999; /* el texto se ve gris pero legible */
+}
+
+.tachado .ingrediente-nombre::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px; /* 👈 grosor de la línea, ajustá a 4px si querés más marcado */
+  background-color: rgba(255,0,0,0.45); /* 👈 mismo color que tenías */
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+
+
+/* Eliminamos botón propio y usamos el estilo existente .menu-eliminar del calendario */
+
+/* Estilos para la lista de compras */
+.lista-compras {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-compras li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lista-compras li:last-child {
+  border-bottom: none;
+}
+
+.ingrediente-nombre {
+  font-weight: 500;
+}
+
+.ingrediente-cantidad {
+  color: #666;
+  font-size: 14px;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+  .modal-contenido {
+    width: 95%;
+    margin: 10px;
   }
   
-  return { ok: true };
-}
-
-
-
-function contarRepeticionesAlimento(alimento, calendario) {
-  let rep = 0;
-  dias.forEach(d => {
-    if (calendario[d].almuerzo === alimento) rep++;
-    if (calendario[d].cena === alimento) rep++;
-  });
-  return rep;
-}
-
-// Revisa si un plato excede su límite en la lista de restringidos
-function validarRestriccion(plato, calendario, listaRestringidos) {
-  if (!listaRestringidos || !listaRestringidos[plato]) return { ok: true };
-  const limite = listaRestringidos[plato];
-  if (contarRepeticionesAlimento(plato, calendario) >= limite) {
-    return { ok: false, reason: 'overRestricted', plate: plato, limite };
-  }
-  return { ok: true };
-}
-
-
-function agregarPlato(dia, tipo, plato, categoriasMapeadas) {
-  if (!plato) return false;
-
-  const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
-
-  // ❌ No repetir mismo plato exacto en el mismo día
-  if (calendario[dia][otroTipo] === plato) {
-    mostrarMensaje(`❌ No podés repetir "${plato}" en ${dia}.`, 'error', 6000);
-    return false;
-  }
-
-  // ❌ No repetir categorías en el mismo día
-  if (!mismoDiaValido(dia, plato, calendario, categoriasMapeadas)) {
-    mostrarMensaje(`❌ Ya hay un plato similar en ${dia}.`, 'error', 6000);
-    return false;
-  }
-
-  // ❌ No más de 2 veces por semana
-  if (contarRepeticiones(plato) >= 2 && calendario[dia][tipo] !== plato) {
-    mostrarMensaje(`❌ El plato "${plato}" ya fue asignado 2 veces esta semana.`, 'error', 6000);
-    return false;
-  }
-
-  // 🔒 Validar ingredientes restringidos según versión
-  const listaRestringidos = (typeof restringidosTradicional !== "undefined") 
-    ? restringidosTradicional 
-    : (typeof restringidosVegetariano !== "undefined") 
-      ? restringidosVegetariano 
-      : null;
-
-  if (listaRestringidos) {
-    const validacionIngredientes = validarIngredientesRestringidos(plato, calendario, listaRestringidos);
-    if (!validacionIngredientes.ok) {
-      mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error', 6000);
-      return false;
-    }
-  }
-
-  // ✅ Si pasa todas, asignar
-  calendario[dia][tipo] = plato;
-  return true;
-}
-
-
-function asignarAcalendario(plato, categorias){
-  let rep=0; 
-  dias.forEach(d=>{ 
-    if(calendario[d].almuerzo===plato) rep++; 
-    if(calendario[d].cena===plato) rep++; 
-  });
-  if(rep>=2) return false;
-  let disp=[...dias];
-  while(disp.length){
-    let dia=disp[Math.floor(Math.random()*disp.length)];
-    let comida=Math.random()<.5?'almuerzo':'cena';
-    if(!calendario[dia][comida]){
-      if(calendario[dia].almuerzo!==plato && calendario[dia].cena!==plato){
-        // ✅ validación extra por categorías
-        if (!categorias || mismoDiaValido(dia, plato, calendario, categorias)) {
-          calendario[dia][comida]=plato; 
-          actualizarCalendario(); 
-          return true;
-        }
-      }
-    }
-    disp.splice(disp.indexOf(dia),1);
-  }
-  return false;
-}
-
-
-function resetearCalendario(){ 
-  dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
-  actualizarCalendario(); 
-}
-
-// =========================
-// RENDER DEL CALENDARIO
-// =========================
-function actualizarCalendario(){
-  guardarCalendario(); // esta función se define en app-normal o app-veg
-  const cuerpo=document.getElementById('calendario-body'); 
-  cuerpo.innerHTML='';
-  const hoy=new Date(); 
-  let indiceHoy=hoy.getDay()-1; 
-  if(indiceHoy<0||indiceHoy>4) indiceHoy=null;
-  dias.forEach((dia,i)=>{
-    const esHoy = i===indiceHoy;
-    cuerpo.innerHTML+=`
-      <tr${esHoy?' style="background-color:#fff8dc;"':''}>
-        <td data-label="Día">${dia}</td>
-        <td data-label="Almuerzo" onclick="seleccionarCelda('${dia}','almuerzo')">${crearContenidoCelda(dia,'almuerzo')}</td>
-        <td data-label="Cena" onclick="seleccionarCelda('${dia}','cena')">${crearContenidoCelda(dia,'cena')}</td>
-      </tr>`;
-  });
-}
-
-function crearContenidoCelda(dia, tipo) {
-  const plato = calendario[dia][tipo];
-  if (!plato) {
-    return '<span style="font-size:12px; color:#999;">Click para agregar un plato</span>';
-  }
-  const contenido = insertarQuiebresLegibles(plato);
-  return `${contenido} <span class="menu-eliminar" role="button" tabindex="0" aria-label="Eliminar plato" onclick="eliminarPlato(event,'${dia}','${tipo}')">Eliminar</span>`;
-}
-
-// Inserta puntos de quiebre sin cortar palabras: tras comas y barras
-function insertarQuiebresLegibles(texto) {
-  if (texto == null) return '';
-  return String(texto)
-    .replace(/,/g, ',<wbr>')
-    .replace(/\//g, '/<wbr>');
-}
-
-function eliminarPlato(e,dia,tipo){ 
-  e.stopPropagation(); 
-  calendario[dia][tipo]=null; 
-  actualizarCalendario(); 
-}
-
-function seleccionarCelda(dia, tipo) {
-  document.querySelectorAll('#calendario-body td').forEach(td => td.classList.remove('selected'));
-
-  if (!seleccion) {
-    seleccion = { dia, tipo };
-    marcarCeldaSeleccionada(dia, tipo);
-    if (!calendario[dia][tipo]) {
-  irAPlatoSemana();
-}
-
-    return;
-  }
-
-  const o = seleccion;
-  const pO = calendario[o.dia][o.tipo];
-  const pD = calendario[dia][tipo];
-
-  if (o.dia === dia && o.tipo === tipo) {
-    seleccion = null;
-    actualizarCalendario();
-    return;
-  }
-
-  if (!pO) {
-    seleccion = { dia, tipo };
-    marcarCeldaSeleccionada(dia, tipo);
-   if (!pD) {
-  irAPlatoSemana();
-}
-
-    return;
-  }
-
-  // Creamos el calendario propuesto (swap/move)
-const tmp = JSON.parse(JSON.stringify(calendario));
-tmp[dia][tipo] = pO;
-tmp[o.dia][o.tipo] = pD;
-
-// Merge simple de mapas de categorías (por si usás tradicional o veg o ambos)
-const categoriasMerged = Object.assign({},
-  (typeof categoriasTradicional !== 'undefined' ? categoriasTradicional : {}),
-  (typeof categoriasVegetariano !== 'undefined' ? categoriasVegetariano : {})
-);
-
-// Validamos el calendario propuesto
-const valid = validarPropuestaCambio(tmp, categoriasMerged);
-
-if (!valid.ok) {
-  // Mensajes amigables según la razón
-  let msg = '❌ Movimiento no permitido.';
-  if (valid.reason === 'samePlateDay') {
-    msg = `❌ No podés dejar el mismo plato dos veces en ${valid.day}.`;
-  } else if (valid.reason === 'categoryConflict') {
-    msg = `❌ Ya hay un plato similar (${valid.category}) en ${valid.day}.`;
-  } else if (valid.reason === 'overWeekly') {
-    msg = `❌ El plato "${valid.plate}" excede el máximo de 2 veces por semana.`;
-  } else if (valid.reason === 'overRestricted') {
-    msg = `❌ El ingrediente "${valid.ingrediente}" superó su límite semanal (${valid.usoActual}/${valid.limite} veces).`;
-  }
-   
-  
-
-  mostrarMensaje(msg, 'error');
-  seleccion = null;
-  actualizarCalendario();
-  return;
-}
-
-// Si pasa validación, aplicamos el calendario propuesto
-calendario = tmp;
-seleccion = null;
-actualizarCalendario();
-
-
-}
-
-function marcarCeldaSeleccionada(dia,tipo){ 
-  document.querySelectorAll('#calendario-body tr').forEach(f=>{ 
-    const c=f.children; 
-    if(c[0].innerText===dia){ 
-      if(tipo==='almuerzo') c[1].classList.add('selected'); 
-      if(tipo==='cena') c[2].classList.add('selected'); 
-    } 
-  }); 
-}
-
-// =========================
-// MENSAJES TOAST
-// =========================
-function mostrarMensaje(texto,tipo){ 
-  const m=document.getElementById('mensaje'); 
-  m.className="mensaje-toast"; 
-  m.classList.add(tipo); 
-  m.innerText=texto; 
-  m.style.display='block'; 
-  setTimeout(()=>{ m.style.display='none'; },4000); 
-}
-
-// =========================
-// EXPORTAR PDF
-// =========================
-function descargarPDF() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("🍴 Menú semanal", 14, 20);
-
-  const cabecera = [["Día", "Almuerzo", "Cena"]];
-  const filas = dias.map(dia => [
-    dia,
-    calendario[dia].almuerzo || "-",
-    calendario[dia].cena || "-"
-  ]);
-
-  doc.autoTable({
-    head: cabecera,
-    body: filas,
-    startY: 30,
-    theme: "grid",
-    headStyles: { fillColor: [143, 157, 104] },
-    styles: { halign: "center" }
-  });
-
-  doc.save("menu-semanal.pdf");
-}
-
-
-
-// SCROLL HACIA ARMAR PLATO
-function irAPlatoSemana() {
-  const target = document.getElementById("plato-semana");
-  if (target) {
-    const y = target.getBoundingClientRect().top + window.scrollY - 100; // 👈 offset de 100px
-    window.scrollTo({ top: y, behavior: "smooth" });
-  }
-}
-
-
-// =========================
-// LISTA DE COMPRAS
-// =========================
-
-// Mapeos editables para ingredientes base
-// Permiten definir cómo descomponer verduras/proteínas/hidratos en ingredientes
-// El valor puede ser una string (se usa tal cual) o un array de strings (varias entradas)
-const ingredientesVerduras = {
-  // ejemplos base; editá libremente
-  "Ens.(tomate,lechuga,cebolla)": ["Tomate", "Lechuga", "Cebolla"],
-  "Ens.(lechuga,tomate,cebolla,palta)": ["Lechuga", "Tomate", "Cebolla", "Palta"],
-  "Salteado(cebolla,pimiento,zanahoria)": ["Cebolla", "Pimiento", "Zanahoria"],
-  "Horno(cebolla,zanahoria,pimiento,calabaza)": ["Cebolla", "Zanahoria", "Pimiento", "Calabaza"],
-};
-
-const ingredientesProteinas = {
-  "Milanesa vaca": "Milanesa de carne",
-  "Milanesa pollo": "Milanesa de pollo",
-  "Milanesa cerdo": "Milanesa de cerdo",
-  "Milanesa pescado": "Milanesa de pescado",
-  "Medallon de legumbre": "Medallón de legumbres",
-  "Huevo (Duro/ Revuelto/ a la plancha)": "Huevo",
-  "Atún": "Atún",
-};
-
-const ingredientesHidratos = {
-  "Arroz(Blanco/ integral/ Yamani)": "Arroz",
-  "Fideos": "Fideos",
-  "Pure de papa": "Papa",
-  "Papa al horno": "Papa",
-  "Batata al horno": "Batata",
-  "Quinoa": "Quinoa",
-};
-
-// Extrae ingredientes de un plato (combinado o completo)
-function extraerIngredientesDePlato(plato) {
-  if (!plato) return [];
-  
-  // 1. Verificar si es un plato completo con ingredientes definidos
-  const ingredientesCompletos = (typeof ingredientesPlatosCompletos !== "undefined") 
-    ? ingredientesPlatosCompletos 
-    : (typeof ingredientesPlatosCompletosVeg !== "undefined") 
-      ? ingredientesPlatosCompletosVeg 
-      : null;
-  
-  if (ingredientesCompletos && ingredientesCompletos[plato]) {
-    return ingredientesCompletos[plato];
+  .modal-header {
+    padding: 15px;
   }
   
-  // 2. Si no es un plato completo, extraer ingredientes de plato combinado
-  const ingredientes = [];
-  const partes = plato.split('+').map(p => p.trim());
-  
-  partes.forEach(parte => {
-    // Limpiar paréntesis y contenido dentro
-    let ingrediente = parte.replace(/\([^)]*\)/g, '').trim();
-    
-    // Si empieza con "Ens." o "Salteado" o "Horno", extraer el contenido de paréntesis
-    if (ingrediente.startsWith('Ens.') || ingrediente.startsWith('Salteado') || ingrediente.startsWith('Horno')) {
-      const match = parte.match(/\(([^)]+)\)/);
-      if (match) {
-        const verduras = match[1].split(',').map(v => v.trim());
-        ingredientes.push(...verduras);
-      }
-    } else {
-      // Es un ingrediente directo: intentar mapear por proteinas/hidratos/verduras conocidas
-      const base = ingredientesProteinas[ingrediente] ?? ingredientesHidratos[ingrediente] ?? ingredientesVerduras[ingrediente] ?? ingrediente;
-      if (Array.isArray(base)) ingredientes.push(...base);
-      else if (base) ingredientes.push(base);
-    }
-  });
-  
-  return ingredientes;
-}
-
-// Genera la lista de compras basada en el calendario
-function generarListaCompras() {
-  const listaCompras = {};
-  
-  // Recorrer todo el calendario
-  dias.forEach(dia => {
-    ['almuerzo', 'cena'].forEach(tipo => {
-      const plato = calendario[dia][tipo];
-      if (plato) {
-        const ingredientes = extraerIngredientesDePlato(plato);
-        
-        ingredientes.forEach(ingrediente => {
-          if (listaCompras[ingrediente]) {
-            listaCompras[ingrediente]++;
-          } else {
-            listaCompras[ingrediente] = 1;
-          }
-        });
-      }
-    });
-  });
-  
-  return listaCompras;
-}
-
-// Muestra la lista de compras en el modal
-function mostrarListaCompras() {
-  const listaCompras = generarListaCompras();
-  const modal = document.getElementById('modalListaCompras');
-  const contenido = document.getElementById('listaComprasContenido');
-  
-  if (Object.keys(listaCompras).length === 0) {
-    contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario para generar la lista de compras.</p>';
-  } else {
-    // Ordenar ingredientes alfabéticamente
-    const ingredientesOrdenados = Object.keys(listaCompras).sort();
-    
-    // UI de extras + lista (los generados del calendario tendrán botón Tachar; los extras, Eliminar)
-    let html = `
-      <div style="margin-bottom:12px;">
-        <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
-        <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
-        <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
-      </div>
-      <ul class="lista-compras" id="listaComprasUl">`;
-    ingredientesOrdenados.forEach(ingrediente => {
-      const cantidad = listaCompras[ingrediente];
-      const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
-      
-      html += `
-        <li>
-          <span class="ingrediente-nombre">${ingrediente}</span>
-          <span class="ingrediente-cantidad">${textoCantidad}</span>
-          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${ingrediente}">Tachar</span>
-        </li>
-      `;
-    });
-    html += '</ul>';
-    
-    contenido.innerHTML = html;
-
-    // listeners: agregar extra
-    const extraInput = document.getElementById('extraCompras');
-    const btnExtra = document.getElementById('btnAgregarExtra');
-    const ul = document.getElementById('listaComprasUl');
-    if (btnExtra && extraInput && ul) {
-      btnExtra.addEventListener('click', () => {
-        const val = (extraInput.value || '').trim();
-        if (!val) return;
-        const li = document.createElement('li');
-        // extras de usuario: botón Eliminar (remueve)
-         li.innerHTML = `
-         <span class="ingrediente-nombre">${val}</span>
-         <span class="ingrediente-cantidad"></span>
-         <span class="acciones">
-         <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${val}">Eliminar</span>
-         <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar"  data-ingrediente="${val}">Tachar</span>
-         </span>
-         `;
-
-
-
-        ul.appendChild(li);
-        extraInput.value = '';
-        guardarListaComprasDesdeDOM();
-
-        // bind eliminador para el nuevo item
-        const del = li.querySelector('.menu-eliminar[data-action=\"eliminar\"]');
-        if (del) {
-          del.addEventListener('click', (e2) => {
-            const li2 = e2.target.closest('li');
-            if (li2 && li2.parentNode) li2.parentNode.removeChild(li2);
-            guardarListaComprasDesdeDOM();
-          });
-        }
-        // listener tachar
-        const chk = li.querySelector('.menu-eliminar[data-action="tachar"]');
-         if (chk) {
-           chk.addEventListener('click', (e2) => {
-          const li2 = e2.target.closest('li');
-           li2.classList.toggle('tachado');
-           guardarListaComprasDesdeDOM();
-  });
-}
-
-      });
-    }
-
-    // listeners: tachar (para elementos del calendario)
-    ul.querySelectorAll('.menu-eliminar[data-action="tachar"]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const li = e.target.closest('li');
-        li.classList.toggle('tachado');
-        guardarListaComprasDesdeDOM();
-      });
-    });
+  .modal-body {
+    padding: 15px;
   }
   
-  modal.style.display = 'flex';
-}
-
-// Descarga la lista de compras como archivo de texto
-function descargarListaCompras() {
-  const listaCompras = generarListaCompras();
-  const ingredientesOrdenados = Object.keys(listaCompras).sort();
-  
-  let contenido = '🛒 LISTA DE COMPRAS - Plato Resuelto\n';
-  contenido += '=====================================\n\n';
-  
-  ingredientesOrdenados.forEach(ingrediente => {
-    const cantidad = listaCompras[ingrediente];
-    const textoCantidad = cantidad > 1 ? ` (comprar para ${cantidad} comidas)` : '';
-    contenido += `• ${ingrediente}${textoCantidad}\n`;
-  });
-  
-  // Crear y descargar archivo
-  const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'lista-compras.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-}
-
-// Persistencia local de la lista mostrada en el modal
-function guardarListaComprasDesdeDOM() {
-  const ul = document.getElementById('listaComprasUl');
-  if (!ul) return;
-  const items = Array.from(ul.querySelectorAll('li')).map(li => ({
-    nombre: li.querySelector('.ingrediente-nombre')?.textContent || '',
-    detalle: li.querySelector('.ingrediente-cantidad')?.textContent || '',
-    tachado: li.classList.contains('tachado')
-  }));
-  localStorage.setItem('listaCompras', JSON.stringify(items));
-  // notificar a listeners externos (p.ej. Firestore en index)
-  document.dispatchEvent(new CustomEvent('listaCompras:cambiada', { detail: items }));
-}
-
-function cargarListaComprasADOMSiExiste() {
-  const guardado = localStorage.getItem('listaCompras');
-  if (!guardado) return false;
-  const items = JSON.parse(guardado);
-  const modal = document.getElementById('modalListaCompras');
-  const contenido = document.getElementById('listaComprasContenido');
-  if (!contenido) return false;
-
-  let html = `
-    <div style="margin-bottom:12px;">
-      <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
-      <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
-      <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
-    </div>
-    <ul class="lista-compras" id="listaComprasUl">`;
-  items.forEach(it => {
-    // asumimos que si detalle está vacío (extra manual), va con Eliminar; si no, es del calendario y va con Tachar
-    const accion = it.detalle ? 'tachar' : 'eliminar';
-    const rotulo = accion === 'tachar' ? 'Tachar' : 'Eliminar';
-    html += `<li class="${it.tachado ? 'tachado' : ''}"><span class="ingrediente-nombre">${it.nombre}</span><span class="ingrediente-cantidad">${it.detalle}</span><span class="menu-eliminar" role="button" tabindex="0" data-action="${accion}" data-ingrediente="${it.nombre}">${rotulo}</span></li>`;
-  });
-  html += '</ul>';
-  contenido.innerHTML = html;
-
-  // volver a conectar listeners
-  const extraInput = document.getElementById('extraCompras');
-  const btnExtra = document.getElementById('btnAgregarExtra');
-  const ul = document.getElementById('listaComprasUl');
-  if (btnExtra && extraInput && ul) {
-    btnExtra.addEventListener('click', () => {
-      const val = (extraInput.value || '').trim();
-      if (!val) return;
-      const li = document.createElement('li');
-      li.innerHTML = `<span class=\"ingrediente-nombre\">${val}</span><span class=\"ingrediente-cantidad\"></span><span class=\"menu-eliminar\" role=\"button\" tabindex=\"0\" data-action=\"eliminar\" data-ingrediente=\"${val}\">Eliminar</span>`;
-      ul.appendChild(li);
-      extraInput.value = '';
-      guardarListaComprasDesdeDOM();
-    });
+  .modal-footer {
+    padding: 15px;
   }
-  ul.querySelectorAll('.menu-eliminar[data-action=\"tachar\"]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const li = e.target.closest('li');
-      li.classList.toggle('tachado');
-      guardarListaComprasDesdeDOM();
-    });
-  });
-  ul.querySelectorAll('.menu-eliminar[data-action=\"eliminar\"]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const li = e.target.closest('li');
-      if (li && li.parentNode) li.parentNode.removeChild(li);
-      guardarListaComprasDesdeDOM();
-    });
-  });
-  if (modal) modal.style.display = 'flex';
-  return true;
-}
-
-// =========================
-// INICIO
-// =========================
-window.onload=()=>{ 
-  cargarCalendario(); // esta función se define en app-normal o app-veg
-  actualizarCalendario(); 
-  
-  // Event listeners para lista de compras
-  const btnListaCompras = document.getElementById('btnListaCompras');
-  const modal = document.getElementById('modalListaCompras');
-  const btnCerrar = document.getElementById('cerrarModal');
-  const btnDescargar = document.getElementById('descargarLista');
-  
-  // Si hay una lista guardada, mostrarla al entrar
-  try { cargarListaComprasADOMSiExiste(); } catch(e) { /* no-op */ }
-
-  if (btnListaCompras) {
-    btnListaCompras.addEventListener('click', mostrarListaCompras);
-  }
-  
-  if (btnCerrar) {
-    btnCerrar.addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-  }
-  
-  if (btnDescargar) {
-    btnDescargar.addEventListener('click', descargarListaCompras);
-  }
-  
-  // Cerrar modal al hacer clic fuera
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.style.display = 'none';
-      }
-    });
-  }
-};
-
-
-
-
-//CALENDARIO ALEATORIO
-
-// ===== Helpers globales =====
-window.getOpciones = function getOpciones(idSelect) {
-  const select = document.getElementById(idSelect);
-  if (!select) return [];
-  return Array.from(select.options)
-    .map(opt => (opt.value ?? "").trim())
-    // 👇 filtramos vacíos, "ensaladas" y lo que esté oculto
-    .filter(val => val !== "" && val !== "ensaladas");
-};
-
-
-
-//BOTON FLOTANTE
-// Botón flotante: ir al día de hoy
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("btnHoy");
-  if (btn) {
-    btn.addEventListener("click", () => {
-      const hoy = new Date();
-      let indiceHoy = hoy.getDay() - 1; // Lunes=0
-      if (indiceHoy < 0 || indiceHoy > 4) {
-        mostrarMensaje("📅 Hoy no es un día de semana configurado (Lun-Vie).", "error");
-        return;
-      }
-      const fila = document.querySelectorAll("#calendario-body tr")[indiceHoy];
-      if (fila) {
-        fila.scrollIntoView({ behavior: "smooth", block: "center" });
-        fila.classList.add("selected");
-        setTimeout(() => fila.classList.remove("selected"), 3000);
-      }
-    });
-  }
-});
-
-
-// =========================
-// scroll mas preciso para boton
-// =========================
-document.getElementById("btnHoy").addEventListener("click", function (e) {
-  e.preventDefault();
-  const hoy = new Date();
-  const indiceHoy = hoy.getDay() - 1; // Lunes=0
-  if (indiceHoy >= 0 && indiceHoy <= 4) {
-    const filaHoy = document.querySelectorAll("#calendario-body tr")[indiceHoy];
-    if (filaHoy) {
-      filaHoy.scrollIntoView({
-        behavior: "smooth",
-        block: "center"  // 👈 lo centra en pantalla (mejor en móvil)
-      });
-    }
-  }
-});
-
-
-
-
-// tutorial.js
-const pasos = [
-  "👋 Bienvenido a <strong>Plato Resuelto!</strong><br>Acá organizás tu menú de la semana o de un solo día de forma fácil y rápida.",
-  " Armá tu plato eligiendo <em>verduras</em>, <em>proteínas</em>, <em>hidratos</em> o un <em>plato completo</em>.",
-  " Hacé clic en <strong>“Agregá el plato al calendario”</strong> y se asignará automáticamente a un día.",
-  " También podés hacer clic en cualquier celda del calendario para <em> agregar, mover, rotar, o eliminar</em> un plato.",
-  "⚡ Usá las funciones rápidas: <br> - 🎲 Generar semana aleatoria <br> - 🔄 Resetear calendario <br> - 📥 Descargar PDF",
-  "📲 ¡Tip! Agregá esta app web a la pantalla de inicio de tu celular."
-];
-
-let pasoActual = 0;
-
-function mostrarPaso() {
-  const stepEl = document.getElementById("tutorial-step");
-  const indicator = document.getElementById("tutorial-indicator");
-
-  stepEl.innerHTML = pasos[pasoActual];
-  indicator.textContent = `Paso ${pasoActual + 1} de ${pasos.length}`;
-
-  // Botón "Atrás"
-  const prevBtn = document.getElementById("tutorial-prev");
-  prevBtn.style.display = pasoActual > 0 ? "inline-flex" : "none";
-  prevBtn.innerHTML = "← Atrás";
-
-  // Botón "Continuar / Empezar"
-  const nextBtn = document.getElementById("tutorial-next");
-  nextBtn.innerHTML = (pasoActual === pasos.length - 1) ? "Empezar →" : "Continuar →";
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const tutorial = document.getElementById("tutorial");
-  if (!localStorage.getItem("tutorialVisto")) {
-    tutorial.style.display = "flex";
-    mostrarPaso();
-  }
-
-  document.getElementById("tutorial-prev").addEventListener("click", () => {
-    if (pasoActual > 0) {
-      pasoActual--;
-      mostrarPaso();
-    }
-  });
-
-  document.getElementById("tutorial-next").addEventListener("click", () => {
-    if (pasoActual < pasos.length - 1) {
-      pasoActual++;
-      mostrarPaso();
-    } else {
-      localStorage.setItem("tutorialVisto", "true");
-      tutorial.style.display = "none";
-    }
-  });
-});
-
-window.mostrarTutorial = function() {
-  pasoActual = 0;
-  document.getElementById("tutorial").style.display = "flex";
-  mostrarPaso();
-};
-
-
-
-
-
-
-// =========================
-// VALIDACIÓN POR CATEGORÍAS POR PLATOS O ALIMENTOS QUE SON SIMILARES
-// =========================
-
-// Dada la string de un plato ("Verdura + Proteína + Hidrato")
-// devuelve las categorías de cada parte según el mapeo
-function obtenerCategoriasDePlato(plato, categoriasMapeadas) {
-  let cats = [];
-
-  // 1️⃣ Primero: si el plato completo está en el mapeo, usar eso
-  if (categoriasMapeadas[plato]) {
-    const cat = categoriasMapeadas[plato];
-    if (Array.isArray(cat)) {
-      cats.push(...cat);
-    } else {
-      cats.push(cat);
-    }
-    return cats; // 👈 importante: si ya lo encontramos, no seguimos
-  }
-
-  // 2️⃣ Si no existe como plato entero, lo partimos por "+"
-  const partes = plato.split("+").map(p => p.trim());
-
-  partes.forEach(parte => {
-    if (categoriasMapeadas[parte]) {
-      const cat = categoriasMapeadas[parte];
-      if (Array.isArray(cat)) {
-        cats.push(...cat);
-      } else {
-        cats.push(cat);
-      }
-    }
-  });
-
-  return cats;
-}
-
-
-// Valida que un nuevo plato no comparta categorías con los que ya tiene ese día
-function mismoDiaValido(dia, nuevoPlato, calendario, categoriasMapeadas) {
-  const categoriasNuevo = obtenerCategoriasDePlato(nuevoPlato, categoriasMapeadas);
-
-  for (let comida in calendario[dia]) {
-    const platoExistente = calendario[dia][comida];
-    if (!platoExistente) continue;
-
-    const categoriasExistente = obtenerCategoriasDePlato(platoExistente, categoriasMapeadas);
-
-    // ❌ Si alguna categoría coincide, no es válido
-    if (categoriasNuevo.some(cat => categoriasExistente.includes(cat))) {
-      return false;
-    }
-  }
-  return true;
 }
 
 
 
-// Valida un calendario "propuesto" (tmpCalendar) antes de aplicarlo.
-// Devuelve { ok: true } o { ok: false, reason: '...', detail: ... }
-function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
-  // 1) Validaciones por día (mismo plato exacto en alm+cen y conflicto de categorías)
-  for (let d of dias) {
-    const alm = tmpCalendar[d].almuerzo;
-    const cen = tmpCalendar[d].cena;
+/* Tutorial modal moderno */
+.tutorial-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  animation: fadeIn 0.3s ease;
+}
 
-    // mismo plato exacto en el mismo día (no permitido)
-    if (alm && cen && alm === cen) {
-      return { ok: false, reason: 'samePlateDay', day: d, plate: alm };
-    }
+.tutorial-box {
+  background: #fff;
+  padding: 30px 24px;
+  max-width: 420px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #333;
+  animation: slideUp 0.4s ease;
+  position: relative;
+}
 
-    // conflicto de categorías entre almuerzo y cena
-    const catsA = alm ? obtenerCategoriasDePlato(alm, categoriasMapeadas) : [];
-    const catsC = cen ? obtenerCategoriasDePlato(cen, categoriasMapeadas) : [];
+/* Paso actual en top */
+.tutorial-step-indicator {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--primario);
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
 
-    for (let cat of catsA) {
-      if (catsC.includes(cat)) {
-        return { ok: false, reason: 'categoryConflict', day: d, category: cat };
-      }
-    }
-  }
+.tutorial-buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  // 2) Validación de máximo 2 apariciones por semana (conteo en tmpCalendar)
-  const counts = {};
-  for (let d of dias) {
-    ['almuerzo', 'cena'].forEach(tipo => {
-      const p = tmpCalendar[d][tipo];
-      if (!p) return;
-      counts[p] = (counts[p] || 0) + 1;
-      if (counts[p] > 2) {
-        return { ok: false, reason: 'overWeekly', plate: p };
-      }
-    });
-  }
+.tutorial-buttons button {
+  flex: 1;
+  background: var(--primario);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 
-  // 3) Validar ingredientes restringidos según versión
-  const listaRestringidos = (typeof restringidosTradicional !== "undefined") 
-    ? restringidosTradicional 
-    : (typeof restringidosVegetariano !== "undefined") 
-      ? restringidosVegetariano 
-      : null;
+.tutorial-buttons button:hover {
+  background: #6f8632;
+  transform: translateY(-2px);
+}
 
-  if (listaRestringidos) {
-    // Contar ingredientes restringidos en el calendario temporal
-    const countsIngredientes = {};
-    
-    for (let d of dias) {
-      ['almuerzo','cena'].forEach(tipo => {
-        const p = tmpCalendar[d][tipo];
-        if (!p) return;
-        
-        // Verificar cada ingrediente restringido en este plato
-        for (const [ingrediente, limite] of Object.entries(listaRestringidos)) {
-          if (plateContainsIngredient(p, ingrediente)) {
-            countsIngredientes[ingrediente] = (countsIngredientes[ingrediente] || 0) + 1;
-            if (countsIngredientes[ingrediente] > limite) {
-              return { 
-                ok: false, 
-                reason: 'overRestricted', 
-                ingrediente: ingrediente, 
-                limite: limite,
-                usoActual: countsIngredientes[ingrediente]
-              };
-            }
-          }
-        }
-      });
-    }
-  }
+.tutorial-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  // Si llega hasta acá, está OK
-  return { ok: true };
-
-  
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
 }
 
 
 
 
-   
+/* boton agregar ensalada */
+.btn-mini {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  background: #8f9d68;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-    
-   
+.btn-mini:hover {
+  background: #738254;
+}
+
+/* Configuración de celdas de tabla */
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; 
+  white-space: normal;
+  word-break: normal;     /* evita cortes arbitrarios dentro de palabras */
+  hyphens: none;          /* sin guiones automáticos */
+}
+
+
+
+
+
+
+
+.btn-whatsapp-top {
+  display: flex;
+  justify-content: flex-start; /* alineado a la izquierda */
+  margin: 10px 0; /* separacion de arriba */
+}
+
+.btn-whatsapp-top .btn-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6rem;
+  padding: 5px 10px;
+  background:  #20b155; /* verde WhatsApp */
+}
+
+.btn-whatsapp-top .btn-whatsapp:hover {
+  background: #21b657;
+}
+
+.icono-whatsapp {
+  width: 16px;
+  height: 16px;
+}
+
+
+
+/* Configuración de celdas de tabla */
+td {
+  vertical-align: top;
+  overflow-wrap: break-word; 
+  white-space: normal;
+  word-break: normal;     /* evita cortes arbitrarios dentro de palabras */
+  hyphens: none;          /* sin guiones automáticos */
+}
+
+
+
+
+
+
+
+#loginBtn {
+  display: block;
+  margin: 80px auto 20px auto; /* lo baja y lo centra */
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: #8f9d68;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#loginBtn:hover {
+  background: #7b8a59;
+}
+
+
+
+
+
+
+
+/* === Botones de abajo minimalistas con ancho completo === */
+.top-buttons,
+.btn-calendario-container {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.top-buttons button,
+.top-buttons a.btn-calendario,
+.btn-calendario-container a.btn-calendario {
+  all: unset;
+  display: block;
+  text-align: center;
+  width: 100%;                  
+  box-sizing: border-box;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #333;
+  background: #f0f0f0;          /* gris base más visible */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.top-buttons button:hover,
+.top-buttons a.btn-calendario:hover,
+.btn-calendario-container a.btn-calendario:hover {
+  background: #e4e4e4;          
+  border-color: #ccc;
+  color: #000;
+}
+
+.top-buttons button:active,
+.top-buttons a.btn-calendario:active,
+.btn-calendario-container a.btn-calendario:active {
+  background: #dcdcdc;
+  transform: scale(0.97);
+}
+
+
+/* BOTON DE TACHAR EN LAS COSAS AGREGADAS DE LA LISTA DE COMPRAS*/
+li {
+  display: grid;
+  grid-template-columns: 1fr auto; /* nombre a la izquierda, acciones a la derecha */
+  align-items: center;
+}
+
+li .acciones {
+  display: flex;
+  gap: 6px;
+}
+
 
 
 
