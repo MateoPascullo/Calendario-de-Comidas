@@ -81,7 +81,178 @@ function contarRepeticiones(plato) {
   return rep;
 }
 
-function asignarAcalendario(plato){
+
+// =========================
+// FUNCIONES PARA DETECTAR INGREDIENTES EN PLATOS COMBINADOS
+// =========================
+
+// Normaliza texto para comparaciones (quita acentos, espacios extra, etc.)
+function normalizarTexto(str) {
+  if (!str) return '';
+  return String(str)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// Extrae todas las partes de un plato (ingredientes individuales)
+function plateToParts(plate) {
+  if (!plate) return [];
+  const raw = String(plate).trim();
+  const set = new Set();
+
+  // Agregar el plato completo
+  set.add(raw);
+  
+  // Dividir por "+" (combinaciones principales)
+  raw.split('+').forEach(p => { 
+    if (p && p.trim()) set.add(p.trim()); 
+  });
+  
+  // Extraer contenido de paréntesis
+  const parenRe = /\(([^)]+)\)/g;
+  let m;
+  while ((m = parenRe.exec(raw)) !== null) {
+    m[1].split(',').forEach(p => { 
+      if (p && p.trim()) set.add(p.trim()); 
+    });
+  }
+  
+  // Dividir por "/" (alternativas)
+  raw.split('/').forEach(p => { 
+    if (p && p.trim()) set.add(p.trim()); 
+  });
+  
+  // Dividir por "," (listas)
+  raw.split(',').forEach(p => { 
+    if (p && p.trim()) set.add(p.trim()); 
+  });
+
+  return Array.from(set)
+    .filter(Boolean)
+    .map(s => normalizarTexto(s));
+}
+
+// Verifica si un plato contiene un ingrediente específico
+function plateContainsIngredient(plate, ingredient) {
+  const ingNorm = normalizarTexto(ingredient);
+  const parts = plateToParts(plate);
+  
+  // Verificación exacta
+  if (parts.includes(ingNorm)) return true;
+  
+  // Verificación parcial (para ingredientes que pueden estar dentro de otros)
+  return parts.some(p => p.indexOf(ingNorm) !== -1);
+}
+
+// Cuenta cuántas veces aparece un ingrediente específico en el calendario
+function contarIngredienteEnCalendario(ingrediente, calendario) {
+  let contador = 0;
+  
+  dias.forEach(dia => {
+    if (calendario[dia].almuerzo && plateContainsIngredient(calendario[dia].almuerzo, ingrediente)) {
+      contador++;
+    }
+    if (calendario[dia].cena && plateContainsIngredient(calendario[dia].cena, ingrediente)) {
+      contador++;
+    }
+  });
+  
+  return contador;
+}
+
+// Valida si un plato excede los límites de ingredientes restringidos
+function validarIngredientesRestringidos(plato, calendario, listaRestringidos) {
+  if (!listaRestringidos || !plato) return { ok: true };
+  
+  // Verificar cada ingrediente restringido
+  for (const [ingrediente, limite] of Object.entries(listaRestringidos)) {
+    if (plateContainsIngredient(plato, ingrediente)) {
+      const usoActual = contarIngredienteEnCalendario(ingrediente, calendario);
+      
+      if (usoActual >= limite) {
+        return { 
+          ok: false, 
+          ingrediente: ingrediente, 
+          limite: limite, 
+          usoActual: usoActual 
+        };
+      }
+    }
+  }
+  
+  return { ok: true };
+}
+
+
+
+function contarRepeticionesAlimento(alimento, calendario) {
+  let rep = 0;
+  dias.forEach(d => {
+    if (calendario[d].almuerzo === alimento) rep++;
+    if (calendario[d].cena === alimento) rep++;
+  });
+  return rep;
+}
+
+// Revisa si un plato excede su límite en la lista de restringidos
+function validarRestriccion(plato, calendario, listaRestringidos) {
+  if (!listaRestringidos || !listaRestringidos[plato]) return { ok: true };
+  const limite = listaRestringidos[plato];
+  if (contarRepeticionesAlimento(plato, calendario) >= limite) {
+    return { ok: false, reason: 'overRestricted', plate: plato, limite };
+  }
+  return { ok: true };
+}
+
+
+function agregarPlato(dia, tipo, plato, categoriasMapeadas) {
+  if (!plato) return false;
+
+  const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
+
+  // ❌ No repetir mismo plato exacto en el mismo día
+  if (calendario[dia][otroTipo] === plato) {
+    mostrarMensaje(`❌ No podés repetir "${plato}" en ${dia}.`, 'error', 6000);
+    return false;
+  }
+
+  // ❌ No repetir categorías en el mismo día
+  if (!mismoDiaValido(dia, plato, calendario, categoriasMapeadas)) {
+    mostrarMensaje(`❌ Ya hay un plato similar en ${dia}.`, 'error', 6000);
+    return false;
+  }
+
+  // ❌ No más de 2 veces por semana
+  if (contarRepeticiones(plato) >= 2 && calendario[dia][tipo] !== plato) {
+    mostrarMensaje(`❌ El plato "${plato}" ya fue asignado 2 veces esta semana.`, 'error', 6000);
+    return false;
+  }
+
+  // 🔒 Validar ingredientes restringidos según versión
+  const listaRestringidos = (typeof restringidosTradicional !== "undefined") 
+    ? restringidosTradicional 
+    : (typeof restringidosVegetariano !== "undefined") 
+      ? restringidosVegetariano 
+      : null;
+
+  if (listaRestringidos) {
+    const validacionIngredientes = validarIngredientesRestringidos(plato, calendario, listaRestringidos);
+    if (!validacionIngredientes.ok) {
+      mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error', 6000);
+      return false;
+    }
+  }
+
+  // ✅ Si pasa todas, asignar
+  calendario[dia][tipo] = plato;
+  return true;
+}
+
+
+function asignarAcalendario(plato, categorias){
   let rep=0; 
   dias.forEach(d=>{ 
     if(calendario[d].almuerzo===plato) rep++; 
@@ -94,15 +265,19 @@ function asignarAcalendario(plato){
     let comida=Math.random()<.5?'almuerzo':'cena';
     if(!calendario[dia][comida]){
       if(calendario[dia].almuerzo!==plato && calendario[dia].cena!==plato){
-        calendario[dia][comida]=plato; 
-        actualizarCalendario(); 
-        return true;
+        // ✅ validación extra por categorías
+        if (!categorias || mismoDiaValido(dia, plato, calendario, categorias)) {
+          calendario[dia][comida]=plato; 
+          actualizarCalendario(); 
+          return true;
+        }
       }
     }
     disp.splice(disp.indexOf(dia),1);
   }
   return false;
 }
+
 
 function resetearCalendario(){ 
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
@@ -186,25 +361,47 @@ function seleccionarCelda(dia, tipo) {
     return;
   }
 
-  const tmp = JSON.parse(JSON.stringify(calendario));
-  tmp[dia][tipo] = pO;
-  tmp[o.dia][o.tipo] = pD;
+  // Creamos el calendario propuesto (swap/move)
+const tmp = JSON.parse(JSON.stringify(calendario));
+tmp[dia][tipo] = pO;
+tmp[o.dia][o.tipo] = pD;
 
-  const noDupMismoDia = d => {
-    const a = tmp[d].almuerzo, c = tmp[d].cena;
-    return !(a && c && a === c);
-  };
+// Merge simple de mapas de categorías (por si usás tradicional o veg o ambos)
+const categoriasMerged = Object.assign({},
+  (typeof categoriasTradicional !== 'undefined' ? categoriasTradicional : {}),
+  (typeof categoriasVegetariano !== 'undefined' ? categoriasVegetariano : {})
+);
 
-  if (!noDupMismoDia(dia) || !noDupMismoDia(o.dia)) {
-    mostrarMensaje('❌ No se puede repetir el mismo plato en el mismo día.', 'error');
-    seleccion = null;
-    actualizarCalendario();
-    return;
+// Validamos el calendario propuesto
+const valid = validarPropuestaCambio(tmp, categoriasMerged);
+
+if (!valid.ok) {
+  // Mensajes amigables según la razón
+  let msg = '❌ Movimiento no permitido.';
+  if (valid.reason === 'samePlateDay') {
+    msg = `❌ No podés dejar el mismo plato dos veces en ${valid.day}.`;
+  } else if (valid.reason === 'categoryConflict') {
+    msg = `❌ Ya hay un plato similar (${valid.category}) en ${valid.day}.`;
+  } else if (valid.reason === 'overWeekly') {
+    msg = `❌ El plato "${valid.plate}" excede el máximo de 2 veces por semana.`;
+  } else if (valid.reason === 'overRestricted') {
+    msg = `❌ El ingrediente "${valid.ingrediente}" superó su límite semanal (${valid.usoActual}/${valid.limite} veces).`;
   }
+   
+  
 
-  calendario = tmp;
+  mostrarMensaje(msg, 'error');
   seleccion = null;
   actualizarCalendario();
+  return;
+}
+
+// Si pasa validación, aplicamos el calendario propuesto
+calendario = tmp;
+seleccion = null;
+actualizarCalendario();
+
+
 }
 
 function marcarCeldaSeleccionada(dia,tipo){ 
@@ -272,11 +469,316 @@ function irAPlatoSemana() {
 
 
 // =========================
+// LISTA DE COMPRAS
+// =========================
+
+// Mapeos editables para ingredientes base
+// Permiten definir cómo descomponer verduras/proteínas/hidratos en ingredientes
+// El valor puede ser una string (se usa tal cual) o un array de strings (varias entradas)
+const ingredientesVerduras = {
+  // ejemplos base; editá libremente
+  "Ens.(tomate,lechuga,cebolla)": ["Tomate", "Lechuga", "Cebolla"],
+  "Ens.(lechuga,tomate,cebolla,palta)": ["Lechuga", "Tomate", "Cebolla", "Palta"],
+  "Salteado(cebolla,pimiento,zanahoria)": ["Cebolla", "Pimiento", "Zanahoria"],
+  "Horno(cebolla,zanahoria,pimiento,calabaza)": ["Cebolla", "Zanahoria", "Pimiento", "Calabaza"],
+};
+
+const ingredientesProteinas = {
+  "Milanesa vaca": "Milanesa de carne",
+  "Milanesa pollo": "Milanesa de pollo",
+  "Milanesa cerdo": "Milanesa de cerdo",
+  "Milanesa pescado": "Milanesa de pescado",
+  "Medallon de legumbre": "Medallón de legumbres",
+  "Huevo (Duro/ Revuelto/ a la plancha)": "Huevo",
+  "Atún": "Atún",
+};
+
+const ingredientesHidratos = {
+  "Arroz(Blanco/ integral/ Yamani)": "Arroz",
+  "Fideos": "Fideos",
+  "Pure de papa": "Papa",
+  "Papa al horno": "Papa",
+  "Batata al horno": "Batata",
+  "Quinoa": "Quinoa",
+};
+
+// Extrae ingredientes de un plato (combinado o completo)
+function extraerIngredientesDePlato(plato) {
+  if (!plato) return [];
+  
+  // 1. Verificar si es un plato completo con ingredientes definidos
+  const ingredientesCompletos = (typeof ingredientesPlatosCompletos !== "undefined") 
+    ? ingredientesPlatosCompletos 
+    : (typeof ingredientesPlatosCompletosVeg !== "undefined") 
+      ? ingredientesPlatosCompletosVeg 
+      : null;
+  
+  if (ingredientesCompletos && ingredientesCompletos[plato]) {
+    return ingredientesCompletos[plato];
+  }
+  
+  // 2. Si no es un plato completo, extraer ingredientes de plato combinado
+  const ingredientes = [];
+  const partes = plato.split('+').map(p => p.trim());
+  
+  partes.forEach(parte => {
+    // Limpiar paréntesis y contenido dentro
+    let ingrediente = parte.replace(/\([^)]*\)/g, '').trim();
+    
+    // Si empieza con "Ens." o "Salteado" o "Horno", extraer el contenido de paréntesis
+    if (ingrediente.startsWith('Ens.') || ingrediente.startsWith('Salteado') || ingrediente.startsWith('Horno')) {
+      const match = parte.match(/\(([^)]+)\)/);
+      if (match) {
+        const verduras = match[1].split(',').map(v => v.trim());
+        ingredientes.push(...verduras);
+      }
+    } else {
+      // Es un ingrediente directo: intentar mapear por proteinas/hidratos/verduras conocidas
+      const base = ingredientesProteinas[ingrediente] ?? ingredientesHidratos[ingrediente] ?? ingredientesVerduras[ingrediente] ?? ingrediente;
+      if (Array.isArray(base)) ingredientes.push(...base);
+      else if (base) ingredientes.push(base);
+    }
+  });
+  
+  return ingredientes;
+}
+
+// Genera la lista de compras basada en el calendario
+function generarListaCompras() {
+  const listaCompras = {};
+  
+  // Recorrer todo el calendario
+  dias.forEach(dia => {
+    ['almuerzo', 'cena'].forEach(tipo => {
+      const plato = calendario[dia][tipo];
+      if (plato) {
+        const ingredientes = extraerIngredientesDePlato(plato);
+        
+        ingredientes.forEach(ingrediente => {
+          if (listaCompras[ingrediente]) {
+            listaCompras[ingrediente]++;
+          } else {
+            listaCompras[ingrediente] = 1;
+          }
+        });
+      }
+    });
+  });
+  
+  return listaCompras;
+}
+
+// Muestra la lista de compras en el modal
+function mostrarListaCompras() {
+  const listaCompras = generarListaCompras();
+  const modal = document.getElementById('modalListaCompras');
+  const contenido = document.getElementById('listaComprasContenido');
+  
+  if (Object.keys(listaCompras).length === 0) {
+    contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario para generar la lista de compras.</p>';
+  } else {
+    // Ordenar ingredientes alfabéticamente
+    const ingredientesOrdenados = Object.keys(listaCompras).sort();
+    
+    // UI de extras + lista (los generados del calendario tendrán botón Tachar; los extras, Eliminar)
+    let html = `
+      <div style="margin-bottom:12px;">
+        <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
+        <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
+        <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
+      </div>
+      <ul class="lista-compras" id="listaComprasUl">`;
+    ingredientesOrdenados.forEach(ingrediente => {
+      const cantidad = listaCompras[ingrediente];
+      const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
+      
+      html += `
+        <li>
+          <span class="ingrediente-nombre">${ingrediente}</span>
+          <span class="ingrediente-cantidad">${textoCantidad}</span>
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${ingrediente}">Tachar</span>
+        </li>
+      `;
+    });
+    html += '</ul>';
+    
+    contenido.innerHTML = html;
+
+    // listeners: agregar extra
+    const extraInput = document.getElementById('extraCompras');
+    const btnExtra = document.getElementById('btnAgregarExtra');
+    const ul = document.getElementById('listaComprasUl');
+    if (btnExtra && extraInput && ul) {
+      btnExtra.addEventListener('click', () => {
+        const val = (extraInput.value || '').trim();
+        if (!val) return;
+        const li = document.createElement('li');
+        // extras de usuario: botón Eliminar (remueve)
+        li.innerHTML = `<span class=\"ingrediente-nombre\">${val}</span><span class=\"ingrediente-cantidad\"></span><span class=\"menu-eliminar\" role=\"button\" tabindex=\"0\" data-action=\"eliminar\" data-ingrediente=\"${val}\">Eliminar</span>`;
+        ul.appendChild(li);
+        extraInput.value = '';
+        guardarListaComprasDesdeDOM();
+
+        // bind eliminador para el nuevo item
+        const del = li.querySelector('.menu-eliminar[data-action=\"eliminar\"]');
+        if (del) {
+          del.addEventListener('click', (e2) => {
+            const li2 = e2.target.closest('li');
+            if (li2 && li2.parentNode) li2.parentNode.removeChild(li2);
+            guardarListaComprasDesdeDOM();
+          });
+        }
+      });
+    }
+
+    // listeners: tachar (para elementos del calendario)
+    ul.querySelectorAll('.menu-eliminar[data-action="tachar"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const li = e.target.closest('li');
+        li.classList.toggle('tachado');
+        guardarListaComprasDesdeDOM();
+      });
+    });
+  }
+  
+  modal.style.display = 'flex';
+}
+
+// Descarga la lista de compras como archivo de texto
+function descargarListaCompras() {
+  const listaCompras = generarListaCompras();
+  const ingredientesOrdenados = Object.keys(listaCompras).sort();
+  
+  let contenido = '🛒 LISTA DE COMPRAS - Plato Resuelto\n';
+  contenido += '=====================================\n\n';
+  
+  ingredientesOrdenados.forEach(ingrediente => {
+    const cantidad = listaCompras[ingrediente];
+    const textoCantidad = cantidad > 1 ? ` (comprar para ${cantidad} comidas)` : '';
+    contenido += `• ${ingrediente}${textoCantidad}\n`;
+  });
+  
+  // Crear y descargar archivo
+  const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lista-compras.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+// Persistencia local de la lista mostrada en el modal
+function guardarListaComprasDesdeDOM() {
+  const ul = document.getElementById('listaComprasUl');
+  if (!ul) return;
+  const items = Array.from(ul.querySelectorAll('li')).map(li => ({
+    nombre: li.querySelector('.ingrediente-nombre')?.textContent || '',
+    detalle: li.querySelector('.ingrediente-cantidad')?.textContent || '',
+    tachado: li.classList.contains('tachado')
+  }));
+  localStorage.setItem('listaCompras', JSON.stringify(items));
+  // notificar a listeners externos (p.ej. Firestore en index)
+  document.dispatchEvent(new CustomEvent('listaCompras:cambiada', { detail: items }));
+}
+
+function cargarListaComprasADOMSiExiste() {
+  const guardado = localStorage.getItem('listaCompras');
+  if (!guardado) return false;
+  const items = JSON.parse(guardado);
+  const modal = document.getElementById('modalListaCompras');
+  const contenido = document.getElementById('listaComprasContenido');
+  if (!contenido) return false;
+
+  let html = `
+    <div style="margin-bottom:12px;">
+      <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
+      <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
+      <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
+    </div>
+    <ul class="lista-compras" id="listaComprasUl">`;
+  items.forEach(it => {
+    // asumimos que si detalle está vacío (extra manual), va con Eliminar; si no, es del calendario y va con Tachar
+    const accion = it.detalle ? 'tachar' : 'eliminar';
+    const rotulo = accion === 'tachar' ? 'Tachar' : 'Eliminar';
+    html += `<li class="${it.tachado ? 'tachado' : ''}"><span class="ingrediente-nombre">${it.nombre}</span><span class="ingrediente-cantidad">${it.detalle}</span><span class="menu-eliminar" role="button" tabindex="0" data-action="${accion}" data-ingrediente="${it.nombre}">${rotulo}</span></li>`;
+  });
+  html += '</ul>';
+  contenido.innerHTML = html;
+
+  // volver a conectar listeners
+  const extraInput = document.getElementById('extraCompras');
+  const btnExtra = document.getElementById('btnAgregarExtra');
+  const ul = document.getElementById('listaComprasUl');
+  if (btnExtra && extraInput && ul) {
+    btnExtra.addEventListener('click', () => {
+      const val = (extraInput.value || '').trim();
+      if (!val) return;
+      const li = document.createElement('li');
+      li.innerHTML = `<span class=\"ingrediente-nombre\">${val}</span><span class=\"ingrediente-cantidad\"></span><span class=\"menu-eliminar\" role=\"button\" tabindex=\"0\" data-action=\"eliminar\" data-ingrediente=\"${val}\">Eliminar</span>`;
+      ul.appendChild(li);
+      extraInput.value = '';
+      guardarListaComprasDesdeDOM();
+    });
+  }
+  ul.querySelectorAll('.menu-eliminar[data-action=\"tachar\"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      li.classList.toggle('tachado');
+      guardarListaComprasDesdeDOM();
+    });
+  });
+  ul.querySelectorAll('.menu-eliminar[data-action=\"eliminar\"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      if (li && li.parentNode) li.parentNode.removeChild(li);
+      guardarListaComprasDesdeDOM();
+    });
+  });
+  if (modal) modal.style.display = 'flex';
+  return true;
+}
+
+// =========================
 // INICIO
 // =========================
 window.onload=()=>{ 
   cargarCalendario(); // esta función se define en app-normal o app-veg
   actualizarCalendario(); 
+  
+  // Event listeners para lista de compras
+  const btnListaCompras = document.getElementById('btnListaCompras');
+  const modal = document.getElementById('modalListaCompras');
+  const btnCerrar = document.getElementById('cerrarModal');
+  const btnDescargar = document.getElementById('descargarLista');
+  
+  // Si hay una lista guardada, mostrarla al entrar
+  try { cargarListaComprasADOMSiExiste(); } catch(e) { /* no-op */ }
+
+  if (btnListaCompras) {
+    btnListaCompras.addEventListener('click', mostrarListaCompras);
+  }
+  
+  if (btnCerrar) {
+    btnCerrar.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+  }
+  
+  if (btnDescargar) {
+    btnDescargar.addEventListener('click', descargarListaCompras);
+  }
+  
+  // Cerrar modal al hacer clic fuera
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  }
 };
 
 
@@ -401,8 +903,146 @@ window.mostrarTutorial = function() {
 };
 
 
-    
 
+
+
+
+// =========================
+// VALIDACIÓN POR CATEGORÍAS POR PLATOS O ALIMENTOS QUE SON SIMILARES
+// =========================
+
+// Dada la string de un plato ("Verdura + Proteína + Hidrato")
+// devuelve las categorías de cada parte según el mapeo
+function obtenerCategoriasDePlato(plato, categoriasMapeadas) {
+  let cats = [];
+
+  // 1️⃣ Primero: si el plato completo está en el mapeo, usar eso
+  if (categoriasMapeadas[plato]) {
+    const cat = categoriasMapeadas[plato];
+    if (Array.isArray(cat)) {
+      cats.push(...cat);
+    } else {
+      cats.push(cat);
+    }
+    return cats; // 👈 importante: si ya lo encontramos, no seguimos
+  }
+
+  // 2️⃣ Si no existe como plato entero, lo partimos por "+"
+  const partes = plato.split("+").map(p => p.trim());
+
+  partes.forEach(parte => {
+    if (categoriasMapeadas[parte]) {
+      const cat = categoriasMapeadas[parte];
+      if (Array.isArray(cat)) {
+        cats.push(...cat);
+      } else {
+        cats.push(cat);
+      }
+    }
+  });
+
+  return cats;
+}
+
+
+// Valida que un nuevo plato no comparta categorías con los que ya tiene ese día
+function mismoDiaValido(dia, nuevoPlato, calendario, categoriasMapeadas) {
+  const categoriasNuevo = obtenerCategoriasDePlato(nuevoPlato, categoriasMapeadas);
+
+  for (let comida in calendario[dia]) {
+    const platoExistente = calendario[dia][comida];
+    if (!platoExistente) continue;
+
+    const categoriasExistente = obtenerCategoriasDePlato(platoExistente, categoriasMapeadas);
+
+    // ❌ Si alguna categoría coincide, no es válido
+    if (categoriasNuevo.some(cat => categoriasExistente.includes(cat))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+
+// Valida un calendario "propuesto" (tmpCalendar) antes de aplicarlo.
+// Devuelve { ok: true } o { ok: false, reason: '...', detail: ... }
+function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
+  // 1) Validaciones por día (mismo plato exacto en alm+cen y conflicto de categorías)
+  for (let d of dias) {
+    const alm = tmpCalendar[d].almuerzo;
+    const cen = tmpCalendar[d].cena;
+
+    // mismo plato exacto en el mismo día (no permitido)
+    if (alm && cen && alm === cen) {
+      return { ok: false, reason: 'samePlateDay', day: d, plate: alm };
+    }
+
+    // conflicto de categorías entre almuerzo y cena
+    const catsA = alm ? obtenerCategoriasDePlato(alm, categoriasMapeadas) : [];
+    const catsC = cen ? obtenerCategoriasDePlato(cen, categoriasMapeadas) : [];
+
+    for (let cat of catsA) {
+      if (catsC.includes(cat)) {
+        return { ok: false, reason: 'categoryConflict', day: d, category: cat };
+      }
+    }
+  }
+
+  // 2) Validación de máximo 2 apariciones por semana (conteo en tmpCalendar)
+  const counts = {};
+  for (let d of dias) {
+    ['almuerzo', 'cena'].forEach(tipo => {
+      const p = tmpCalendar[d][tipo];
+      if (!p) return;
+      counts[p] = (counts[p] || 0) + 1;
+      if (counts[p] > 2) {
+        return { ok: false, reason: 'overWeekly', plate: p };
+      }
+    });
+  }
+
+  // 3) Validar ingredientes restringidos según versión
+  const listaRestringidos = (typeof restringidosTradicional !== "undefined") 
+    ? restringidosTradicional 
+    : (typeof restringidosVegetariano !== "undefined") 
+      ? restringidosVegetariano 
+      : null;
+
+  if (listaRestringidos) {
+    // Contar ingredientes restringidos en el calendario temporal
+    const countsIngredientes = {};
+    
+    for (let d of dias) {
+      ['almuerzo','cena'].forEach(tipo => {
+        const p = tmpCalendar[d][tipo];
+        if (!p) return;
+        
+        // Verificar cada ingrediente restringido en este plato
+        for (const [ingrediente, limite] of Object.entries(listaRestringidos)) {
+          if (plateContainsIngredient(p, ingrediente)) {
+            countsIngredientes[ingrediente] = (countsIngredientes[ingrediente] || 0) + 1;
+            if (countsIngredientes[ingrediente] > limite) {
+              return { 
+                ok: false, 
+                reason: 'overRestricted', 
+                ingrediente: ingrediente, 
+                limite: limite,
+                usoActual: countsIngredientes[ingrediente]
+              };
+            }
+          }
+        }
+      });
+    }
+  }
+
+
+  // Si llega hasta acá, está OK
+  return { ok: true };
+
+  
+}
 
 
 
@@ -411,6 +1051,7 @@ window.mostrarTutorial = function() {
 
 
                         
+
 
 
 
