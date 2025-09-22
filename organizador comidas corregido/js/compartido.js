@@ -614,7 +614,17 @@ function mostrarListaCompras() {
         if (!val) return;
         const li = document.createElement('li');
         // extras de usuario: botón Eliminar (remueve)
-        li.innerHTML = `<span class=\"ingrediente-nombre\">${val}</span><span class=\"ingrediente-cantidad\"></span><span class=\"menu-eliminar\" role=\"button\" tabindex=\"0\" data-action=\"eliminar\" data-ingrediente=\"${val}\">Eliminar</span>`;
+         li.innerHTML = `
+         <span class="ingrediente-nombre">${val}</span>
+         <span class="ingrediente-cantidad"></span>
+         <span class="acciones">
+         <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${val}">Eliminar</span>
+         <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar"  data-ingrediente="${val}">Tachar</span>
+         </span>
+         `;
+
+
+
         ul.appendChild(li);
         extraInput.value = '';
         guardarListaComprasDesdeDOM();
@@ -628,6 +638,16 @@ function mostrarListaCompras() {
             guardarListaComprasDesdeDOM();
           });
         }
+        // listener tachar
+        const chk = li.querySelector('.menu-eliminar[data-action="tachar"]');
+         if (chk) {
+           chk.addEventListener('click', (e2) => {
+          const li2 = e2.target.closest('li');
+           li2.classList.toggle('tachado');
+           guardarListaComprasDesdeDOM();
+  });
+}
+
       });
     }
 
@@ -1048,9 +1068,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
-
-
                         
+
 
 
 
