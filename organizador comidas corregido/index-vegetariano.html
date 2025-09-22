@@ -307,9 +307,10 @@
   // ---------- LISTA DE COMPRAS ----------
   async function guardarListaCompras(user) {
     try {
-      const raw = localStorage.getItem('listaCompras');
-      const lista = raw ? JSON.parse(raw) : [];
+      // Obtener la lista actual desde la variable global
+      const lista = window.listaComprasFirestore || [];
       await setDoc(doc(db, "calendarios", user.uid), { listaComprasVeg: lista }, { merge: true });
+      console.log("Lista de compras vegetariana guardada en Firestore ✅");
     } catch (e) { console.error("Error guardando listaComprasVeg:", e); }
   }
 
@@ -317,10 +318,12 @@
     try {
       const snap = await getDoc(doc(db, "calendarios", user.uid));
       if (snap.exists() && Array.isArray(snap.data().listaComprasVeg)) {
-        localStorage.setItem("listaCompras", JSON.stringify(snap.data().listaComprasVeg));
+        // Actualizar la variable global en lugar de localStorage
+        window.listaComprasFirestore = snap.data().listaComprasVeg;
         if (typeof cargarListaComprasADOMSiExiste === "function") {
           cargarListaComprasADOMSiExiste();
         }
+        console.log("Lista de compras vegetariana cargada ✅");
       }
     } catch (e) { console.error("Error cargando listaComprasVeg:", e); }
   }
