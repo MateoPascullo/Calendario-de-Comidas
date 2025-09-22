@@ -215,7 +215,7 @@
     <option value="Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
     <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)</option>
     <option value="Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)">Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)</option>
-    < <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
+    <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
      <option value="Ravioles con salsa de tomate">Ravioles con salsa de tomate</option>
      <option value="Ravioles con salsa mixta">Ravioles con salsa mixta</option>
      <option value="Ñoquis con salsa de tomate">Ñoquis con salsa de tomate</option>
@@ -282,12 +282,11 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, onAuthStateChanged } 
+  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } 
     from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } 
+  import { getFirestore, doc, setDoc, getDoc, getDocFromServer } 
     from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  // 🔹 Configuración de Firebase (misma que en index.html)
   const firebaseConfig = {
     apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
     authDomain: "plato-resuelto.firebaseapp.com",
@@ -300,66 +299,81 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
   const db = getFirestore(app);
 
-  // Contenedor del contenido protegido
   const contenido = document.getElementById("contenido");
 
-  // ---------- FUNCIONES FIRESTORE ----------
-  async function guardarCalendario(user) {
-    await setDoc(doc(db, "calendarios", user.uid), {
-      vegetariano: calendario
-    }, { merge: true });
-  }
-
+  // ---------- LISTA DE COMPRAS ----------
   async function guardarListaCompras(user) {
     try {
       const raw = localStorage.getItem('listaCompras');
       const lista = raw ? JSON.parse(raw) : [];
-      await setDoc(doc(db, "calendarios", user.uid), {
-        listaComprasVeg: lista
-      }, { merge: true });
-    } catch (e) { console.error('Error guardando listaComprasVeg:', e); }
-  }
-
-  async function cargarCalendario(user) {
-    const docSnap = await getDoc(doc(db, "calendarios", user.uid));
-    if (docSnap.exists() && docSnap.data().vegetariano) {
-      calendario = docSnap.data().vegetariano;
-      actualizarCalendario();
-    }
+      await setDoc(doc(db, "calendarios", user.uid), { listaComprasVeg: lista }, { merge: true });
+    } catch (e) { console.error("Error guardando listaComprasVeg:", e); }
   }
 
   async function cargarListaCompras(user) {
     try {
-      const docSnap = await getDoc(doc(db, "calendarios", user.uid));
-      const arr = docSnap.exists() ? (docSnap.data().listaComprasVeg || null) : null;
-      if (Array.isArray(arr)) {
-        localStorage.setItem('listaCompras', JSON.stringify(arr));
-        if (typeof cargarListaComprasADOMSiExiste === 'function') {
+      const snap = await getDoc(doc(db, "calendarios", user.uid));
+      if (snap.exists() && Array.isArray(snap.data().listaComprasVeg)) {
+        localStorage.setItem("listaCompras", JSON.stringify(snap.data().listaComprasVeg));
+        if (typeof cargarListaComprasADOMSiExiste === "function") {
           cargarListaComprasADOMSiExiste();
         }
       }
-    } catch (e) { console.error('Error cargando listaComprasVeg:', e); }
+    } catch (e) { console.error("Error cargando listaComprasVeg:", e); }
   }
 
   // ---------- DETECTAR SESIÓN ----------
   onAuthStateChanged(auth, async (user) => {
+    const originalGuardar = window.guardarCalendario;
+    const originalCargar  = window.cargarCalendario;
+
     if (user) {
       contenido.style.display = "block";
 
-      await cargarCalendario(user);
+      // override globales
+      window.guardarCalendario = async function () {
+        try {
+          await setDoc(doc(db, "calendarios", user.uid), { vegetariano: calendario }, { merge: true });
+          console.log("Calendario vegetariano guardado en Firestore ✅");
+        } catch (e) { console.error("Error guardando en Firestore:", e); }
+        if (typeof originalGuardar === "function") originalGuardar();
+      };
+
+      window.cargarCalendario = async function () {
+        try {
+          const snap = await getDocFromServer(doc(db, "calendarios", user.uid));
+          if (snap.exists() && snap.data().vegetariano) {
+            calendario = snap.data().vegetariano;
+            console.log("Calendario vegetariano cargado desde Firestore ✅");
+          }
+        } catch (e) {
+          console.warn("Fallo getDocFromServer, uso getDoc:", e);
+          const snap = await getDoc(doc(db, "calendarios", user.uid));
+          if (snap.exists() && snap.data().vegetariano) {
+            calendario = snap.data().vegetariano;
+          }
+        }
+        actualizarCalendario();
+      };
+
+      await cargarCalendario();
       await cargarListaCompras(user);
 
       document.addEventListener("change", () => guardarCalendario(user));
       document.addEventListener("click", (e) => {
         if (e.target.tagName === "BUTTON") guardarCalendario(user);
       });
+      document.addEventListener("listaCompras:cambiada", () => guardarListaCompras(user));
 
-      document.addEventListener('listaCompras:cambiada', () => guardarListaCompras(user));
     } else {
-      // 🚨 Si no está logueado → redirigimos al index.html
-      window.location.href = "index.html";
+      contenido.style.display = "none";
+      if (originalGuardar) window.guardarCalendario = originalGuardar;
+      if (originalCargar)  window.cargarCalendario  = originalCargar;
+      // opcional: redirigir
+      // window.location.href = "index.html";
     }
   });
 </script>
