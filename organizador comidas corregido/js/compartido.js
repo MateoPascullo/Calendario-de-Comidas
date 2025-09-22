@@ -570,99 +570,133 @@ function generarListaCompras() {
 
 // Muestra la lista de compras en el modal
 function mostrarListaCompras() {
-  const listaCompras = generarListaCompras();
+  const listaGenerada = generarListaCompras(); // { ingrediente: cantidad, ... }
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
-  
-  if (Object.keys(listaCompras).length === 0) {
-    contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario para generar la lista de compras.</p>';
-  } else {
-    // Ordenar ingredientes alfabéticamente
-    const ingredientesOrdenados = Object.keys(listaCompras).sort();
-    
-    // UI de extras + lista (los generados del calendario tendrán botón Tachar; los extras, Eliminar)
-    let html = `
-      <div style="margin-bottom:12px;">
-        <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
-        <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
-        <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
-      </div>
-      <ul class="lista-compras" id="listaComprasUl">`;
-    ingredientesOrdenados.forEach(ingrediente => {
-      const cantidad = listaCompras[ingrediente];
-      const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
-      
-      html += `
-        <li>
-          <span class="ingrediente-nombre">${ingrediente}</span>
-          <span class="ingrediente-cantidad">${textoCantidad}</span>
-          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${ingrediente}">Tachar</span>
-        </li>
-      `;
-    });
-    html += '</ul>';
-    
-    contenido.innerHTML = html;
 
-    // listeners: agregar extra
-    const extraInput = document.getElementById('extraCompras');
-    const btnExtra = document.getElementById('btnAgregarExtra');
-    const ul = document.getElementById('listaComprasUl');
-    if (btnExtra && extraInput && ul) {
-      btnExtra.addEventListener('click', () => {
-        const val = (extraInput.value || '').trim();
-        if (!val) return;
-        const li = document.createElement('li');
-        // extras de usuario: botón Eliminar (remueve)
-         li.innerHTML = `
-         <span class="ingrediente-nombre">${val}</span>
-         <span class="ingrediente-cantidad"></span>
-         <span class="acciones">
-         <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${val}">Eliminar</span>
-         <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar"  data-ingrediente="${val}">Tachar</span>
-         </span>
-         `;
+  // cargar items guardados en localStorage (formato: [{nombre, detalle, tachado}, ...])
+  let guardados = [];
+  try {
+    const raw = localStorage.getItem('listaCompras');
+    guardados = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    guardados = [];
+  }
 
+  // función de normalización (usa la que ya está si existe)
+  const norm = (typeof normalizarTexto === 'function') ? normalizarTexto : (s) => String(s || '').toLowerCase().trim();
 
+  // merge (mapa por nombre normalizado)
+  const mapa = {};
 
-        ul.appendChild(li);
-        extraInput.value = '';
-        guardarListaComprasDesdeDOM();
-
-        // bind eliminador para el nuevo item
-        const del = li.querySelector('.menu-eliminar[data-action=\"eliminar\"]');
-        if (del) {
-          del.addEventListener('click', (e2) => {
-            const li2 = e2.target.closest('li');
-            if (li2 && li2.parentNode) li2.parentNode.removeChild(li2);
-            guardarListaComprasDesdeDOM();
-          });
-        }
-        // listener tachar
-        const chk = li.querySelector('.menu-eliminar[data-action="tachar"]');
-         if (chk) {
-           chk.addEventListener('click', (e2) => {
-          const li2 = e2.target.closest('li');
-           li2.classList.toggle('tachado');
-           guardarListaComprasDesdeDOM();
+  // 1) agrego lo generado por el calendario
+  Object.keys(listaGenerada).forEach(nombre => {
+    const cantidad = listaGenerada[nombre];
+    const detalle = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
+    mapa[norm(nombre)] = { nombre, detalle, tachado: false, source: 'calendar' };
   });
-}
 
-      });
+  // 2) agrego/combino lo guardado por el usuario
+  guardados.forEach(it => {
+    const k = norm(it.nombre);
+    if (mapa[k]) {
+      // si ya existe (del calendario) conservo detalle del calendario salvo que el guardado tenga detalle
+      if (it.detalle && String(it.detalle).trim()) mapa[k].detalle = it.detalle;
+      mapa[k].tachado = !!it.tachado;
+      // keep source 'calendar' para items originados en calendario
+    } else {
+      mapa[k] = { nombre: it.nombre, detalle: it.detalle || '', tachado: !!it.tachado, source: (it.detalle ? 'calendar' : 'extra') };
     }
+  });
 
-    // listeners: tachar (para elementos del calendario)
-    ul.querySelectorAll('.menu-eliminar[data-action="tachar"]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const li = e.target.closest('li');
-        li.classList.toggle('tachado');
+  // Si no hay nada (ni calendario ni extras)
+  const entries = Object.values(mapa).sort((a,b) => a.nombre.localeCompare(b.nombre, 'es'));
+  if (entries.length === 0) {
+    contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario ni items guardados para la lista.</p>';
+    modal.style.display = 'flex';
+    return;
+  }
+
+  // Construyo HTML (input + lista combinada)
+  let html = `
+    <div style="margin-bottom:12px;">
+      <label for="extraCompras" style="font-weight:600; display:block; margin-bottom:6px;">Agregar extras</label>
+      <input id="extraCompras" type="text" placeholder="Ej.: Aceite, sal, frutas..." style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;" />
+      <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
+    </div>
+    <ul class="lista-compras" id="listaComprasUl">`;
+
+  entries.forEach(item => {
+    const accion = item.source === 'calendar' ? 'tachar' : 'eliminar';
+    const rotulo = accion === 'tachar' ? 'Tachar' : 'Eliminar';
+    html += `
+      <li class="${item.tachado ? 'tachado' : ''}">
+        <span class="ingrediente-nombre">${item.nombre}</span>
+        <span class="ingrediente-cantidad">${item.detalle || ''}</span>
+        <span class="menu-eliminar" role="button" tabindex="0" data-action="${accion}" data-ingrediente="${item.nombre}">${rotulo}</span>
+      </li>`;
+  });
+
+  html += '</ul>';
+  contenido.innerHTML = html;
+
+  // listeners: agregar extra
+  const extraInput = document.getElementById('extraCompras');
+  const btnExtra = document.getElementById('btnAgregarExtra');
+  const ul = document.getElementById('listaComprasUl');
+
+  if (btnExtra && extraInput && ul) {
+    btnExtra.addEventListener('click', () => {
+      const val = (extraInput.value || '').trim();
+      if (!val) return;
+      const li = document.createElement('li');
+      // al crear un extra, le doy ambas acciones (Eliminar y Tachar) para flexibilidad
+      li.innerHTML = `
+        <span class="ingrediente-nombre">${val}</span>
+        <span class="ingrediente-cantidad"></span>
+        <span class="acciones">
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${val}">Eliminar</span>
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${val}">Tachar</span>
+        </span>`;
+      ul.appendChild(li);
+      extraInput.value = '';
+      guardarListaComprasDesdeDOM();
+
+      // bind botones del nuevo li
+      const del = li.querySelector('.menu-eliminar[data-action="eliminar"]');
+      if (del) del.addEventListener('click', (e2) => {
+        const li2 = e2.target.closest('li');
+        if (li2 && li2.parentNode) li2.parentNode.removeChild(li2);
+        guardarListaComprasDesdeDOM();
+      });
+      const chk = li.querySelector('.menu-eliminar[data-action="tachar"]');
+      if (chk) chk.addEventListener('click', (e2) => {
+        const li2 = e2.target.closest('li');
+        li2.classList.toggle('tachado');
         guardarListaComprasDesdeDOM();
       });
     });
   }
-  
+
+  // listeners: tachar/eliminar para elementos existentes
+  ul.querySelectorAll('.menu-eliminar[data-action="tachar"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      li.classList.toggle('tachado');
+      guardarListaComprasDesdeDOM();
+    });
+  });
+  ul.querySelectorAll('.menu-eliminar[data-action="eliminar"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const li = e.target.closest('li');
+      if (li && li.parentNode) li.parentNode.removeChild(li);
+      guardarListaComprasDesdeDOM();
+    });
+  });
+
   modal.style.display = 'flex';
 }
+
 
 // Descarga la lista de compras como archivo de texto
 function descargarListaCompras() {
@@ -1069,8 +1103,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
-
                         
+
 
 
 
