@@ -574,7 +574,10 @@ function mostrarListaCompras() {
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
   
-  if (Object.keys(listaCompras).length === 0) {
+  // Cargar elementos guardados previamente
+  const elementosGuardados = cargarElementosGuardados();
+  
+  if (Object.keys(listaCompras).length === 0 && elementosGuardados.length === 0) {
     contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario para generar la lista de compras.</p>';
   } else {
     // Ordenar ingredientes alfabéticamente
@@ -588,6 +591,8 @@ function mostrarListaCompras() {
         <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
       </div>
       <ul class="lista-compras" id="listaComprasUl">`;
+    
+    // Agregar elementos del calendario
     ingredientesOrdenados.forEach(ingrediente => {
       const cantidad = listaCompras[ingrediente];
       const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
@@ -600,6 +605,22 @@ function mostrarListaCompras() {
         </li>
       `;
     });
+    
+    // Agregar elementos extras guardados
+    elementosGuardados.forEach(elemento => {
+      const claseTachado = elemento.tachado ? 'tachado' : '';
+      html += `
+        <li class="${claseTachado}">
+          <span class="ingrediente-nombre">${elemento.nombre}</span>
+          <span class="ingrediente-cantidad">${elemento.detalle}</span>
+          <span class="acciones">
+            <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${elemento.nombre}">Eliminar</span>
+            <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${elemento.nombre}">Tachar</span>
+          </span>
+        </li>
+      `;
+    });
+    
     html += '</ul>';
     
     contenido.innerHTML = html;
@@ -690,7 +711,18 @@ function descargarListaCompras() {
   window.URL.revokeObjectURL(url);
 }
 
-// Persistencia local de la lista mostrada en el modal
+// Variables globales para manejar la lista de compras desde Firestore
+let listaComprasFirestore = [];
+
+// Cargar elementos guardados desde Firestore (función que será sobrescrita por Firebase)
+function cargarElementosGuardados() {
+  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
+  // Si no hay usuario logueado, retorna array vacío
+  console.log("cargarElementosGuardados: No hay usuario logueado, usando lista vacía");
+  return window.listaComprasFirestore || [];
+}
+
+// Persistencia en Firestore de la lista mostrada en el modal
 function guardarListaComprasDesdeDOM() {
   const ul = document.getElementById('listaComprasUl');
   if (!ul) return;
@@ -699,15 +731,18 @@ function guardarListaComprasDesdeDOM() {
     detalle: li.querySelector('.ingrediente-cantidad')?.textContent || '',
     tachado: li.classList.contains('tachado')
   }));
-  localStorage.setItem('listaCompras', JSON.stringify(items));
-  // notificar a listeners externos (p.ej. Firestore en index)
+  
+  // Actualizar la variable global
+  listaComprasFirestore = items;
+  window.listaComprasFirestore = items;
+  
+  // notificar a listeners externos (Firestore en index)
   document.dispatchEvent(new CustomEvent('listaCompras:cambiada', { detail: items }));
 }
 
 function cargarListaComprasADOMSiExiste() {
-  const guardado = localStorage.getItem('listaCompras');
-  if (!guardado) return false;
-  const items = JSON.parse(guardado);
+  const items = cargarElementosGuardados();
+  if (!items || items.length === 0) return false;
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
   if (!contenido) return false;
@@ -719,12 +754,29 @@ function cargarListaComprasADOMSiExiste() {
       <button id="btnAgregarExtra" class="btn-descargar" style="margin-top:8px;">Agregar</button>
     </div>
     <ul class="lista-compras" id="listaComprasUl">`;
+  
   items.forEach(it => {
-    // asumimos que si detalle está vacío (extra manual), va con Eliminar; si no, es del calendario y va con Tachar
-    const accion = it.detalle ? 'tachar' : 'eliminar';
-    const rotulo = accion === 'tachar' ? 'Tachar' : 'Eliminar';
-    html += `<li class="${it.tachado ? 'tachado' : ''}"><span class="ingrediente-nombre">${it.nombre}</span><span class="ingrediente-cantidad">${it.detalle}</span><span class="menu-eliminar" role="button" tabindex="0" data-action="${accion}" data-ingrediente="${it.nombre}">${rotulo}</span></li>`;
+    // Si tiene detalle, es del calendario (solo Tachar), si no tiene detalle es extra manual (Eliminar + Tachar)
+    if (it.detalle) {
+      // Elemento del calendario
+      html += `<li class="${it.tachado ? 'tachado' : ''}">
+        <span class="ingrediente-nombre">${it.nombre}</span>
+        <span class="ingrediente-cantidad">${it.detalle}</span>
+        <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${it.nombre}">Tachar</span>
+      </li>`;
+    } else {
+      // Elemento extra manual
+      html += `<li class="${it.tachado ? 'tachado' : ''}">
+        <span class="ingrediente-nombre">${it.nombre}</span>
+        <span class="ingrediente-cantidad">${it.detalle}</span>
+        <span class="acciones">
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${it.nombre}">Eliminar</span>
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${it.nombre}">Tachar</span>
+        </span>
+      </li>`;
+    }
   });
+  
   html += '</ul>';
   contenido.innerHTML = html;
 
@@ -732,34 +784,64 @@ function cargarListaComprasADOMSiExiste() {
   const extraInput = document.getElementById('extraCompras');
   const btnExtra = document.getElementById('btnAgregarExtra');
   const ul = document.getElementById('listaComprasUl');
+  
   if (btnExtra && extraInput && ul) {
     btnExtra.addEventListener('click', () => {
       const val = (extraInput.value || '').trim();
       if (!val) return;
       const li = document.createElement('li');
-      li.innerHTML = `<span class=\"ingrediente-nombre\">${val}</span><span class=\"ingrediente-cantidad\"></span><span class=\"menu-eliminar\" role=\"button\" tabindex=\"0\" data-action=\"eliminar\" data-ingrediente=\"${val}\">Eliminar</span>`;
+      li.innerHTML = `
+        <span class="ingrediente-nombre">${val}</span>
+        <span class="ingrediente-cantidad"></span>
+        <span class="acciones">
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="eliminar" data-ingrediente="${val}">Eliminar</span>
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${val}">Tachar</span>
+        </span>
+      `;
       ul.appendChild(li);
       extraInput.value = '';
       guardarListaComprasDesdeDOM();
+      
+      // Conectar listeners para el nuevo elemento
+      const delBtn = li.querySelector('.menu-eliminar[data-action="eliminar"]');
+      const tacharBtn = li.querySelector('.menu-eliminar[data-action="tachar"]');
+      
+      if (delBtn) {
+        delBtn.addEventListener('click', (e) => {
+          const li2 = e.target.closest('li');
+          if (li2 && li2.parentNode) li2.parentNode.removeChild(li2);
+          guardarListaComprasDesdeDOM();
+        });
+      }
+      
+      if (tacharBtn) {
+        tacharBtn.addEventListener('click', (e) => {
+          const li2 = e.target.closest('li');
+          li2.classList.toggle('tachado');
+          guardarListaComprasDesdeDOM();
+        });
+      }
     });
   }
-  ul.querySelectorAll('.menu-eliminar[data-action=\"tachar\"]').forEach(btn => {
+  
+  // Conectar listeners para elementos existentes
+  ul.querySelectorAll('.menu-eliminar[data-action="tachar"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const li = e.target.closest('li');
       li.classList.toggle('tachado');
       guardarListaComprasDesdeDOM();
     });
   });
-  ul.querySelectorAll('.menu-eliminar[data-action=\"eliminar\"]').forEach(btn => {
+  
+  ul.querySelectorAll('.menu-eliminar[data-action="eliminar"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const li = e.target.closest('li');
       if (li && li.parentNode) li.parentNode.removeChild(li);
       guardarListaComprasDesdeDOM();
     });
   });
-  // ❌ No abrir modal automáticamente, solo preparar contenido
-return true;
-
+  
+  return true;
 }
 
 // =========================
@@ -1065,6 +1147,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
   
 }
+
+
 
 
 
