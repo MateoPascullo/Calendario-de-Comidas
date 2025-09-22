@@ -36,21 +36,35 @@ function validarPlato() {
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
 
-      if (calendario[dia][otroTipo] === platoFinal) {
-        console.log('Error: repetido mismo día (veg)');
+       if (calendario[dia][otroTipo] === platoFinal) {
         mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
+      } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasVegetariano)) {
+        mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} porque ya hay un plato de la misma categoría.`, 'error');
       } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
-        console.log('Error: ya asignado 2 veces en la semana (veg)');
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       } else {
-        calendario[dia][tipo] = platoFinal;
-        actualizarCalendario();
-        mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+        // 🔒 Validar ingredientes restringidos
+        const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
+        if (!validacionIngredientes.ok) {
+          mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        } else {
+          calendario[dia][tipo] = platoFinal;
+          actualizarCalendario();
+          mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+        }
       }
       seleccion = null;
       limpiarSelects();
     } else {
-      const ok = asignarAcalendario(platoFinal);
+      // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
+      const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
+      if (!validacionIngredientes.ok) {
+        mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        limpiarSelects();
+        return;
+      }
+
+      const ok = asignarAcalendario(platoFinal, categoriasVegetariano);
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
       } else {
@@ -61,7 +75,7 @@ function validarPlato() {
     return;
   }
 
- // ----- Motivos específicos de invalidez (veg mejorados) -----
+  // ----- Motivos específicos de invalidez (veg mejorados) -----
 if (!hasV && !hasP && !hasH && !hasC) {
   mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
 } else if (hasC && (hasV || hasP || hasH)) {
@@ -178,6 +192,92 @@ window.generarCalendarioAleatorioVeg = function () {
     console.log("✅ Calendario vegetariano generado:", calendario);
   }
 };
+
+
+
+
+
+
+
+// =========================
+// LISTA PARA AGREGAR ALIMENTOS Y PLATOS QUE NO TIENEN QUE REPETIRSE EN EL MISMO DIA POR SER DE GRUPO SIMILAR
+// =========================
+//IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
+const categoriasVegetariano = {
+  
+  "Milanesas de berenjena gratinadas + guacamole": "milanesa",
+  "Milanesa de legumbre": "milanesa",
+  
+  "Pure de papa":"papa",
+  "Papa al horno":"papa",
+  
+  
+  "Costeleta vaca": "costeleta",
+  "Costeleta cerdo": "costeleta",
+  
+  "pollo al horno":"pollo",
+  "Pollo asado":"pollo",
+
+  "Ravioles con salsa de tomate": "pasta",
+  "Ravioles con salsa mixta": "pasta",
+  "Ravioles con salsa bolognesa": "pasta",
+  "Ñoquis con salsa de tomate": "pasta",
+  "Ñoquis con salsa mixta": "pasta",
+  "Ñoquis con salsa bolognesa": "pasta",
+  "Fideos": "pasta",
+
+  "Tarta de espinaca,queso,cebolla,puerro": "tarta",
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
+  "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
+
+
+
+};
+
+// =========================
+// ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
+// =========================
+const restringidosVegetariano = {
+  
+  //PROTEINAS
+  "Medallon de legumbre":3,
+  "Milanesa de legumbre":3,
+ 
+ //HIDRATOS
+  "Arroz(Blanco/ integral/ Yamani)":3,
+  "fideos":3,
+  "Pure de papa":3,
+  "Papa al horno":3,
+  "Batata al horno":3,
+  "Choclo":3,
+  "Quinoa":3,
+  "Cuscus":3,
+  "Trigo-burgol":3,
+  
+   
+};
+
+// =========================
+// INGREDIENTES DE PLATOS COMPLETOS VEGETARIANOS PARA LISTA DE COMPRAS
+// =========================
+const ingredientesPlatosCompletosVeg = {
+  "Tarta de espinaca, queso, cebolla y puerro": ["Espinaca", "Queso", "Cebolla", "Puerro", "Masa de tarta"],
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
+  "Tarta de zapallito, queso, huevo y cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
+  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
+  "Pastel de papa y zapallo": ["Papa", "Zapallo", "Queso"],
+  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
+  "Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
+  "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
+  "Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)": ["Fajitas", "Cebolla", "Pimiento", "Zanahoria", "Berenjena", "Aceite", "Especias"],
+  "Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo": ["Arroz", "Huevo", "Pan rallado", "Zanahoria", "Rúcula", "Tomate", "Huevo"],
+  "Ravioles con salsa de tomate": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite"],
+  "Ravioles con salsa mixta": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
+  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
+  "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
+};
+
+
 
 
 
