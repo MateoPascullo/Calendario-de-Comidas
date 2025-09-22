@@ -101,16 +101,19 @@ if (!hasV && !hasP && !hasH && !hasC) {
 
 
 // =========================
-// STORAGE
+// STORAGE - Solo Firestore
 // =========================
 function guardarCalendario(){ 
-  localStorage.setItem('calendario', JSON.stringify(calendario)); 
+  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
+  // Si no hay usuario logueado, no guardamos nada
+  console.log("guardarCalendario: No hay usuario logueado, no se guarda");
 }
+
 function cargarCalendario(){ 
-  const g = localStorage.getItem('calendario'); 
-  if(g){ 
-    try{ calendario = JSON.parse(g);}catch(e){console.error("Error al cargar calendario:",e);} 
-  } 
+  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
+  // Si no hay usuario logueado, usamos calendario vacío
+  console.log("cargarCalendario: No hay usuario logueado, usando calendario vacío");
+  dias.forEach(dia => calendario[dia] = {almuerzo:null,cena:null});
 }
 
 
