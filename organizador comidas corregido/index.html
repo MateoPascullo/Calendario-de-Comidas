@@ -91,10 +91,11 @@
 
     <div class="btn-calendario-container">
     
-    <a href="index-vegetariano.html" class="btn-calendario">Ir al calendario vegetariano</a>
-   </div>
+    </div>
   
   <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
+  
+  <a href="javascript:void(0)" id="btnListaCompras" class="btn-calendario btn-flotante btn-lista-compras">🛒 Generá tu lista de compras!</a>
   
   <h1>PlatoResuelto!</h1>
   <h2>Organizá tus comidas</h2>
@@ -194,11 +195,11 @@
      <option value="Milanesa cerdo">Milanesa cerdo</option>
      <option value="Milanesa pescado">Milanesa pescado</option>
      <option value="Milanesa de soja">Milanesa de soja</option>
-     <option value="Medallon de legumbre">Medallon de legumbre</option>
      <option value="Hamburguesa vacuna">Hamburguesa vacuna</option>
      <option value="Medallon de pollo">Medallon de pollo</option>
-     <option value="nugget de pollo">Nugget de Pollo</option>
-     <option value="bife vacuno">Bife vacuno</option>
+     <option value="Medallon de legumbre">Medallon de legumbre</option>
+     <option value="Nugget de pollo">Nugget de Pollo</option>
+     <option value="Bife vacuno">Bife vacuno</option>
      <option value="Filet pollo">Filet pollo</option>
      <option value="Pata muslo pollo">Pata muslo pollo</option>
      <option value="Pechuga pollo">Pechuga pollo</option>
@@ -208,18 +209,15 @@
      <option value="Atún">Atún</option>
      <option value="Costeleta vaca">Costeleta vaca</option>
      <option value="Costeleta cerdo">Costeleta cerdo</option>
-     <option value="Huevo duro">Huevo duro</option>
-     <option value="huevo revuelto">Huevo revuelto</option>
-     <option value="huevo a la plancha">Huevo a la plancha</option>
+     <option value="Huevo (Duro/ Revuelto/ a la plancha)">Huevo (Duro/ Revuelto/ a la plancha)</option>
      <option value="jamon cocido/crudo">Jamon cocido/crudo</option>
   </select>
 
   <select id="hidrato">
     <option value=""> Hidratos de carbono </option>
-      <option value="Arroz">Arroz</option>
-      <option value="Arroz integral/yamani">Arroz integral/yamaní</option>
-      <option value="Fideos">Fideos</option>
-      
+     
+     <option value="Arroz(Blanco/ integral/ Yamani)">Arroz(Blanco/ integral/ Yamani)</option>
+     <option value="Fideos">Fideos</option>
      <option value="Pure de papa">Pure de papa</option>
      <option value="Papa al horno">Papa al horno</option>
      <option value="Batata al horno">Batata al horno</option>
@@ -240,7 +238,6 @@
      <option value="Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo">Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo</option>
      <option value="Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)">Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)</option>
      <option value="Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)">Pata muslo + verduras al horno (cebolla,pimiento,zanahoria,papa)</option>
-     <option value="Pescado al paquete con verduras">Pescado al paquete con verduras</option>
      <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
       <option value="Milanesas de berenjena gratinadas + guacamole">Milanesas de berenjena gratinadas + guacamole</option>
      <option value="Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de carne + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
@@ -259,6 +256,7 @@
      <option value="Ñoquis con salsa de tomate">Ñoquis con salsa de tomate</option>
      <option value="Ñoquis con salsa mixta">Ñoquis con salsa mixta</option>
      <option value="Ñoquis con salsa bolognesa">Ñoquis con salsa bolognesa</option>
+     
 
 
 
@@ -289,6 +287,9 @@
     <button id="addToHome" style="display:none; margin-bottom:10px;">
   📲 Agregar a mi pantalla de inicio
     </button>
+    <div class="btn-calendario-container" style="margin-top:6px;">
+      <a href="index-vegetariano.html" class="btn-calendario">Ir al calendario vegetariano</a>
+    </div>
     
     
     <div id="ios-install-hint" style="display:none; margin:10px; padding:10px; background:#fefae0; border:1px solid #ccc; border-radius:8px; font-size:0.9rem;">
@@ -305,7 +306,7 @@
 
 
     <div class="btn-calendario-container">
-       <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">Repasar tutorial</a>
+       <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">📘 Ver tutorial</a>
       <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
     </div>
   
@@ -320,6 +321,21 @@
 
 <div id="mensaje" class="mensaje-toast"></div>
 
+<!-- Modal para Lista de Compras -->
+<div id="modalListaCompras" class="modal-lista-compras" style="display:none;">
+  <div class="modal-contenido">
+    <div class="modal-header">
+      <h2>🛒 Tu Lista de Compras</h2>
+      <button id="cerrarModal" class="btn-cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="listaComprasContenido"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="descargarLista" class="btn-descargar">📥 Descargar Lista</button>
+    </div>
+  </div>
+</div>
 
 </div> <!-- 🔒 aca cierra el contenido que quiero proteger con el login -->
 
@@ -364,6 +380,18 @@ async function guardarCalendario(user) {
   console.log("Calendario tradicional guardado en Firestore ✅");
 }
 
+// 🔹 Guardar lista de compras en Firestore
+async function guardarListaCompras(user) {
+  try {
+    const raw = localStorage.getItem('listaCompras');
+    const lista = raw ? JSON.parse(raw) : [];
+    await setDoc(doc(db, "calendarios", user.uid), {
+      listaCompras: lista
+    }, { merge: true });
+    console.log("Lista de compras guardada en Firestore ✅");
+  } catch (e) { console.error('Error guardando listaCompras:', e); }
+}
+
 // 🔹 Cargar calendario TRADICIONAL desde Firestore
 async function cargarCalendario(user) {
   const docSnap = await getDoc(doc(db, "calendarios", user.uid));
@@ -374,6 +402,20 @@ async function cargarCalendario(user) {
   } else {
     console.log("No había calendario tradicional guardado todavía.");
   }
+}
+
+// 🔹 Cargar lista de compras desde Firestore (y reflejar en UI)
+async function cargarListaCompras(user) {
+  try {
+    const docSnap = await getDoc(doc(db, "calendarios", user.uid));
+    if (docSnap.exists() && Array.isArray(docSnap.data().listaCompras)) {
+      localStorage.setItem('listaCompras', JSON.stringify(docSnap.data().listaCompras));
+      if (typeof cargarListaComprasADOMSiExiste === 'function') {
+        cargarListaComprasADOMSiExiste();
+      }
+      console.log("Lista de compras cargada ✅");
+    }
+  } catch (e) { console.error('Error cargando listaCompras:', e); }
 }
 
 
@@ -401,6 +443,8 @@ async function cargarCalendario(user) {
 
       // 🔹 Cargar calendario del usuario
       await cargarCalendario(user);
+      // 🔹 Cargar lista de compras del usuario
+      await cargarListaCompras(user);
 
       // 🔹 Guardar cada vez que cambie
       document.addEventListener("change", () => guardarCalendario(user));
@@ -409,6 +453,9 @@ async function cargarCalendario(user) {
           guardarCalendario(user);
         }
       });
+
+      // 🔹 Escuchar cambios en la lista de compras (desde modal/UI)
+      document.addEventListener('listaCompras:cambiada', () => guardarListaCompras(user));
 
     } else {
       
@@ -424,6 +471,7 @@ async function cargarCalendario(user) {
 
 </body>
 </html>
+
 
 
 
