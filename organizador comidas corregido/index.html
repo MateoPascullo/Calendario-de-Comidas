@@ -345,7 +345,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
     from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } 
+  import { getFirestore, doc, setDoc, getDoc, getDocFromServer } 
     from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
   // 🔹 Configuración de Firebase
@@ -369,55 +369,31 @@
   const logoutBtn = document.getElementById("logoutBtn");
   const status = document.getElementById("status");
   const contenido = document.getElementById("contenido");
-  const calendarioBody = document.getElementById("calendario-body");
 
   // ---------- FUNCIONES FIRESTORE ----------
-  // 🔹 Guardar calendario TRADICIONAL en Firestore
-async function guardarCalendario(user) {
-  await setDoc(doc(db, "calendarios", user.uid), {
-    tradicional: calendario   // 👈 guardamos el objeto calendario
-  }, { merge: true });        // merge:true evita pisar el vegetariano
-  console.log("Calendario tradicional guardado en Firestore ✅");
-}
-
-// 🔹 Guardar lista de compras en Firestore
-async function guardarListaCompras(user) {
-  try {
-    const raw = localStorage.getItem('listaCompras');
-    const lista = raw ? JSON.parse(raw) : [];
-    await setDoc(doc(db, "calendarios", user.uid), {
-      listaCompras: lista
-    }, { merge: true });
-    console.log("Lista de compras guardada en Firestore ✅");
-  } catch (e) { console.error('Error guardando listaCompras:', e); }
-}
-
-// 🔹 Cargar calendario TRADICIONAL desde Firestore
-async function cargarCalendario(user) {
-  const docSnap = await getDoc(doc(db, "calendarios", user.uid));
-  if (docSnap.exists() && docSnap.data().tradicional) {
-    calendario = docSnap.data().tradicional; // 👈 recuperamos el objeto
-    actualizarCalendario();                  // 👈 lo pintamos en la tabla
-    console.log("Calendario tradicional cargado ✅");
-  } else {
-    console.log("No había calendario tradicional guardado todavía.");
+  async function guardarListaCompras(user) {
+    try {
+      const raw = localStorage.getItem('listaCompras');
+      const lista = raw ? JSON.parse(raw) : [];
+      await setDoc(doc(db, "calendarios", user.uid), {
+        listaCompras: lista
+      }, { merge: true });
+      console.log("Lista de compras guardada en Firestore ✅");
+    } catch (e) { console.error('Error guardando listaCompras:', e); }
   }
-}
 
-// 🔹 Cargar lista de compras desde Firestore (y reflejar en UI)
-async function cargarListaCompras(user) {
-  try {
-    const docSnap = await getDoc(doc(db, "calendarios", user.uid));
-    if (docSnap.exists() && Array.isArray(docSnap.data().listaCompras)) {
-      localStorage.setItem('listaCompras', JSON.stringify(docSnap.data().listaCompras));
-      if (typeof cargarListaComprasADOMSiExiste === 'function') {
-        cargarListaComprasADOMSiExiste();
+  async function cargarListaCompras(user) {
+    try {
+      const docSnap = await getDoc(doc(db, "calendarios", user.uid));
+      if (docSnap.exists() && Array.isArray(docSnap.data().listaCompras)) {
+        localStorage.setItem('listaCompras', JSON.stringify(docSnap.data().listaCompras));
+        if (typeof cargarListaComprasADOMSiExiste === 'function') {
+          cargarListaComprasADOMSiExiste();
+        }
+        console.log("Lista de compras cargada ✅");
       }
-      console.log("Lista de compras cargada ✅");
-    }
-  } catch (e) { console.error('Error cargando listaCompras:', e); }
-}
-
+    } catch (e) { console.error('Error cargando listaCompras:', e); }
+  }
 
   // ---------- LOGIN / LOGOUT ----------
   loginBtn.addEventListener("click", async () => {
@@ -435,33 +411,71 @@ async function cargarListaCompras(user) {
 
   // ---------- DETECTAR SESIÓN ----------
   onAuthStateChanged(auth, async (user) => {
+    // guardamos referencias a las funciones globales originales
+    const originalGuardar = window.guardarCalendario;
+    const originalCargar  = window.cargarCalendario;
+
     if (user) {
       status.textContent = `Hola, ${user.displayName}`;
       loginBtn.style.display = "none";
       logoutBtn.style.display = "inline-block";
       contenido.style.display = "block";
 
-      // 🔹 Cargar calendario del usuario
-      await cargarCalendario(user);
-      // 🔹 Cargar lista de compras del usuario
+      // 🔹 OVERRIDE: guardarCalendario global ahora escribe en Firestore
+      window.guardarCalendario = async function () {
+        try {
+          await setDoc(doc(db, "calendarios", user.uid), { tradicional: calendario }, { merge: true });
+          console.log("Calendario tradicional guardado en Firestore ✅");
+        } catch (err) {
+          console.error("Error guardando en Firestore:", err);
+        }
+        if (typeof originalGuardar === "function") {
+          try { originalGuardar(); } catch(e) {}
+        }
+      };
+
+      // 🔹 OVERRIDE: cargarCalendario global ahora lee de Firestore
+      window.cargarCalendario = async function () {
+        try {
+          const snap = await getDocFromServer(doc(db, "calendarios", user.uid));
+          if (snap.exists() && snap.data().tradicional) {
+            calendario = snap.data().tradicional;
+            console.log("Calendario tradicional cargado desde Firestore (server) ✅");
+          } else {
+            console.log("No había calendario tradicional en Firestore");
+          }
+        } catch (err) {
+          console.warn("getDocFromServer falló, pruebo con getDoc:", err);
+          const snap = await getDoc(doc(db, "calendarios", user.uid));
+          if (snap.exists() && snap.data().tradicional) {
+            calendario = snap.data().tradicional;
+            console.log("Calendario tradicional cargado desde cache Firestore ✅");
+          }
+        }
+        actualizarCalendario();
+      };
+
+      // 🔹 Cargar datos iniciales
+      await cargarCalendario();
       await cargarListaCompras(user);
 
-      // 🔹 Guardar cada vez que cambie
+      // 🔹 Guardar cada vez que cambie algo
       document.addEventListener("change", () => guardarCalendario(user));
       document.addEventListener("click", (e) => {
         if (e.target.tagName === "BUTTON") {
           guardarCalendario(user);
         }
       });
-
-      // 🔹 Escuchar cambios en la lista de compras (desde modal/UI)
       document.addEventListener('listaCompras:cambiada', () => guardarListaCompras(user));
 
     } else {
-      
       loginBtn.style.display = "inline-block";
       logoutBtn.style.display = "none";
       contenido.style.display = "none";
+
+      // restaurar funciones originales (modo localStorage)
+      if (originalGuardar) window.guardarCalendario = originalGuardar;
+      if (originalCargar)  window.cargarCalendario  = originalCargar;
     }
   });
 </script>
@@ -471,6 +485,7 @@ async function cargarListaCompras(user) {
 
 </body>
 </html>
+
 
 
 
