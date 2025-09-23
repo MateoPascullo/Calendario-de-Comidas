@@ -216,6 +216,7 @@ const categoriasVegetariano = {
   
   "Milanesas de berenjena gratinadas + guacamole": "milanesa",
   "Milanesa de legumbre": "milanesa",
+  "Medallon de legumbre":"milanesa",
   
   "Pure de papa":"papa",
   "Papa al horno":"papa",
@@ -280,6 +281,8 @@ const ingredientesPlatosCompletosVeg = {
   "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
 };
+
+
 
 
 
