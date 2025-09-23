@@ -22,10 +22,12 @@ function validarPlato() {
 
   // Reglas válidas (vegetariano): solo completo OR V+P+H
   if (hasC && !hasV && !hasP && !hasH) {
-    valido = true; platoFinal = c;
+    valido = true; 
+    platoFinal = c;
     console.log('Razon: Plato completo solo (veg)');
   } else if (hasV && hasP && hasH && !hasC) {
-    valido = true; platoFinal = `${v}+ ${p}+ ${h}`;
+    valido = true; 
+    platoFinal = `${v}+ ${p}+ ${h}`;
     console.log('Razon: Verdura + Proteína + Hidrato (veg)');
   } else {
     console.log('Razon: NO cumple reglas válidas (veg)');
@@ -36,7 +38,7 @@ function validarPlato() {
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
 
-       if (calendario[dia][otroTipo] === platoFinal) {
+      if (calendario[dia][otroTipo] === platoFinal) {
         mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
       } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasVegetariano)) {
         mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} porque ya hay un plato de la misma categoría.`, 'error');
@@ -48,47 +50,51 @@ function validarPlato() {
         if (!validacionIngredientes.ok) {
           mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
         } else {
+          // ✅ Éxito
           calendario[dia][tipo] = platoFinal;
           actualizarCalendario();
           mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+          limpiarSelects();   // solo limpiar si se agregó bien
+          seleccion = null;   // solo borrar selección si se agregó bien
         }
       }
-      seleccion = null;
-      limpiarSelects();
+
+      // 🚫 No reseteamos seleccion ni limpiamos selects en caso de error
+
     } else {
       // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
       const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
       if (!validacionIngredientes.ok) {
         mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
-        limpiarSelects();
-        return;
+        return;  // no limpiar selects ni borrar seleccion
       }
 
       const ok = asignarAcalendario(platoFinal, categoriasVegetariano);
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
+        limpiarSelects();  // solo limpiar si fue exitoso
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       }
-      limpiarSelects();
     }
     return;
   }
 
   // ----- Motivos específicos de invalidez (veg mejorados) -----
-if (!hasV && !hasP && !hasH && !hasC) {
-  mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-} else if (hasC && (hasV || hasP || hasH)) {
-  mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-} else if (hasV && (!hasP || !hasH)) {
-  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
-} else if (!hasV && (hasP || hasH)) {
-  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
-} else {
-  mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  if (!hasV && !hasP && !hasH && !hasC) {
+    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  } else if (hasC && (hasV || hasP || hasH)) {
+    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  } else if (hasV && (!hasP || !hasH)) {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  } else if (!hasV && (hasP || hasH)) {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  } else {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  }
 }
 
-}
+
 
 
 // =========================
@@ -215,12 +221,7 @@ const categoriasVegetariano = {
   "Papa al horno":"papa",
   
   
-  "Costeleta vaca": "costeleta",
-  "Costeleta cerdo": "costeleta",
   
-  "pollo al horno":"pollo",
-  "Pollo asado":"pollo",
-
   "Ravioles con salsa de tomate": "pasta",
   "Ravioles con salsa mixta": "pasta",
   "Ravioles con salsa bolognesa": "pasta",
@@ -279,6 +280,8 @@ const ingredientesPlatosCompletosVeg = {
   "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
 };
+
+
 
 
 
