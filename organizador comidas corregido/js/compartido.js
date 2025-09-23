@@ -513,45 +513,61 @@ const ingredientesHidratos = {
 };
 
 // Extrae ingredientes de un plato (combinado o completo)
+// Extrae ingredientes de un plato (combinado o completo, incluye ensaladas custom)
 function extraerIngredientesDePlato(plato) {
   if (!plato) return [];
-  
-  // 1. Verificar si es un plato completo con ingredientes definidos
+
+  // 1. Si está definido en los ingredientes completos
   const ingredientesCompletos = (typeof ingredientesPlatosCompletos !== "undefined") 
     ? ingredientesPlatosCompletos 
     : (typeof ingredientesPlatosCompletosVeg !== "undefined") 
       ? ingredientesPlatosCompletosVeg 
       : null;
-  
   if (ingredientesCompletos && ingredientesCompletos[plato]) {
     return ingredientesCompletos[plato];
   }
-  
-  // 2. Si no es un plato completo, extraer ingredientes de plato combinado
+
+  // 2. Si no, procesar combinados
   const ingredientes = [];
   const partes = plato.split('+').map(p => p.trim());
-  
+
   partes.forEach(parte => {
-    // Limpiar paréntesis y contenido dentro
-    let ingrediente = parte.replace(/\([^)]*\)/g, '').trim();
-    
-    // Si empieza con "Ens." o "Salteado" o "Horno", extraer el contenido de paréntesis
-    if (ingrediente.startsWith('Ens.') || ingrediente.startsWith('Salteado') || ingrediente.startsWith('Horno')) {
+    // 🔹 Detectar ensalada custom o cualquier plato con paréntesis
+    const matchParen = parte.match(/\(([^)]+)\)/);
+    if (matchParen) {
+      const verduras = matchParen[1].split(',').map(v => v.trim());
+      ingredientes.push(...verduras);
+      return;
+    }
+
+    // 🔹 Para Ens./Salteado/Horno/Crudo/etc. sin paréntesis
+    if (
+      parte.startsWith('Ens.') ||
+      parte.startsWith('Salteado') ||
+      parte.startsWith('Horno') ||
+      parte.startsWith('Crudo')
+    ) {
       const match = parte.match(/\(([^)]+)\)/);
       if (match) {
         const verduras = match[1].split(',').map(v => v.trim());
         ingredientes.push(...verduras);
       }
     } else {
-      // Es un ingrediente directo: intentar mapear por proteinas/hidratos/verduras conocidas
-      const base = ingredientesProteinas[ingrediente] ?? ingredientesHidratos[ingrediente] ?? ingredientesVerduras[ingrediente] ?? ingrediente;
+      // 🔹 Mapeo directo con categorías conocidas
+      const base =
+        ingredientesProteinas[parte] ??
+        ingredientesHidratos[parte] ??
+        ingredientesVerduras[parte] ??
+        parte;
+
       if (Array.isArray(base)) ingredientes.push(...base);
       else if (base) ingredientes.push(base);
     }
   });
-  
+
   return ingredientes;
 }
+
 
 // Genera la lista de compras basada en el calendario
 function generarListaCompras() {
@@ -1163,6 +1179,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
