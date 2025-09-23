@@ -248,10 +248,6 @@ function agregarPlato(dia, tipo, plato, categoriasMapeadas) {
 
   // ✅ Si pasa todas, asignar
   calendario[dia][tipo] = plato;
-  
-  // Sincronizar con lista de compras si está abierta
-  sincronizarListaComprasConCalendario();
-  
   return true;
 }
 
@@ -273,10 +269,6 @@ function asignarAcalendario(plato, categorias){
         if (!categorias || mismoDiaValido(dia, plato, calendario, categorias)) {
           calendario[dia][comida]=plato; 
           actualizarCalendario(); 
-          
-          // Sincronizar con lista de compras si está abierta
-          sincronizarListaComprasConCalendario();
-          
           return true;
         }
       }
@@ -290,9 +282,6 @@ function asignarAcalendario(plato, categorias){
 function resetearCalendario(){ 
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
   actualizarCalendario(); 
-  
-  // Sincronizar con lista de compras si está abierta
-  sincronizarListaComprasConCalendario();
 }
 
 // =========================
@@ -337,9 +326,6 @@ function eliminarPlato(e,dia,tipo){
   e.stopPropagation(); 
   calendario[dia][tipo]=null; 
   actualizarCalendario(); 
-  
-  // Sincronizar con lista de compras si está abierta
-  sincronizarListaComprasConCalendario();
 }
 
 function seleccionarCelda(dia, tipo) {
@@ -415,9 +401,6 @@ calendario = tmp;
 seleccion = null;
 actualizarCalendario();
 
-// Sincronizar con lista de compras si está abierta
-sincronizarListaComprasConCalendario();
-
 
 }
 
@@ -489,64 +472,14 @@ function irAPlatoSemana() {
 // LISTA DE COMPRAS
 // =========================
 
-// Sincroniza la lista de compras con el calendario actual
+// Sincroniza la lista de compras con el calendario actual (versión simplificada)
 function sincronizarListaComprasConCalendario() {
+  // Solo sincronizar si el modal está abierto
   const modal = document.getElementById('modalListaCompras');
-  if (!modal || modal.style.display === 'none') return; // Solo si el modal está abierto
+  if (!modal || modal.style.display === 'none') return;
   
-  const ul = document.getElementById('listaComprasUl');
-  if (!ul) return;
-  
-  // Generar nueva lista de ingredientes del calendario
-  const nuevaListaCompras = generarListaCompras();
-  const ingredientesActuales = Object.keys(nuevaListaCompras);
-  
-  // Obtener elementos del calendario actuales en el DOM
-  const elementosCalendarioActuales = Array.from(ul.querySelectorAll('li[data-source="calendario"]'));
-  
-  // Remover elementos del calendario que ya no están en la nueva lista
-  elementosCalendarioActuales.forEach(li => {
-    const ingrediente = li.getAttribute('data-ingrediente');
-    if (!ingredientesActuales.includes(ingrediente)) {
-      li.remove();
-    }
-  });
-  
-  // Agregar nuevos ingredientes del calendario
-  ingredientesActuales.forEach(ingrediente => {
-    const existeEnDOM = ul.querySelector(`li[data-source="calendario"][data-ingrediente="${ingrediente}"]`);
-    if (!existeEnDOM) {
-      const cantidad = nuevaListaCompras[ingrediente];
-      const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
-      
-      const li = document.createElement('li');
-      li.setAttribute('data-source', 'calendario');
-      li.setAttribute('data-ingrediente', ingrediente);
-      li.innerHTML = `
-        <span class="ingrediente-nombre">${ingrediente}</span>
-        <span class="ingrediente-cantidad">${textoCantidad}</span>
-        <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${ingrediente}">Tachar</span>
-      `;
-      
-      // Insertar antes de los elementos del usuario
-      const primerElementoUsuario = ul.querySelector('li[data-source="usuario"]');
-      if (primerElementoUsuario) {
-        ul.insertBefore(li, primerElementoUsuario);
-      } else {
-        ul.appendChild(li);
-      }
-      
-      // Conectar listener para tachar
-      const tacharBtn = li.querySelector('.menu-eliminar[data-action="tachar"]');
-      if (tacharBtn) {
-        tacharBtn.addEventListener('click', (e) => {
-          const li2 = e.target.closest('li');
-          li2.classList.toggle('tachado');
-          guardarListaComprasDesdeDOM();
-        });
-      }
-    }
-  });
+  // Simplemente regenerar la lista cuando se abra el modal
+  // La sincronización real se hace en mostrarListaCompras()
 }
 
 // Mapeos editables para ingredientes base
@@ -1225,8 +1158,13 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
   
 }
 
+
+
+
+
   
-}
+
+
 
 
 
