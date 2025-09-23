@@ -34,68 +34,67 @@ function validarPlato() {
   }
 
   if (valido) {
-    // Asignación al calendario (igual que antes)
+    // Asignación al calendario
     if (seleccion) {
       const { dia, tipo } = seleccion;
       const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
 
-          if (calendario[dia][otroTipo] === platoFinal) {
-           mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
-           } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasTradicional)) {
-           mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} Ya hay otra comida o plato muy similar en el día.`, 'error');
-           } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
-           mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
-           } else {
-             // 🔒 Validar ingredientes restringidos
-             const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
-             if (!validacionIngredientes.ok) {
-               mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
-             } else {
-               calendario[dia][tipo] = platoFinal;
-               actualizarCalendario();
-               mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
-             }
-           }
-           
+      if (calendario[dia][otroTipo] === platoFinal) {
+        mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
+      } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasTradicional)) {
+        mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} Ya hay otra comida o plato muy similar en el día.`, 'error');
+      } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
+        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+      } else {
+        // Validar ingredientes restringidos
+        const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
+        if (!validacionIngredientes.ok) {
+          mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        } else {
+          // === ÉXITO: asignar al día seleccionado ===
+          calendario[dia][tipo] = platoFinal;
+          actualizarCalendario();
+          mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+          limpiarSelects();    // limpiar sólo en éxito
+          seleccion = null;    // borrar selección SOLO en éxito
+        }
+      }
 
-      seleccion = null;
-      limpiarSelects();
+      // <-- NO borrar seleccion aquí en caso de error (importante)
     } else {
-      // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
+      // Validar ingredientes restringidos antes de asignar automáticamente
       const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
       if (!validacionIngredientes.ok) {
         mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
-        limpiarSelects();
-        return;
+        return; // NO limpiar selects ni tocar seleccion
       }
 
       const ok = asignarAcalendario(platoFinal, categoriasTradicional);
 
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
+        limpiarSelects(); // limpiar solo cuando la asignación automática fue exitosa
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       }
-      limpiarSelects();
     }
     return;
   }
 
   // ----- Motivos específicos de invalidez (mejorados) -----
-if (!hasV && !hasP && !hasH && !hasC) {
-  mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
-} else if (hasC && (hasV || hasP || hasH)) {
-  mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-} else if (hasV && !hasP && !hasH) {
-  mostrarMensaje('❌ Faltan más opciones: agregá proteína o hidrato.', 'error');
-} else if (!hasV && (hasP || hasH)) {
-  mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
-} else if (hasV && hasP && hasH) {
-  mostrarMensaje('❌ Esta combinación no es válida. Probá con: verdura+proteína, verdura+hidrato o las tres juntas.', 'error');
-} else {
-  mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
-}
-
+  if (!hasV && !hasP && !hasH && !hasC) {
+    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  } else if (hasC && (hasV || hasP || hasH)) {
+    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  } else if (hasV && !hasP && !hasH) {
+    mostrarMensaje('❌ Faltan más opciones: agregá proteína o hidrato.', 'error');
+  } else if (!hasV && (hasP || hasH)) {
+    mostrarMensaje('❌ Falta elegir al menos una verdura u hortaliza.', 'error');
+  } else if (hasV && hasP && hasH) {
+    mostrarMensaje('❌ Esta combinación no es válida. Probá con: verdura+proteína, verdura+hidrato o las tres juntas.', 'error');
+  } else {
+    mostrarMensaje('❌ Combinación no válida. Revisá tu selección.', 'error');
+  }
 }
 
 
@@ -347,6 +346,8 @@ const ingredientesPlatosCompletos = {
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
   "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo",]
 };
+
+
 
 
 
