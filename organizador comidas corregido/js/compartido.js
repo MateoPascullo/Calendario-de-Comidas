@@ -164,25 +164,36 @@ function contarIngredienteEnCalendario(ingrediente, calendario) {
 }
 
 // Valida si un plato excede los límites de ingredientes restringidos
-function validarIngredientesRestringidos(plato, calendario, listaRestringidos) {
-  if (!listaRestringidos || !plato) return { ok: true };
-  
-  // Verificar cada ingrediente restringido
-  for (const [ingrediente, limite] of Object.entries(listaRestringidos)) {
-    if (plateContainsIngredient(plato, ingrediente)) {
-      const usoActual = contarIngredienteEnCalendario(ingrediente, calendario);
-      
-      if (usoActual >= limite) {
-        return { 
-          ok: false, 
-          ingrediente: ingrediente, 
-          limite: limite, 
-          usoActual: usoActual 
+function validarIngredientesRestringidos(plato, calendario, restringidos) {
+  // Separar por partes en caso de combinados
+  const partes = plato.split('+').map(p => p.trim());
+
+  for (const parte of partes) {
+    if (restringidos[parte]) {
+      // Contar cuántas veces aparece este ingrediente en todo el calendario
+      let count = 0;
+      for (const dia in calendario) {
+        for (const tipo in calendario[dia]) {
+          const platoDia = calendario[dia][tipo];
+          if (platoDia) {
+            const partesDia = platoDia.split('+').map(p => p.trim());
+            if (partesDia.includes(parte)) {
+              count++;
+            }
+          }
+        }
+      }
+      if (count >= restringidos[parte]) {
+        return {
+          ok: false,
+          ingrediente: parte,
+          usoActual: count,
+          limite: restringidos[parte]
         };
       }
     }
   }
-  
+
   return { ok: true };
 }
 
@@ -1178,7 +1189,9 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
+
   
+
 
 
 
