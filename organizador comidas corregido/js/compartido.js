@@ -1061,7 +1061,7 @@ const pasos = [
   " Armá tu plato eligiendo <em>verduras</em>, <em>proteínas</em>, <em>hidratos</em> o un <em>plato completo</em>.",
   " Hacé clic en <strong>“Agregá el plato al calendario”</strong> y se asignará automáticamente a un día.",
   " También podés hacer clic en cualquier celda del calendario para <em> agregar, mover, rotar, o eliminar</em> un plato.",
-  "⚡ Usá las funciones rápidas: <br> - 🎲 Generar semana aleatoria <br> - 🔄 Resetear calendario <br> - 📥 Descargar PDF",
+  "⚡ Usá las funciones rápidas: <br> - 🎲 Generar semana aleatoria <br> - 🔄 Resetear calendario <br> - 🛒 Generá tu lista de compras",
   "📲 ¡Tip! Agregá esta app web a la pantalla de inicio de tu celular."
 ];
 
@@ -1269,6 +1269,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
