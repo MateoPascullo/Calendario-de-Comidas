@@ -620,10 +620,14 @@ function mostrarListaCompras() {
   }
 
   // Mapeo rápido de los guardados por nombre normalizado
-  const guardadosMap = {};
-  elementosGuardados.forEach(e => {
+ // Mapeo de guardados, pero solo extras de usuario
+const guardadosMap = {};
+elementosGuardados
+  .filter(e => e.source === 'usuario') // 👈 filtramos, no traemos los viejos del calendario
+  .forEach(e => {
     if (e && e.nombre) guardadosMap[ normalizarTexto(e.nombre) ] = e;
   });
+
 
   // Merge: primero los del calendario (aplicando tachado si existe en guardados)
   const merged = {}; // key(normalizada) -> { nombre, cantidad, tachado, source, detalle }
@@ -1297,7 +1301,9 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
+
   
+
 
 
 
