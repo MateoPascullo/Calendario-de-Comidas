@@ -446,7 +446,7 @@ function descargarPDF() {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
-  doc.text("🍴 Menú semanal", 14, 20);
+  doc.text("Menú semanal", 14, 20);
 
   const cabecera = [["Día", "Almuerzo", "Cena"]];
   const filas = dias.map(dia => [
@@ -732,29 +732,101 @@ function mostrarListaCompras() {
 
 // Descarga la lista de compras como archivo de texto
 function descargarListaCompras() {
-  const listaCompras = generarListaCompras();
-  const ingredientesOrdenados = Object.keys(listaCompras).sort();
+  const listaCalendario = generarListaCompras();
+  const elementosGuardados = (typeof cargarElementosGuardados === 'function') ? cargarElementosGuardados() : (window.listaComprasFirestore || []);
   
-  let contenido = '🛒 LISTA DE COMPRAS - Plato Resuelto\n';
-  contenido += '=====================================\n\n';
-  
-  ingredientesOrdenados.forEach(ingrediente => {
-    const cantidad = listaCompras[ingrediente];
-    const textoCantidad = cantidad > 1 ? ` (comprar para ${cantidad} comidas)` : '';
-    contenido += `• ${ingrediente}${textoCantidad}\n`;
+  const rowMap = {};
+  Object.keys(listaCalendario).forEach(ing => {
+    const key = normalizarTexto(ing);
+    rowMap[key] = {
+      nombre: ing,
+      cantidad: listaCalendario[ing],
+      tachado: false
+    };
   });
-  
-  // Crear y descargar archivo
-  const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'lista-compras.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
+
+  (elementosGuardados || []).forEach(e => {
+    const nombre = (e && e.nombre) ? e.nombre : '';
+    if (!nombre) return;
+    const key = normalizarTexto(nombre);
+    if (rowMap[key]) {
+      if (e.tachado) rowMap[key].tachado = true;
+      if (e.detalle) rowMap[key].cantidad = e.detalle;
+    } else {
+      rowMap[key] = {
+        nombre,
+        cantidad: e.detalle || '',
+        tachado: !!e.tachado
+      };
+    }
+  });
+
+  const filas = Object.keys(rowMap).sort().map(k => {
+    const it = rowMap[k];
+    const cantidad = (typeof it.cantidad === 'number') ? String(it.cantidad) : (it.cantidad || '');
+    const estado = it.tachado ? 'tachado' : '';
+    return [it.nombre, cantidad, estado];
+  });
+
+  if (filas.length === 0) {
+    const contenido = '🛒 LISTA DE COMPRAS - Vacía\n\nNo hay elementos para descargar.';
+    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lista-compras.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return;
+  }
+
+  try {
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF) throw new Error('jsPDF no disponible');
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(" Lista de compras - Plato Resuelto", 14, 18);
+
+    const head = [["Ingrediente", "Cantidad", "Estado"]];
+    doc.autoTable({
+      head,
+      body: filas,
+      startY: 28,
+      theme: "grid",
+      headStyles: { fillColor: [143, 157, 104] },
+      styles: { fontSize: 10, cellPadding: 3, halign: 'left' },
+      columnStyles: { 1: { halign: 'center' }, 2: { halign: 'center' } }
+    });
+
+    doc.save("lista-de-compras.pdf");
+    return;
+  } catch (err) {
+    let contenido = '🛒 LISTA DE COMPRAS - Plato Resuelto\n';
+    contenido += '=====================================\n\n';
+    filas.forEach(r => {
+      const nombre = r[0];
+      const cantidad = r[1] ? ` - ${r[1]}` : '';
+      const estado = r[2] ? ` (${r[2]})` : '';
+      contenido += `• ${nombre}${cantidad}${estado}\n`;
+    });
+
+    const blob = new Blob([contenido], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lista-compras.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    return;
+  }
 }
+
 
 // Variables globales para manejar la lista de compras desde Firestore
 let listaComprasFirestore = [];
@@ -1190,7 +1262,9 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
+
   
+
 
 
 
