@@ -291,14 +291,27 @@ function asignarAcalendario(plato, categorias){
 
 
 function resetearCalendario(){ 
+  console.log('resetearCalendario - INICIO');
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
   actualizarCalendario(); 
   
-  // Forzar actualización de lista si está abierta
-  const modal = document.getElementById('modalListaCompras');
-  if (modal && modal.style.display !== 'none') {
-    setTimeout(() => mostrarListaCompras(), 100);
-  }
+  // Esperar a que el guardado (si existe) finalice antes de regenerar lista
+  esperarGuardadoCalendario().then(() => {
+    // Forzar actualización de lista si está abierta
+    const modal = document.getElementById('modalListaCompras');
+    if (modal && modal.style.display !== 'none') {
+      console.log('resetearCalendario - modal abierto, regenerando lista');
+      const contenido = document.getElementById('listaComprasContenido');
+      if (contenido) {
+        contenido.innerHTML = '';
+        contenido.offsetHeight; // forzar reflow
+      }
+      setTimeout(() => {
+        console.log('resetearCalendario - regenerando lista después de delay');
+        mostrarListaCompras();
+      }, 200);
+    }
+  });
 }
 
 // =========================
@@ -319,6 +332,18 @@ function actualizarCalendario(){
         <td data-label="Almuerzo" onclick="seleccionarCelda('${dia}','almuerzo')">${crearContenidoCelda(dia,'almuerzo')}</td>
         <td data-label="Cena" onclick="seleccionarCelda('${dia}','cena')">${crearContenidoCelda(dia,'cena')}</td>
       </tr>`;
+  });
+  // Si el modal está abierto, refrescar lista tras guardar
+  esperarGuardadoCalendario().then(() => {
+    const modal = document.getElementById('modalListaCompras');
+    if (modal && modal.style.display !== 'none') {
+      const contenido = document.getElementById('listaComprasContenido');
+      if (contenido) {
+        contenido.innerHTML = '';
+        contenido.offsetHeight;
+      }
+      setTimeout(() => mostrarListaCompras(), 50);
+    }
   });
 }
 
@@ -524,6 +549,17 @@ function descargarPDF() {
   doc.save("menu-semanal.pdf");
 }
 
+// Asegura que, si guardarCalendario es asíncrona (override Firebase), esperemos a que termine
+function esperarGuardadoCalendario() {
+  try {
+    const res = (typeof guardarCalendario === 'function') ? guardarCalendario() : null;
+    if (res && typeof res.then === 'function') {
+      return res;
+    }
+  } catch (e) {}
+  return Promise.resolve();
+}
+
 
 
 // SCROLL HACIA ARMAR PLATO
@@ -643,10 +679,14 @@ function extraerIngredientesDePlato(plato) {
 function generarListaCompras() {
   const listaCompras = {};
   
+  // Debug: verificar estado del calendario
+  console.log('generarListaCompras - estado calendario:', JSON.stringify(calendario));
+  
   dias.forEach(dia => {
     ['almuerzo', 'cena'].forEach(tipo => {
       const plato = calendario[dia][tipo];
       if (plato) {
+        console.log(`Plato encontrado: ${dia} ${tipo} = ${plato}`);
         const ingredientes = extraerIngredientesDePlato(plato);
         
         ingredientes.forEach(ingrediente => {
@@ -660,18 +700,25 @@ function generarListaCompras() {
     });
   });
   
+  console.log('generarListaCompras - resultado:', listaCompras);
   return listaCompras;
 }
 
 
 // Muestra la lista de compras en el modal
 function mostrarListaCompras() {
+  console.log('mostrarListaCompras - INICIO');
+  
   const listaCompras = generarListaCompras();
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
   
   // Limpiar contenido previo para evitar cache en iOS
-  if (contenido) contenido.innerHTML = '';
+  if (contenido) {
+    contenido.innerHTML = '';
+    // Forzar reflow en iOS
+    contenido.offsetHeight;
+  }
   
   // Cargar elementos guardados previamente (solo extras del usuario)
   const elementosGuardados = cargarElementosGuardados();
@@ -1395,8 +1442,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
-
   
+
 
 
 
