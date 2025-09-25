@@ -328,9 +328,60 @@ function crearContenidoCelda(dia, tipo) {
 // Inserta puntos de quiebre sin cortar palabras: tras comas y barras
 function insertarQuiebresLegibles(texto) {
   if (texto == null) return '';
-  return String(texto)
-    .replace(/,/g, ',<wbr>')
-    .replace(/\//g, '/<wbr>');
+  const raw = String(texto);
+
+  // helpers para identificar a qué select pertenece una parte
+  function esOpcionDeSelect(parte, selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return false;
+    const val = (parte || '').trim();
+    return Array.from(sel.options).some(opt => (opt.value || '').trim() === val);
+  }
+
+  function inferirCategoria(parte, indice, totalPartes) {
+    const p = (parte || '').trim();
+    // Si coincide con opciones de select, usar eso
+    if (esOpcionDeSelect(p, 'proteina')) return 'proteina';
+    if (esOpcionDeSelect(p, 'hidrato')) return 'hidrato';
+    if (esOpcionDeSelect(p, 'verdura') || /\(/.test(p) || /^Ens\.|^Salteado|^Horno|^Crudo/.test(p)) return 'verdura';
+    if (esOpcionDeSelect(p, 'completo')) return 'completo';
+
+    // fallback por posición en combos: 0=verdura, 1=proteina, 2=hidrato
+    if (totalPartes >= 2) {
+      if (indice === 0) return 'verdura';
+      if (indice === 1) return 'proteina';
+      if (indice === 2) return 'hidrato';
+    }
+    // si es único, asumir completo (visual) para distinguirlo
+    return 'completo';
+  }
+
+  function aplicarQuiebres(s) {
+    return String(s)
+      .replace(/,/g, ',<wbr>')
+      .replace(/\//g, '/<wbr>');
+  }
+
+  // Si el plato entero es una opción de "plato completo", mostrar un solo punto al inicio
+  const trimmed = raw.trim();
+  if (esOpcionDeSelect(trimmed, 'completo')) {
+    return `<span class="bullet-dot bullet-completo"></span>${aplicarQuiebres(trimmed)}`;
+  }
+
+  const partes = raw.split('+');
+
+  if (partes.length === 1) {
+    const cat = inferirCategoria(partes[0], 0, 1);
+    return `<span class="bullet-dot bullet-${cat}"></span>${aplicarQuiebres(partes[0].trim())}`;
+  }
+
+  // mantener el "+" entre partes pero prefijar cada una con su punto color
+  const render = partes.map((parte, i) => {
+    const cat = inferirCategoria(parte, i, partes.length);
+    return `<span class="bullet-dot bullet-${cat}"></span>${aplicarQuiebres(parte.trim())}`;
+  });
+
+  return render.join(' + ');
 }
 
 function eliminarPlato(e,dia,tipo){ 
@@ -498,14 +549,16 @@ function sincronizarListaComprasConCalendario() {
 // El valor puede ser una string (se usa tal cual) o un array de strings (varias entradas)
 const ingredientesVerduras = {
   // ejemplos base; editá libremente
-  "Ens.(tomate,lechuga,cebolla)": ["Tomate", "Lechuga", "Cebolla"],
-  "Ens.(lechuga,tomate,cebolla,palta)": ["Lechuga", "Tomate", "Cebolla", "Palta"],
-  "Salteado(cebolla,pimiento,zanahoria)": ["Cebolla", "Pimiento", "Zanahoria"],
-  "Horno(cebolla,zanahoria,pimiento,calabaza)": ["Cebolla", "Zanahoria", "Pimiento", "Calabaza"],
+  "Ens.(tomate,lechuga,cebolla)": [ "Tomate", "Lechuga", "Cebolla"],
+  "Ens.(lechuga,tomate,cebolla,palta)": [ "Lechuga", "Tomate", "Cebolla", "Palta"],
+  "Salteado(cebolla,pimiento,zanahoria)": [ "Cebolla", "Pimiento", "Zanahoria"],
+  "Horno(cebolla,zanahoria,pimiento,calabaza)": [ "Cebolla", "Zanahoria", "Pimiento", "Calabaza"],
+  // Mostrar sin el prefijo "Puré"
+  "Puré zapallo/calabaza": "Zapallo/Calabaza",
 };
 
 const ingredientesProteinas = {
-  "Milanesa vaca": "Milanesa de carne",
+  "Milanesa carne": "Milanesa de carne",
   "Milanesa pollo": "Milanesa de pollo",
   "Milanesa cerdo": "Milanesa de cerdo",
   "Milanesa pescado": "Milanesa de pescado",
@@ -584,7 +637,6 @@ function extraerIngredientesDePlato(plato) {
 function generarListaCompras() {
   const listaCompras = {};
   
-  // Recorrer todo el calendario
   dias.forEach(dia => {
     ['almuerzo', 'cena'].forEach(tipo => {
       const plato = calendario[dia][tipo];
@@ -592,11 +644,11 @@ function generarListaCompras() {
         const ingredientes = extraerIngredientesDePlato(plato);
         
         ingredientes.forEach(ingrediente => {
-          if (listaCompras[ingrediente]) {
-            listaCompras[ingrediente]++;
-          } else {
-            listaCompras[ingrediente] = 1;
+          const clave = normalizarTexto(ingrediente);  // 👈 unifica
+          if (!listaCompras[clave]) {
+            listaCompras[clave] = { nombre: ingrediente.trim(), cantidad: 0 };
           }
+          listaCompras[clave].cantidad++;
         });
       }
     });
@@ -604,6 +656,7 @@ function generarListaCompras() {
   
   return listaCompras;
 }
+
 
 // Muestra la lista de compras en el modal
 function mostrarListaCompras() {
@@ -617,8 +670,13 @@ function mostrarListaCompras() {
   if (Object.keys(listaCompras).length === 0 && elementosGuardados.length === 0) {
     contenido.innerHTML = '<p style="text-align: center; color: #666;">No hay platos en el calendario para generar la lista de compras.</p>';
   } else {
-    // Ordenar ingredientes alfabéticamente
-    const ingredientesOrdenados = Object.keys(listaCompras).sort();
+    // Ordenar por nombre visible (no por clave normalizada)
+    const ingredientesOrdenados = Object.entries(listaCompras)
+      .sort((a, b) => {
+        const nombreA = (a[1]?.nombre || a[0] || '').toString().toLowerCase();
+        const nombreB = (b[1]?.nombre || b[0] || '').toString().toLowerCase();
+        return nombreA.localeCompare(nombreB);
+      });
     
     // UI de extras + lista (los generados del calendario tendrán botón Tachar; los extras, Eliminar)
     let html = `
@@ -630,15 +688,16 @@ function mostrarListaCompras() {
       <ul class="lista-compras" id="listaComprasUl">`;
     
     // Agregar elementos del calendario (solo botón Tachar)
-    ingredientesOrdenados.forEach(ingrediente => {
-      const cantidad = listaCompras[ingrediente];
-      const textoCantidad = cantidad > 1 ? `(comprar para ${cantidad} comidas)` : '';
-      
+    ingredientesOrdenados.forEach(([clave, data]) => {
+      const nombre = (data && data.nombre) ? data.nombre : clave;
+      const cant = (data && typeof data.cantidad === 'number') ? data.cantidad : 0;
+      const textoCantidad = `(comprar para ${cant} comida${cant===1?'':'s'})`;
+
       html += `
-        <li data-source="calendario" data-ingrediente="${ingrediente}">
-          <span class="ingrediente-nombre">${ingrediente}</span>
+        <li data-source="calendario" data-ingrediente="${clave}">
+          <span class="ingrediente-nombre">${nombre}</span>
           <span class="ingrediente-cantidad">${textoCantidad}</span>
-          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${ingrediente}">Tachar</span>
+          <span class="menu-eliminar" role="button" tabindex="0" data-action="tachar" data-ingrediente="${clave}">Tachar</span>
         </li>
       `;
     });
@@ -731,41 +790,96 @@ function mostrarListaCompras() {
 }
 
 // Descarga la lista de compras como archivo de texto
+// Reemplazar por la versión siguiente
 function descargarListaCompras() {
   const listaCalendario = generarListaCompras();
   const elementosGuardados = (typeof cargarElementosGuardados === 'function') ? cargarElementosGuardados() : (window.listaComprasFirestore || []);
-  
+
+  // Para debug: volcá esto en la consola del navegador
+  console.debug('generarListaCompras ->', listaCalendario);
+  console.debug('elementosGuardados ->', elementosGuardados);
+
   const rowMap = {};
+
+  // Helper: extrae primer número entero del texto (o null si no hay)
+  function parseDetalleAMNumero(detalle) {
+    if (detalle == null) return null;
+    const s = String(detalle).trim();
+    if (!s) return null;
+    const m = s.match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+  }
+
+  // 1) POBLAR rowMap sumando cantidades para claves normalizadas
   Object.keys(listaCalendario).forEach(ing => {
     const key = normalizarTexto(ing);
-    rowMap[key] = {
-      nombre: ing,
-      cantidad: listaCalendario[ing],
-      tachado: false
-    };
-  });
+    const entry = listaCalendario[ing] || {};
+    const cantidad = Number(entry.cantidad) || 0;
+    const nombreMostrar = (entry.nombre || ing);
 
-  (elementosGuardados || []).forEach(e => {
-    const nombre = (e && e.nombre) ? e.nombre : '';
-    if (!nombre) return;
-    const key = normalizarTexto(nombre);
     if (rowMap[key]) {
-      if (e.tachado) rowMap[key].tachado = true;
-      if (e.detalle) rowMap[key].cantidad = e.detalle;
+      // sumar si ya existe (evita pisar por variantes del mismo ingrediente)
+      const prev = Number(rowMap[key].cantidad) || 0;
+      rowMap[key].cantidad = prev + cantidad;
+      // conservar el nombre ya guardado
     } else {
       rowMap[key] = {
+        nombre: nombreMostrar,
+        cantidad: cantidad,
+        tachado: false
+      };
+    }
+  });
+
+  console.debug('rowMap después de calendario (antes de extras):', JSON.parse(JSON.stringify(rowMap)));
+
+  // 2) MEZCLAR con elementos guardados/extra del usuario
+  (elementosGuardados || []).forEach(e => {
+    const nombre = (e && e.nombre) ? String(e.nombre).trim() : '';
+    if (!nombre) return;
+    const key = normalizarTexto(nombre);
+    const detalleRaw = (e && e.detalle) ? String(e.detalle).trim() : '';
+    const detalleNum = parseDetalleAMNumero(detalleRaw);
+
+    if (rowMap[key]) {
+      // si ya existe por calendario -> actualizar tachado o cantidad según detalle del usuario
+      if (e.tachado) rowMap[key].tachado = true;
+
+      if (detalleNum != null) {
+        // si el usuario puso un número explícito, lo usamos como override
+        rowMap[key].cantidad = detalleNum;
+      } else if (detalleRaw) {
+        // si el usuario puso texto (ej: "1 frasco", "2 kg" o "comprar para 2 personas"),
+        // preferimos conservar la cantidad numérica del calendario, pero guardamos el texto
+        // como nota para mostrar junto a la cantidad.
+        rowMap[key].detalle = detalleRaw;
+      }
+    } else {
+      // no existe en calendario: crear entrada desde el extra
+      rowMap[key] = {
         nombre,
-        cantidad: e.detalle || '',
+        cantidad: detalleNum != null ? detalleNum : (detalleRaw || ''),
         tachado: !!e.tachado
       };
     }
   });
 
+  console.debug('rowMap final (antes de construir filas):', JSON.parse(JSON.stringify(rowMap)));
+
+  // 3) convertir a filas para PDF
   const filas = Object.keys(rowMap).sort().map(k => {
     const it = rowMap[k];
-    const cantidad = (typeof it.cantidad === 'number') ? String(it.cantidad) : (it.cantidad || '');
+    let cantidadStr = '';
+
+    if (typeof it.cantidad === 'number') {
+      cantidadStr = `comprar para ${it.cantidad} comida${it.cantidad===1?'':'s'}`;
+      if (it.detalle) cantidadStr = `${cantidadStr} — ${it.detalle}`;
+    } else {
+      cantidadStr = it.cantidad || (it.detalle || '');
+    }
+
     const estado = it.tachado ? 'tachado' : '';
-    return [it.nombre, cantidad, estado];
+    return [it.nombre, cantidadStr, estado];
   });
 
   if (filas.length === 0) {
@@ -782,6 +896,7 @@ function descargarListaCompras() {
     return;
   }
 
+  // 4) generar PDF con jsPDF (mismo fallback)
   try {
     const { jsPDF } = window.jspdf || {};
     if (!jsPDF) throw new Error('jsPDF no disponible');
@@ -1269,6 +1384,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
