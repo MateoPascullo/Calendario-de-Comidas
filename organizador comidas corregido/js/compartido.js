@@ -293,8 +293,12 @@ function asignarAcalendario(plato, categorias){
 function resetearCalendario(){ 
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
   actualizarCalendario(); 
-  // forzar sincronización si el modal está abierto (evita caché UI en iOS)
-  sincronizarListaComprasConCalendario();
+  
+  // Forzar actualización de lista si está abierta
+  const modal = document.getElementById('modalListaCompras');
+  if (modal && modal.style.display !== 'none') {
+    setTimeout(() => mostrarListaCompras(), 100);
+  }
 }
 
 // =========================
@@ -316,9 +320,6 @@ function actualizarCalendario(){
         <td data-label="Cena" onclick="seleccionarCelda('${dia}','cena')">${crearContenidoCelda(dia,'cena')}</td>
       </tr>`;
   });
-
-  // Si el modal está abierto, refrescar lista para reflejar cambios
-  sincronizarListaComprasConCalendario();
 }
 
 function crearContenidoCelda(dia, tipo) {
@@ -363,8 +364,8 @@ function insertarQuiebresLegibles(texto) {
 
   function aplicarQuiebres(s) {
     return String(s)
-      .replace(/,/g, ',<wbr>')
-      .replace(/\//g, '/<wbr>');
+    .replace(/,/g, ',<wbr>')
+    .replace(/\//g, '/<wbr>');
   }
 
   // Si el plato entero es una opción de "plato completo", mostrar un solo punto al inicio
@@ -545,12 +546,8 @@ function sincronizarListaComprasConCalendario() {
   const modal = document.getElementById('modalListaCompras');
   if (!modal || modal.style.display === 'none') return;
   
-  // Regenerar la lista en caliente para reflejar el estado actual del calendario
-  try {
-    mostrarListaCompras();
-  } catch (e) {
-    console.warn('sincronizarListaComprasConCalendario: no se pudo regenerar la lista', e);
-  }
+  // Simplemente regenerar la lista cuando se abra el modal
+  // La sincronización real se hace en mostrarListaCompras()
 }
 
 // Mapeos editables para ingredientes base
@@ -673,6 +670,9 @@ function mostrarListaCompras() {
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
   
+  // Limpiar contenido previo para evitar cache en iOS
+  if (contenido) contenido.innerHTML = '';
+  
   // Cargar elementos guardados previamente (solo extras del usuario)
   const elementosGuardados = cargarElementosGuardados();
   
@@ -701,7 +701,7 @@ function mostrarListaCompras() {
       const nombre = (data && data.nombre) ? data.nombre : clave;
       const cant = (data && typeof data.cantidad === 'number') ? data.cantidad : 0;
       const textoCantidad = `(comprar para ${cant} comida${cant===1?'':'s'})`;
-
+      
       html += `
         <li data-source="calendario" data-ingrediente="${clave}">
           <span class="ingrediente-nombre">${nombre}</span>
@@ -1101,6 +1101,7 @@ window.onload=()=>{
   if (btnCerrar) {
     btnCerrar.addEventListener('click', () => {
       modal.style.display = 'none';
+      // Limpiar contenido para evitar cache en iOS
       const contenido = document.getElementById('listaComprasContenido');
       if (contenido) contenido.innerHTML = '';
     });
@@ -1115,6 +1116,7 @@ window.onload=()=>{
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.style.display = 'none';
+        // Limpiar contenido para evitar cache en iOS
         const contenido = document.getElementById('listaComprasContenido');
         if (contenido) contenido.innerHTML = '';
       }
@@ -1394,9 +1396,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
-
-
   
+
 
 
 
