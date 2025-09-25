@@ -1,8 +1,28 @@
-
-   :root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
+:root { --primario:#8f9d68; --fondo:#f9f9f9; --borde:#ddd; --texto:#333; }
     body { font-family:'Segoe UI',sans-serif; background:var(--fondo); color:var(--texto); margin:0; padding:20px; line-height:1.6; }
     h1,h2,h3 { color:var(--primario); margin-bottom:10px; }
     select,button,input,textarea { margin:10px 0; padding:10px; width:100%; max-width:400px; border:1px solid var(--borde); border-radius:6px; font-size:16px; }
+
+/* Colores para selects específicos */
+#verdura { background-color: #a3c574; }
+#proteina { background-color: #e3a78f; }
+#hidrato { background-color: #e2bb5f; }
+#completo { background-color: #b2ccdb; }
+
+/* Puntos de color delante de cada alimento */
+.bullet-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  position: relative;
+  top: -1px; /* leve alineación vertical */
+}
+.bullet-verdura { background-color: #a3c574; }
+.bullet-proteina { background-color: #e3a78f; }
+.bullet-hidrato { background-color: #e2bb5f; }
+.bullet-completo { background-color: #b2ccdb; }
     button { background:var(--primario); color:#fff; border:none; cursor:pointer; transition:background .3s; }
     button:hover { background:#0088cc; }
     #mensaje { margin:20px; font-weight:bold; }
@@ -631,6 +651,8 @@ li .acciones {
   display: flex;
   gap: 6px;
 }
+
+  
 
 
 
