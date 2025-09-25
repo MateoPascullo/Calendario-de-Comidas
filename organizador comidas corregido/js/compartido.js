@@ -293,6 +293,8 @@ function asignarAcalendario(plato, categorias){
 function resetearCalendario(){ 
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
   actualizarCalendario(); 
+  // forzar sincronización si el modal está abierto (evita caché UI en iOS)
+  sincronizarListaComprasConCalendario();
 }
 
 // =========================
@@ -314,6 +316,9 @@ function actualizarCalendario(){
         <td data-label="Cena" onclick="seleccionarCelda('${dia}','cena')">${crearContenidoCelda(dia,'cena')}</td>
       </tr>`;
   });
+
+  // Si el modal está abierto, refrescar lista para reflejar cambios
+  sincronizarListaComprasConCalendario();
 }
 
 function crearContenidoCelda(dia, tipo) {
@@ -540,8 +545,12 @@ function sincronizarListaComprasConCalendario() {
   const modal = document.getElementById('modalListaCompras');
   if (!modal || modal.style.display === 'none') return;
   
-  // Simplemente regenerar la lista cuando se abra el modal
-  // La sincronización real se hace en mostrarListaCompras()
+  // Regenerar la lista en caliente para reflejar el estado actual del calendario
+  try {
+    mostrarListaCompras();
+  } catch (e) {
+    console.warn('sincronizarListaComprasConCalendario: no se pudo regenerar la lista', e);
+  }
 }
 
 // Mapeos editables para ingredientes base
@@ -1092,6 +1101,8 @@ window.onload=()=>{
   if (btnCerrar) {
     btnCerrar.addEventListener('click', () => {
       modal.style.display = 'none';
+      const contenido = document.getElementById('listaComprasContenido');
+      if (contenido) contenido.innerHTML = '';
     });
   }
   
@@ -1104,6 +1115,8 @@ window.onload=()=>{
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.style.display = 'none';
+        const contenido = document.getElementById('listaComprasContenido');
+        if (contenido) contenido.innerHTML = '';
       }
     });
   }
@@ -1384,6 +1397,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
