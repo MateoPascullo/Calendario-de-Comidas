@@ -291,7 +291,6 @@ function asignarAcalendario(plato, categorias){
 
 
 function resetearCalendario(){ 
-  console.log('resetearCalendario - INICIO');
   dias.forEach(d=>calendario[d]={almuerzo:null,cena:null}); 
   actualizarCalendario(); 
   
@@ -300,14 +299,12 @@ function resetearCalendario(){
     // Forzar actualización de lista si está abierta
     const modal = document.getElementById('modalListaCompras');
     if (modal && modal.style.display !== 'none') {
-      console.log('resetearCalendario - modal abierto, regenerando lista');
       const contenido = document.getElementById('listaComprasContenido');
       if (contenido) {
         contenido.innerHTML = '';
         contenido.offsetHeight; // forzar reflow
       }
       setTimeout(() => {
-        console.log('resetearCalendario - regenerando lista después de delay');
         mostrarListaCompras();
       }, 200);
     }
@@ -679,14 +676,10 @@ function extraerIngredientesDePlato(plato) {
 function generarListaCompras() {
   const listaCompras = {};
   
-  // Debug: verificar estado del calendario
-  console.log('generarListaCompras - estado calendario:', JSON.stringify(calendario));
-  
   dias.forEach(dia => {
     ['almuerzo', 'cena'].forEach(tipo => {
       const plato = calendario[dia][tipo];
       if (plato) {
-        console.log(`Plato encontrado: ${dia} ${tipo} = ${plato}`);
         const ingredientes = extraerIngredientesDePlato(plato);
         
         ingredientes.forEach(ingrediente => {
@@ -700,15 +693,12 @@ function generarListaCompras() {
     });
   });
   
-  console.log('generarListaCompras - resultado:', listaCompras);
   return listaCompras;
 }
 
 
 // Muestra la lista de compras en el modal
 function mostrarListaCompras() {
-  console.log('mostrarListaCompras - INICIO');
-  
   const listaCompras = generarListaCompras();
   const modal = document.getElementById('modalListaCompras');
   const contenido = document.getElementById('listaComprasContenido');
@@ -852,8 +842,8 @@ function descargarListaCompras() {
   const elementosGuardados = (typeof cargarElementosGuardados === 'function') ? cargarElementosGuardados() : (window.listaComprasFirestore || []);
 
   // Para debug: volcá esto en la consola del navegador
-  console.debug('generarListaCompras ->', listaCalendario);
-  console.debug('elementosGuardados ->', elementosGuardados);
+  // console.debug('generarListaCompras ->', listaCalendario);
+  // console.debug('elementosGuardados ->', elementosGuardados);
 
   const rowMap = {};
 
@@ -887,7 +877,7 @@ function descargarListaCompras() {
     }
   });
 
-  console.debug('rowMap después de calendario (antes de extras):', JSON.parse(JSON.stringify(rowMap)));
+  // console.debug('rowMap después de calendario (antes de extras):', JSON.parse(JSON.stringify(rowMap)));
 
   // 2) MEZCLAR con elementos guardados/extra del usuario
   (elementosGuardados || []).forEach(e => {
@@ -920,7 +910,7 @@ function descargarListaCompras() {
     }
   });
 
-  console.debug('rowMap final (antes de construir filas):', JSON.parse(JSON.stringify(rowMap)));
+  // console.debug('rowMap final (antes de construir filas):', JSON.parse(JSON.stringify(rowMap)));
 
   // 3) convertir a filas para PDF
   const filas = Object.keys(rowMap).sort().map(k => {
@@ -1006,7 +996,7 @@ let listaComprasFirestore = [];
 function cargarElementosGuardados() {
   // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
   // Si no hay usuario logueado, retorna array vacío
-  console.log("cargarElementosGuardados: No hay usuario logueado, usando lista vacía");
+  // console.log("cargarElementosGuardados: No hay usuario logueado, usando lista vacía");
   return window.listaComprasFirestore || [];
 }
 
@@ -1441,8 +1431,8 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
-
   
+
 
 
 
