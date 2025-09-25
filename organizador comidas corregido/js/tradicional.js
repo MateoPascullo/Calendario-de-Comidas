@@ -242,7 +242,7 @@ window.generarCalendarioAleatorio = function () {
 //IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
 
 const categoriasTradicional = {
-  "Milanesa vaca": "milanesa",
+  "Milanesa carne": "milanesa",
   "Milanesa pollo": "milanesa",
   "Milanesa cerdo": "milanesa",
   "Milanesa pescado": "milanesa",
@@ -260,6 +260,7 @@ const categoriasTradicional = {
   
   "pollo al horno":"pollo",
   "Pollo asado":"pollo",
+  "Pata muslo pollo": "pollo",
 
   "Ravioles con salsa de tomate": "pasta",
   "Ravioles con salsa mixta": "pasta",
@@ -281,7 +282,7 @@ const categoriasTradicional = {
 const restringidosTradicional = {
   
   //PROTEINAS
-  "Milanesa vaca": 3,
+  "Milanesa carne": 3,
   "Milanesa pollo": 3,
   "Milanesa cerdo": 3,
   "Milanesa pescado": 3,
@@ -327,13 +328,13 @@ const ingredientesPlatosCompletos = {
   "Tarta de zapallito,queso,huevo, cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
   "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": ["Atún", "Queso cremoso", "Tomate", "Cebolla", "Huevo", "Pimiento", "Ajo", "Masa de tarta"],
   "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)": ["Papa", "Zapallo", "Carne picada", "Cebolla verdeo", "Pimiento", "Cebolla", "Queso rallado"],
-  "Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)": ["Pata muslo de pollo", "Cebolla", "Pimiento", "Zanahoria", "Papa"],
+  "Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)": ["Pata muslo pollo", "Cebolla", "Pimiento", "Zanahoria", "Papa"],
   "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
   "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
   "Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Carne", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
   "Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Pollo", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
   "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
-  "Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)": ["Pollo", "Tortillas", "Cebolla", "Pimiento", "Zanahoria", "Aceite", "Especias"],
+  "Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)": ["Pollo", "Fajitas", "Cebolla", "Pimiento", "Zanahoria", "Aceite", "Especias"],
   "Ens. de  atún, huevo, cebolla, tomate, arroz": ["Atún", "Huevo", "Cebolla", "Tomate", "Arroz"],
   "Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
   "Carne +verduras al horno(calabaza,cebolla, papa)": ["Carne", "Calabaza", "Cebolla", "Papa"],
@@ -346,6 +347,8 @@ const ingredientesPlatosCompletos = {
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
   "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo",]
 };
+
+
 
 
 
