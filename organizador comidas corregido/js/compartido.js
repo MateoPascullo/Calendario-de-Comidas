@@ -1437,3 +1437,4 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
 
+
