@@ -249,7 +249,7 @@ const restringidosVegetariano = {
   "Milanesa de legumbre":3,
  
  //HIDRATOS
-  "Arroz(Blanco/ integral/ Yamani)":3,
+  "Arroz Blanco/ integral/ Yamani":3,
   "fideos":3,
   "Pure de papa":3,
   "Papa al horno":3,
@@ -281,6 +281,7 @@ const ingredientesPlatosCompletosVeg = {
   "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
 };
+
 
 
 
