@@ -248,6 +248,10 @@ const categoriasTradicional = {
   "Milanesa pescado": "milanesa",
   "Nugget de pollo": "milanesa",
   "Milanesas de berenjena gratinadas + guacamole": "milanesa",
+  
+  "Jamón cocido": "Jamón",
+  "Jamón crudo": "Jamón",
+
 
   
   "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)":"papa",
@@ -302,10 +306,11 @@ const restringidosTradicional = {
   "Atún":3,
   "Costeleta vaca":3,
   "Costeleta cerdo":3,
-  "jamon cocido/crudo":3,
+  "Jamón cocido":3,
+  "jamón crudo":3,
 
   //HIDRATOS:
-  "Arroz(Blanco/ integral/ Yamani)":3,
+  "Arroz Blanco/ integral/ Yamani":3,
   "Fideos":3,
   "Pure de papa":3,
   "Papa al horno":3,
