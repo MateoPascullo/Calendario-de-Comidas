@@ -310,7 +310,7 @@ const restringidosTradicional = {
   "jamón crudo":3,
 
   //HIDRATOS:
-  "Arroz Blanco/ integral/ Yamani":3,
+  "Arroz Blanco/ Integral/ Yamani":3,
   "Fideos":3,
   "Pure de papa":3,
   "Papa al horno":3,
