@@ -1,491 +1,286 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Plato Resuelto</title>
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Courgette&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+// =========================
+// VALIDACIÓN DE PLATOS (versión vegetariana)
+// =========================
+function validarPlato() {
+  const s = getSeleccionados();
 
- <link rel="stylesheet" href="css/style.css?v=10">
+  // Normalización robusta
+  const v = (s.verdura ?? '').trim();
+  const p = (s.proteina ?? '').trim();
+  const h = (s.hidrato ?? '').trim();
+  const c = (s.completo ?? '').trim();
 
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8f9d68">
+  const hasV = v.length > 0;
+  const hasP = p.length > 0;
+  const hasH = h.length > 0;
+  const hasC = c.length > 0;
 
-<!-- Favicons -->
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="shortcut icon" href="favicon-32.png">
+  console.log('validarPlato (veg) -> seleccionados:', { v, p, h, c, hasV, hasP, hasH, hasC });
 
-<!-- Para iPhone -->
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+  let valido = false;
+  let platoFinal = '';
 
-<!-- Open Graph -->
-<meta property="og:title" content="Plato Resuelto">
-<meta property="og:description" content="Organizá tus comidas con un calendario simple y ágil.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://platoresuelto.com/">
-<meta property="og:image" content="https://platoresuelto.com/og-image-1200x630.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Plato Resuelto">
-<meta name="twitter:description" content="Organizá tus comidas con un calendario simple y ágil.">
-<meta name="twitter:image" content="https://platoresuelto.com/og-image-1200x630.png">
-
-</head>
-
-
-
-
-<!-- Tutorial inicial -->
-<div id="tutorial" class="tutorial-overlay" style="display:none;">
-  <div class="tutorial-box">
-    <div id="tutorial-indicator" class="tutorial-step-indicator"></div>
-    <div id="tutorial-step"></div>
-    <div class="tutorial-buttons">
-      <button id="tutorial-prev" style="display:none;"></button>
-      <button id="tutorial-next"></button>
-    </div>
-  </div>
-</div>
-
-<script src="js/tutorial.js" defer></script>
-
-
-
-<body>
-    <div class="login-container">
-    <button id="loginBtn">Acceder</button>
-    <p id="status"></p>
-
-  </div>
-  
-  
-  
-  
- 
-    
-   <!-- 🔒 contenido que quiero proteger -->
-    
-   
-   
-  <div id="contenido" style="display:none;">
-   
-     <!-- boton de whatsapp -->
-    <div class="btn-whatsapp-top">
-  <a href="https://wa.me/?text=🔥 Probá esta app de calendario de comidas! 👉 https://platoresuelto.com" 
-     target="_blank" 
-     class="btn-calendario btn-whatsapp">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="icono-whatsapp">
-      <path fill="white" d="M16 .667C7.64.667.667 7.64.667 16c0 2.828.736 5.59 2.14 8.027L.667 31.333l7.493-2.093A15.27 15.27 0 0 0 16 31.333C24.36 31.333 31.333 24.36 31.333 16S24.36.667 16 .667zm0 27.733c-2.56 0-5.04-.693-7.2-2l-.52-.307-4.453 1.24 1.2-4.587-.307-.547A12.29 12.29 0 0 1 3.707 16c0-6.76 5.533-12.293 12.293-12.293 3.28 0 6.36 1.28 8.68 3.6a12.27 12.27 0 0 1 3.613 8.693c0 6.76-5.533 12.293-12.293 12.293z"/>
-      <path fill="white" d="M24.067 19.88c-.4-.2-2.36-1.16-2.72-1.293-.36-.133-.627-.2-.893.2-.267.4-1.027 1.293-1.267 1.56-.227.267-.467.3-.867.1-.4-.2-1.693-.627-3.227-2-1.187-1.04-1.987-2.32-2.213-2.72-.227-.4-.024-.627.173-.827.173-.173.4-.467.6-.7.2-.233.267-.4.4-.667.133-.267.067-.5-.033-.7-.1-.2-.893-2.147-1.227-2.947-.32-.773-.647-.667-.893-.68h-.76c-.253 0-.667.093-1.013.467-.347.373-1.333 1.293-1.333 3.147 0 1.853 1.36 3.64 1.547 3.893.187.253 2.68 4.093 6.493 5.747.907.393 1.613.627 2.16.8.907.293 1.733.253 2.387.153.727-.107 2.36-.96 2.693-1.893.333-.933.333-1.733.233-1.893-.093-.16-.333-.253-.733-.453z"/>
-    </svg>
-    Compartí la app
-  </a>
-</div>
-
-    <div class="btn-calendario-container">
-    
-    </div>
-  
-  <a href="#calendario" id="btnHoy" class="btn-calendario btn-flotante">¿Ya tenés el menú de hoy?</a>
-  
-  <a href="javascript:void(0)" id="btnListaCompras" class="btn-calendario btn-flotante btn-lista-compras">🛒 Generá tu lista de compras!</a>
-  
-  <h1>PlatoResuelto!</h1>
-  <h2>Organizá tus comidas</h2>
-
-  <div style="text-align:center; margin:20px 0;">
-    <img src="plato-buen-comer-bis.jpg" alt="Plato saludable" class="plato-saludable">
-  </div>
-
-  <!-- scroll de arma tu ensalada-->
-  <h3 id="plato-semana">Armá un plato para la semana</h3>
-
-
-
-  <!-- Selector de Verduras y Ensaladas -->
-  <select id="verdura">
-    <option value=""> Verduras y hortalizas </option>
-     
-     <option value="Ens.(tomate,lechuga,cebolla)">Ens.(tomate,lechuga,cebolla)</option>
-     <option value="Ens.(lechuga,tomate,cebolla,palta)">Ens.(lechuga,tomate,cebolla,palta)</option>
-     <option value="Ens.(lechuga,zanahoria,repollo)">Ens.(lechuga,zanahoria,repollo)</option>
-     <option value="Ens.(rúcula,zanahoria,repollo)">Ens.(rúcula,zanahoria,repollo)</option>
-     <option value="Ens.(achicoria,zanahoria,repollo)">Ens.(achicoria,zanahoria,repollo)</option>
-     <option value="Ens.(rúcula,t.cherry,palta)">Ens.(rúcula,t.cherry,palta)</option>
-     <option value="Ens.(zanahoria,remolacha,repollo)">Ens.(zanahoria,remolacha,repollo)</option>
-     <option value="Ens.(Apio,manzana verde, nueces)">Ens.(Apio,manzana verde, nueces)</option>
-     <option value="Salteado(cebolla,pimiento,zanahoria)">Salteado(cebolla,pimiento,zanahoria)</option>
-     <option value="Salteado(zucchini,berenjena,cebolla)">Salteado(zucchini,berenjena,cebolla)</option>
-     <option value="Horno(cebolla,zanahoria,pimiento,calabaza)">Horno(cebolla,zanahoria,pimiento,calabaza)</option>
-     <option value="Puré zapallo/calabaza">Puré zapallo/calabaza</option>
-
-     
-
-       <option value="ensaladas">🥗 Armá tu ensalada</option>
-  <!-- 👇 opción “custom” para inyectar la ensalada armada -->
-  <option id="verduraCustom" value="" style="display:none;"></option>
-</select>
-  </select>
-
- <div id="ensalada" class="subgrilla" style="display:none;">
-  <!-- 🔹 Nueva fila con título + botón chiquito -->
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <h4 style="margin:0;">Armá tu ensalada</h4>
-    
-  </div>
-  
-
-  <p>Elegí el tipo de cocción:</p>
-  <div class="opciones-coccion">
-    <label><input type="radio" name="coccion" value="Crudo"> Crudo</label>
-    <label><input type="radio" name="coccion" value="Salteado"> Salteado</label>
-    <label><input type="radio" name="coccion" value="Horno"> Horno</label>
-    <label><input type="radio" name="coccion" value="Hervido"> Hervido</label>
-  </div>
-
-  <p>Seleccioná las verduras:</p>
-  <div class="opciones-ensalada">
-    <label class="chip"><input type="checkbox" value="Lechuga">Lechuga</label>
-    <label class="chip"><input type="checkbox" value="Rúcula">Rúcula</label>
-    <label class="chip"><input type="checkbox" value="Achicoria">Achicoria</label>
-    <label class="chip"><input type="checkbox" value="Espinaca">Espinaca</label>
-    <label class="chip"><input type="checkbox" value="Acelga">Acelga</label>
-    <label class="chip"><input type="checkbox" value="Repollo">Repollo</label>
-    <label class="chip"><input type="checkbox" value="Tomate">Tomate</label>
-    <label class="chip"><input type="checkbox" value="Tomate cherry">Tomate cherry</label>
-    <label class="chip"><input type="checkbox" value="Cebolla">Cebolla</label>
-    <label class="chip"><input type="checkbox" value="Cebolla verdeo">Cebolla verdeo</label>
-    <label class="chip"><input type="checkbox" value="Puerro">Puerro</label>
-    <label class="chip"><input type="checkbox" value="Ajo">Ajo</label>
-    <label class="chip"><input type="checkbox" value="Pimiento">Pimiento</label>
-    <label class="chip"><input type="checkbox" value="Zanahoria">Zanahoria</label>
-    <label class="chip"><input type="checkbox" value="Remolacha">Remolacha</label>
-    <label class="chip"><input type="checkbox" value="Zapallito">Zapallito</label>
-    <label class="chip"><input type="checkbox" value="Zucchini">Zucchini</label>
-    <label class="chip"><input type="checkbox" value="Berenjena">Berenjena</label>
-    <label class="chip"><input type="checkbox" value="Pepino">Pepino</label>
-    <label class="chip"><input type="checkbox" value="Calabaza">Calabaza</label>
-    <label class="chip"><input type="checkbox" value="Zapallo">Zapallo</label>
-    <label class="chip"><input type="checkbox" value="Arvejas">Arvejas</label>
-    <label class="chip"><input type="checkbox" value="Chaucha">Chaucha</label>
-    <label class="chip"><input type="checkbox" value="Brocoli">Brocoli</label>
-    <label class="chip"><input type="checkbox" value="Coliflor">Coliflor</label>
-    <label class="chip"><input type="checkbox" value="Alcaucil">Alcaucil</label>
-    <label class="chip"><input type="checkbox" value="Apio">Apio</label>
-  </div>
-
-  
-  <button type="button" onclick="copiarEnsalada()" class="btn-mini">Agregar ensalada</button>
-
-</div>
-
-
-
-  <select id="proteina">
-    <option value=""> Proteínas </option>  
-     <option value="Milanesa carne">Milanesa carne</option>
-     <option value="Milanesa pollo">Milanesa pollo</option>
-     <option value="Milanesa cerdo">Milanesa cerdo</option>
-     <option value="Milanesa pescado">Milanesa pescado</option>
-     <option value="Milanesa de soja">Milanesa de soja</option>
-     <option value="Hamburguesa vacuna">Hamburguesa vacuna</option>
-     <option value="Medallon de pollo">Medallon de pollo</option>
-     <option value="Medallon de legumbre">Medallon de legumbre</option>
-     <option value="Nugget de pollo">Nugget de Pollo</option>
-     <option value="Bife vacuno">Bife vacuno</option>
-     <option value="Filet pollo">Filet pollo</option>
-     <option value="Pata muslo pollo">Pata muslo pollo</option>
-     <option value="Pechuga pollo">Pechuga pollo</option>
-     <option value="Filet pescado">Filet pescado</option>
-     <option value="pollo al horno">Pollo al horno</option>
-     <option value="Pollo asado">Pollo asado</option>
-     <option value="Atún">Atún</option>
-     <option value="Costeleta vaca">Costeleta vaca</option>
-     <option value="Costeleta cerdo">Costeleta cerdo</option>
-     <option value="Huevo (Duro/ Revuelto/ a la plancha)">Huevo (Duro/ Revuelto/ a la plancha)</option>
-     <option value="jamon cocido/crudo">Jamon cocido/crudo</option>
-  </select>
-
-  <select id="hidrato">
-    <option value=""> Hidratos de carbono </option>
-     
-     <option value="Arroz(Blanco/ integral/ Yamani)">Arroz(Blanco/ integral/ Yamani)</option>
-     <option value="Fideos">Fideos</option>
-     <option value="Pure de papa">Pure de papa</option>
-     <option value="Papa al horno">Papa al horno</option>
-     <option value="Batata al horno">Batata al horno</option>
-     <option value="Choclo">Choclo</option>
-     <option value="Quinoa">Quínoa</option>
-     <option value="Cuscus">Cuscús</option>
-     <option value="Trigo burgol">Trigo burgol</option>
-     <option value="Lentejas">Lentejas</option>
-     <option value="Garbanzos">Garbanzos</option>
-     <option value="Porotos">Porotos</option>
-  </select>
-
-  <select id="completo">
-    <option value=""> Plato completo </option>
-      <option value="Tarta de espinaca,queso,cebolla,puerro">Tarta de espinaca,queso,cebolla,puerro</option>
-     <option value="Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)">Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)</option>
-    <option value="Tarta de zapallito,queso,huevo, cebolla">Tarta de zapallito,queso,huevo, cebolla</option>
-     <option value="Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo">Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo</option>
-     <option value="Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)">Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)</option>
-     <option value="Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)">Pata muslo + verduras al horno (cebolla,pimiento,zanahoria,papa)</option>
-     <option value="Omeltte de queso y espinaca + Ens. Lenteja y tomate">Omeltte de queso y espinaca + Ens. Lenteja y tomate</option>
-      <option value="Milanesas de berenjena gratinadas + guacamole">Milanesas de berenjena gratinadas + guacamole</option>
-     <option value="Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de carne + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
-     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
-     <option value="Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de pollo + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
-     <option value="Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)">Wok de fideos de arroz + verduras (pimiento,cebolla,zucchini,zanahoria)</option>
-     <option value="Fajitas de pollo y verduras salteadas(cebolla,pimiento,zanahoria)">Fajitas de pollo y verduras salteadas (cebolla,pimiento,zanahoria)</option>
-     <option value="Ens. de  atún, huevo, cebolla, tomate, arroz">Ens. de  atún, huevo, cebolla, tomate, arroz</option>
-      <option value="Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema">Crepes des espinaca,cebolla, c.verdeo + salsa de morrón y crema</option>
-     <option value="Carne +verduras al horno(calabaza,cebolla, papa)">Carne +verduras al horno(calabaza,cebolla, papa)</option>
-     <option value="Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)">Pescado  al paquete con verduras (cebolla,pimiento,c .verdeo)</option>
-     <option value="Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo">Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo</option>
-     <option value="Ravioles con salsa de tomate">Ravioles con salsa de tomate</option>
-     <option value="Ravioles con salsa mixta">Ravioles con salsa mixta</option>
-     <option value="Ravioles con salsa bolognesa">Ravioles con salsa bolognesa</option>
-     <option value="Ñoquis con salsa de tomate">Ñoquis con salsa de tomate</option>
-     <option value="Ñoquis con salsa mixta">Ñoquis con salsa mixta</option>
-     <option value="Ñoquis con salsa bolognesa">Ñoquis con salsa bolognesa</option>
-     
-
-
-
-  </select>
-
-  <button onclick="validarPlato()">Agregá el plato al calendario</button>
-
-  
-
-  <h2>🗓️ Calendario semanal</h2>
-  
-
-  
-
-  <table id="calendario">
-    <thead><tr><th>Día</th><th>Almuerzo</th><th>Cena</th></tr></thead>
-    <tbody id="calendario-body"></tbody>
-  </table>
-
-  <div class="top-buttons">
-    
-    <button onclick="resetearCalendario()">🔄 Resetear calendario</button>
-
-    <button onclick="generarCalendarioAleatorio()">🎲 Generar semana aleatoria</button>
-
-    
-
-    <button id="addToHome" style="display:none; margin-bottom:10px;">
-  📲 Agregar a mi pantalla de inicio
-    </button>
-    <div class="btn-calendario-container" style="margin-top:6px;">
-      <a href="index-vegetariano.html" class="btn-calendario">Ir al calendario vegetariano</a>
-    </div>
-    
-    
-    <div id="ios-install-hint" style="display:none; margin:10px; padding:10px; background:#fefae0; border:1px solid #ccc; border-radius:8px; font-size:0.9rem;">
-  📲 Para agregar esta app a tu pantalla de inicio:<br>
-  1. Tocá <strong>Compartir</strong> (cuadrado con flecha ↑)<br>
-  2. Elegí <strong>Agregar a pantalla de inicio</strong>
-</div>
-    
-    <button onclick="descargarPDF()">📥 Descargá tu menú semanal (PDF)</button>
-
-    <button onclick="window.open('https://forms.gle/ddyvdbKZqHhuM8W77','_blank')">Sugerinos un nuevo alimento o Plato</button>
-
-  
-
-
-    <div class="btn-calendario-container">
-       <a href="javascript:void(0)" onclick="mostrarTutorial()" class="btn-calendario">📘 Ver tutorial</a>
-      <a href="nosotros.html" class="btn-calendario">Sobre nosotros</a>
-    </div>
-  
-    <button id="logoutBtn" style="display:none">Cerrar sesión</button>
-  </div>
-<script src="js/compartido.js" defer></script>
-<script src="js/tradicional.js" defer></script>
-<script src="js/pwa.js" defer></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-<div id="mensaje" class="mensaje-toast"></div>
-
-<!-- Modal para Lista de Compras -->
-<div id="modalListaCompras" class="modal-lista-compras" style="display:none;">
-  <div class="modal-contenido">
-    <div class="modal-header">
-      <h2>🛒 Tu Lista de Compras</h2>
-      <button id="cerrarModal" class="btn-cerrar">×</button>
-    </div>
-    <div class="modal-body">
-      <div id="listaComprasContenido"></div>
-    </div>
-    <div class="modal-footer">
-      <button id="descargarLista" class="btn-descargar">📥 Descargar Lista</button>
-    </div>
-  </div>
-</div>
-
-</div> <!-- 🔒 aca cierra el contenido que quiero proteger con el login -->
-
-
-<!-- ESTE ES EL CODIGO QUE ME DIO FIREBASE MODIFICADO POR CHAGPT PARA QUE FUNCIONES EL LOGIN -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } 
-    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, getDocFromServer } 
-    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-  // 🔹 Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyBgyXUiZPdYlWQBclhhH70mfRuIXIuw2EE",
-    authDomain: "plato-resuelto.firebaseapp.com",
-    projectId: "plato-resuelto",
-    storageBucket: "plato-resuelto.firebasestorage.app",
-    messagingSenderId: "11080746612",
-    appId: "1:11080746612:web:22f488078f01def94ff321",
-    measurementId: "G-16RQJ5KB0H"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-  const db = getFirestore(app);
-
-  // 🔹 Elementos del DOM
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const status = document.getElementById("status");
-  const contenido = document.getElementById("contenido");
-
-  // ---------- FUNCIONES FIRESTORE ----------
-  async function guardarListaCompras(user) {
-    try {
-      // Obtener la lista actual desde la variable global
-      const lista = window.listaComprasFirestore || [];
-      await setDoc(doc(db, "calendarios", user.uid), {
-        listaCompras: lista
-      }, { merge: true });
-      console.log("Lista de compras guardada en Firestore ✅");
-    } catch (e) { console.error('Error guardando listaCompras:', e); }
+  // Reglas válidas (vegetariano): solo completo OR V+P+H
+  if (hasC && !hasV && !hasP && !hasH) {
+    valido = true; 
+    platoFinal = c;
+    console.log('Razon: Plato completo solo (veg)');
+  } else if (hasV && hasP && hasH && !hasC) {
+    valido = true; 
+    platoFinal = `${v}+ ${p}+ ${h}`;
+    console.log('Razon: Verdura + Proteína + Hidrato (veg)');
+  } else {
+    console.log('Razon: NO cumple reglas válidas (veg)');
   }
 
-  async function cargarListaCompras(user) {
-    try {
-      const docSnap = await getDoc(doc(db, "calendarios", user.uid));
-      if (docSnap.exists() && Array.isArray(docSnap.data().listaCompras)) {
-        // Actualizar la variable global en lugar de localStorage
-        window.listaComprasFirestore = docSnap.data().listaCompras;
-        if (typeof cargarListaComprasADOMSiExiste === 'function') {
-          cargarListaComprasADOMSiExiste();
+  if (valido) {
+    if (seleccion) {
+      const { dia, tipo } = seleccion;
+      const otroTipo = (tipo === 'almuerzo') ? 'cena' : 'almuerzo';
+
+      if (calendario[dia][otroTipo] === platoFinal) {
+        mostrarMensaje(`❌ No podés repetir "${platoFinal}" en ${dia}.`, 'error');
+      } else if (!mismoDiaValido(dia, platoFinal, calendario, categoriasVegetariano)) {
+        mostrarMensaje(`❌ No podés asignar "${platoFinal}" en ${dia} porque ya hay un plato de la misma categoría.`, 'error');
+      } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
+        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+      } else {
+        // 🔒 Validar ingredientes restringidos
+        const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
+        if (!validacionIngredientes.ok) {
+          mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        } else {
+          // ✅ Éxito
+          calendario[dia][tipo] = platoFinal;
+          actualizarCalendario();
+          mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
+          limpiarSelects();   // solo limpiar si se agregó bien
+          seleccion = null;   // solo borrar selección si se agregó bien
         }
-        console.log("Lista de compras cargada ✅");
       }
-    } catch (e) { console.error('Error cargando listaCompras:', e); }
-  }
 
-  // ---------- LOGIN / LOGOUT ----------
-  loginBtn.addEventListener("click", async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      console.log("Usuario logueado:", result.user.email);
-    } catch (error) {
-      console.error("Error en login:", error);
-    }
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
-  });
-
-  // ---------- DETECTAR SESIÓN ----------
-  onAuthStateChanged(auth, async (user) => {
-    // guardamos referencias a las funciones globales originales
-    const originalGuardar = window.guardarCalendario;
-    const originalCargar  = window.cargarCalendario;
-
-    if (user) {
-      status.textContent = `Hola, ${user.displayName}`;
-      loginBtn.style.display = "none";
-      logoutBtn.style.display = "inline-block";
-      contenido.style.display = "block";
-
-      // 🔹 OVERRIDE: guardarCalendario global ahora escribe en Firestore
-      window.guardarCalendario = async function () {
-        try {
-          await setDoc(doc(db, "calendarios", user.uid), { tradicional: calendario }, { merge: true });
-          console.log("Calendario tradicional guardado en Firestore ✅");
-        } catch (err) {
-          console.error("Error guardando en Firestore:", err);
-        }
-        if (typeof originalGuardar === "function") {
-          try { originalGuardar(); } catch(e) {}
-        }
-      };
-
-      // 🔹 OVERRIDE: cargarCalendario global ahora lee de Firestore
-      window.cargarCalendario = async function () {
-        try {
-          const snap = await getDocFromServer(doc(db, "calendarios", user.uid));
-          if (snap.exists() && snap.data().tradicional) {
-            calendario = snap.data().tradicional;
-            console.log("Calendario tradicional cargado desde Firestore (server) ✅");
-          } else {
-            console.log("No había calendario tradicional en Firestore");
-          }
-        } catch (err) {
-          console.warn("getDocFromServer falló, pruebo con getDoc:", err);
-          const snap = await getDoc(doc(db, "calendarios", user.uid));
-          if (snap.exists() && snap.data().tradicional) {
-            calendario = snap.data().tradicional;
-            console.log("Calendario tradicional cargado desde cache Firestore ✅");
-          }
-        }
-        actualizarCalendario();
-      };
-
-      // 🔹 Cargar datos iniciales
-      await cargarCalendario();
-      await cargarListaCompras(user);
-
-      // 🔹 Guardar cada vez que cambie algo
-      document.addEventListener("change", () => guardarCalendario(user));
-      document.addEventListener("click", (e) => {
-        if (e.target.tagName === "BUTTON") {
-          guardarCalendario(user);
-        }
-      });
-      document.addEventListener('listaCompras:cambiada', () => guardarListaCompras(user));
+      // 🚫 No reseteamos seleccion ni limpiamos selects en caso de error
 
     } else {
-      loginBtn.style.display = "inline-block";
-      logoutBtn.style.display = "none";
-      contenido.style.display = "none";
+      // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
+      const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
+      if (!validacionIngredientes.ok) {
+        mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
+        return;  // no limpiar selects ni borrar seleccion
+      }
 
-      // restaurar funciones originales (modo localStorage)
-      if (originalGuardar) window.guardarCalendario = originalGuardar;
-      if (originalCargar)  window.cargarCalendario  = originalCargar;
+      const ok = asignarAcalendario(platoFinal, categoriasVegetariano);
+      if (ok) {
+        mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
+        limpiarSelects();  // solo limpiar si fue exitoso
+      } else {
+        mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
+      }
     }
+    return;
+  }
+
+  // ----- Motivos específicos de invalidez (veg mejorados) -----
+  if (!hasV && !hasP && !hasH && !hasC) {
+    mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
+  } else if (hasC && (hasV || hasP || hasH)) {
+    mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
+  } else if (hasV && (!hasP || !hasH)) {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  } else if (!hasV && (hasP || hasH)) {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  } else {
+    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
+  }
+}
+
+
+
+
+// =========================
+// STORAGE - Solo Firestore
+// =========================
+function guardarCalendario(){ 
+  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
+  // Si no hay usuario logueado, no guardamos nada
+  console.log("guardarCalendario: No hay usuario logueado, no se guarda");
+}
+
+function cargarCalendario(){ 
+  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
+  // Si no hay usuario logueado, usamos calendario vacío
+  console.log("cargarCalendario: No hay usuario logueado, usando calendario vacío");
+  dias.forEach(dia => calendario[dia] = {almuerzo:null,cena:null});
+}
+
+
+// =========================
+// GENERADOR ALEATORIO (Vegetariano)
+// =========================
+
+// Lee las opciones desde los <select> del HTML
+window.getOpciones = window.getOpciones || function (idSelect) {
+  const select = document.getElementById(idSelect);
+  if (!select) {
+    console.warn(`⚠️ No encontré el <select> #${idSelect}.`);
+    return [];
+  }
+  return Array.from(select.options)
+    .map(opt => (opt.value ?? "").trim())
+    .filter(val => val !== "");
+};
+
+// Genera un plato aleatorio vegetariano
+window.generarPlatoAleatorioVeg = function () {
+  const verduras  = window.getOpciones("verdura");
+  const proteinas = window.getOpciones("proteina");
+  const hidratos  = window.getOpciones("hidrato");
+  const completos = window.getOpciones("completo");
+
+  // En vegetariano solo se permite: 
+  // 1) un completo, o 
+  // 2) Verdura + Proteína + Hidrato
+  const modo = (completos.length > 0 && Math.random() < 0.5) ? "completo" : "combo";
+
+  if (modo === "completo") {
+    return completos[Math.floor(Math.random() * completos.length)];
+  }
+
+  if (!verduras.length || !proteinas.length || !hidratos.length) {
+    console.error("❌ Faltan opciones en los selects (verdura/proteina/hidrato).");
+    return null;
+  }
+
+  const v = verduras[Math.floor(Math.random() * verduras.length)];
+  const p = proteinas[Math.floor(Math.random() * proteinas.length)];
+  const h = hidratos[Math.floor(Math.random() * hidratos.length)];
+  return `${v}+ ${p}+ ${h}`;
+};
+
+
+// Genera la semana Lun–Vie en almuerzo y cena (vegetariano)
+window.generarCalendarioAleatorioVeg = function () {
+  const dias  = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+  const tipos = ["almuerzo", "cena"];
+
+  calendario = {};
+  dias.forEach(d => (calendario[d] = { almuerzo: "", cena: "" }));
+
+  dias.forEach(dia => {
+    tipos.forEach(tipo => {
+      let platoValido = null;
+      let intentos = 0;
+
+      while (!platoValido && intentos < 50) {
+        intentos++;
+        const candidato = window.generarPlatoAleatorioVeg();
+        if (!candidato) break;
+
+        const otroTipo = (tipo === "almuerzo") ? "cena" : "almuerzo";
+        // no repetir mismo plato en el mismo día
+        if (calendario[dia][otroTipo] === candidato) continue;
+        // máximo 2 veces por semana
+        if (typeof contarRepeticiones === "function" && contarRepeticiones(candidato) >= 2) continue;
+
+        platoValido = candidato;
+      }
+
+      if (platoValido) {
+        calendario[dia][tipo] = platoValido;
+      } else {
+        console.warn(`⚠️ No se pudo asignar plato para ${dia} (${tipo})`);
+      }
+    });
   });
-</script>
+
+  if (typeof actualizarCalendario === "function") actualizarCalendario();
+  if (typeof guardarCalendario === "function") guardarCalendario();
+  if (typeof mostrarMensaje === "function") {
+    mostrarMensaje("✅ Calendario vegetariano generado aleatoriamente.", "exito");
+  } else {
+    console.log("✅ Calendario vegetariano generado:", calendario);
+  }
+};
 
 
 
 
-</body>
-</html>
+
+
+
+// =========================
+// LISTA PARA AGREGAR ALIMENTOS Y PLATOS QUE NO TIENEN QUE REPETIRSE EN EL MISMO DIA POR SER DE GRUPO SIMILAR
+// =========================
+//IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
+const categoriasVegetariano = {
+  
+  "Milanesas de berenjena gratinadas + guacamole": "milanesa",
+  "Milanesa de legumbre": "milanesa",
+  "Medallon de legumbre":"milanesa",
+  
+  "Pure de papa":"papa",
+  "Papa al horno":"papa",
+  
+  
+  
+  "Ravioles con salsa de tomate": "pasta",
+  "Ravioles con salsa mixta": "pasta",
+  "Ravioles con salsa bolognesa": "pasta",
+  "Ñoquis con salsa de tomate": "pasta",
+  "Ñoquis con salsa mixta": "pasta",
+  "Ñoquis con salsa bolognesa": "pasta",
+  "Fideos": "pasta",
+
+  "Tarta de espinaca,queso,cebolla,puerro": "tarta",
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
+  "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
+
+
+
+};
+
+// =========================
+// ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
+// =========================
+const restringidosVegetariano = {
+  
+  //PROTEINAS
+  "Medallon de legumbre":3,
+  "Milanesa de legumbre":3,
+ 
+ //HIDRATOS
+  "Arroz Blanco/ integral/ Yamani":3,
+  "fideos":3,
+  "Pure de papa":3,
+  "Papa al horno":3,
+  "Batata al horno":3,
+  "Choclo":3,
+  "Quinoa":3,
+  "Cuscus":3,
+  "Trigo-burgol":3,
+  
+   
+};
+
+// =========================
+// INGREDIENTES DE PLATOS COMPLETOS VEGETARIANOS PARA LISTA DE COMPRAS
+// =========================
+const ingredientesPlatosCompletosVeg = {
+  "Tarta de espinaca, queso, cebolla y puerro": ["Espinaca", "Queso", "Cebolla", "Puerro", "Masa de tarta"],
+  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
+  "Tarta de zapallito, queso, huevo y cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
+  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
+  "Pastel de papa y zapallo": ["Papa", "Zapallo", "Queso"],
+  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
+  "Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
+  "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
+  "Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)": ["Fajitas", "Cebolla", "Pimiento", "Zanahoria", "Berenjena", "Aceite", "Especias"],
+  "Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo": ["Arroz", "Huevo", "Pan rallado", "Zanahoria", "Rúcula", "Tomate", "Huevo"],
+  "Ravioles con salsa de tomate": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite"],
+  "Ravioles con salsa mixta": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
+  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
+  "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
+};
 
 
 
