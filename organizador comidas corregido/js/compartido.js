@@ -602,8 +602,10 @@ const ingredientesProteinas = {
   "Milanesa cerdo": "Milanesa de cerdo",
   "Milanesa pescado": "Milanesa de pescado",
   "Medallon de legumbre": "Medallón de legumbres",
-  "Huevo (Duro/ Revuelto/ a la plancha)": "Huevo",
+  "Huevo Duro/ Revuelto/ a la plancha": "Huevo",
   "Atún": "Atún",
+  "jamón cocido":"jamón cocido",
+  "Jamón crudo":"Jamón crudo",
 };
 
 const ingredientesHidratos = {
@@ -1432,6 +1434,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
