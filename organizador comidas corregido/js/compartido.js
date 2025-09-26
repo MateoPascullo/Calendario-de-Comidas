@@ -602,14 +602,14 @@ const ingredientesProteinas = {
   "Milanesa cerdo": "Milanesa de cerdo",
   "Milanesa pescado": "Milanesa de pescado",
   "Medallon de legumbre": "Medallón de legumbres",
-  "Huevo Duro/ Revuelto/ a la plancha": "Huevo",
+  "Huevo Duro/ Revuelto/ A la plancha": "Huevo",
   "Atún": "Atún",
   "jamón cocido":"jamón cocido",
   "Jamón crudo":"Jamón crudo",
 };
 
 const ingredientesHidratos = {
-  "Arroz(Blanco/ integral/ Yamani)": "Arroz",
+  "Arroz Blanco/ Integral/ Yamani": "Arroz",
   "Fideos": "Fideos",
   "Pure de papa": "Papa",
   "Papa al horno": "Papa",
@@ -1434,6 +1434,7 @@ function validarPropuestaCambio(tmpCalendar, categoriasMapeadas) {
 
 
   
+
 
 
 
