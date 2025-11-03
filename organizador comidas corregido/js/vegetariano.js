@@ -231,9 +231,10 @@ const categoriasVegetariano = {
   "Ñoquis con salsa bolognesa": "pasta",
   "Fideos": "pasta",
 
-  "Tarta de espinaca,queso,cebolla,puerro": "tarta",
+  "Tarta de espinaca, q. cremoso, cebolla y puerro": "tarta",
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
-  "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
+  "Tarta de zapallito, q. cremoso, huevo y cebolla":"tarta",
+  
 
 
 
@@ -266,12 +267,12 @@ const restringidosVegetariano = {
 // INGREDIENTES DE PLATOS COMPLETOS VEGETARIANOS PARA LISTA DE COMPRAS
 // =========================
 const ingredientesPlatosCompletosVeg = {
-  "Tarta de espinaca, queso, cebolla y puerro": ["Espinaca", "Queso", "Cebolla", "Puerro", "Masa de tarta"],
+  "Tarta de espinaca, q. cremoso, cebolla y puerro": ["Espinaca", "Queso cremoso", "Cebolla", "Puerro", "Masa de tarta"],
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
-  "Tarta de zapallito, queso, huevo y cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
-  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
-  "Pastel de papa y zapallo": ["Papa", "Zapallo", "Queso"],
-  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
+  "Tarta de zapallito, q. cremoso, huevo y cebolla": ["Zapallito", "Queso cremoso", "Huevo", "Cebolla", "Masa de tarta"],
+  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso cremoso", "Palta", "Limón", "Cebolla", "Tomate"],
+  "Pastel de papa y zapallo": ["Papa", "Zapallo", "Queso cremoso"],
+  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso cremoso", "Espinaca", "Lentejas", "Tomate"],
   "Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
   "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
   "Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)": ["Fajitas", "Cebolla", "Pimiento", "Zanahoria", "Berenjena", "Aceite", "Especias"],
@@ -281,6 +282,8 @@ const ingredientesPlatosCompletosVeg = {
   "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
 };
+
+
 
 
 
