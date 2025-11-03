@@ -274,9 +274,11 @@ const categoriasTradicional = {
   "Ñoquis con salsa bolognesa": "pasta",
   "Fideos": "pasta",
 
-  "Tarta de espinaca,queso,cebolla,puerro": "tarta",
+  "Tarta de espinaca,q. cremoso,cebolla,puerro": "tarta",
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
+  "Tarta de zapallito, q. cremoso,huevo, cebolla":"tarta",
   "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
+
 
 };
 
@@ -328,14 +330,14 @@ const restringidosTradicional = {
 // INGREDIENTES DE PLATOS COMPLETOS PARA LISTA DE COMPRAS
 // =========================
 const ingredientesPlatosCompletos = {
-  "Tarta de espinaca,queso,cebolla,puerro": ["Espinaca", "Queso", "Cebolla", "Puerro", "Masa de tarta"],
+  "Tarta de espinaca,q. cremoso,cebolla,puerro": ["Espinaca", "Queso cremoso", "Cebolla", "Puerro", "Masa de tarta"],
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
-  "Tarta de zapallito,queso,huevo, cebolla": ["Zapallito", "Queso", "Huevo", "Cebolla", "Masa de tarta"],
+  "Tarta de zapallito, q. cremoso,huevo, cebolla": ["Zapallito", "Queso cremoso", "Huevo", "Cebolla", "Masa de tarta"],
   "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": ["Atún", "Queso cremoso", "Tomate", "Cebolla", "Huevo", "Pimiento", "Ajo", "Masa de tarta"],
-  "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)": ["Papa", "Zapallo", "Carne picada", "Cebolla verdeo", "Pimiento", "Cebolla", "Queso rallado"],
+  "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)": ["Papa", "Zapallo", "Carne picada", "Cebolla verdeo", "Pimiento", "Cebolla", "Queso cremoso"],
   "Pata muslo + verduras al horno(cebolla,pimiento,zanahoria,papa)": ["Pata muslo pollo", "Cebolla", "Pimiento", "Zanahoria", "Papa"],
-  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso", "Espinaca", "Lentejas", "Tomate"],
-  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso rallado", "Palta", "Limón", "Cebolla", "Tomate"],
+  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso cremoso", "Espinaca", "Lentejas", "Tomate"],
+  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso cremoso", "Palta", "Limón", "Cebolla", "Tomate"],
   "Wok de carne + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Carne", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
   "Wok de pollo + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Pollo", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
   "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
@@ -352,6 +354,9 @@ const ingredientesPlatosCompletos = {
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
   "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo",]
 };
+
+
+
 
 
 
