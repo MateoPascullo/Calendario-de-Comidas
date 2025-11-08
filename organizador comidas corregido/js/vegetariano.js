@@ -4,7 +4,6 @@
 function validarPlato() {
   const s = getSeleccionados();
 
-  // Normalización robusta
   const v = (s.verdura ?? '').trim();
   const p = (s.proteina ?? '').trim();
   const h = (s.hidrato ?? '').trim();
@@ -15,22 +14,15 @@ function validarPlato() {
   const hasH = h.length > 0;
   const hasC = c.length > 0;
 
-  console.log('validarPlato (veg) -> seleccionados:', { v, p, h, c, hasV, hasP, hasH, hasC });
-
   let valido = false;
   let platoFinal = '';
 
-  // Reglas válidas (vegetariano): solo completo OR V+P+H
   if (hasC && !hasV && !hasP && !hasH) {
-    valido = true; 
+    valido = true;
     platoFinal = c;
-    console.log('Razon: Plato completo solo (veg)');
   } else if (hasV && hasP && hasH && !hasC) {
-    valido = true; 
+    valido = true;
     platoFinal = `${v}+ ${p}+ ${h}`;
-    console.log('Razon: Verdura + Proteína + Hidrato (veg)');
-  } else {
-    console.log('Razon: NO cumple reglas válidas (veg)');
   }
 
   if (valido) {
@@ -45,34 +37,28 @@ function validarPlato() {
       } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       } else {
-        // 🔒 Validar ingredientes restringidos
         const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
         if (!validacionIngredientes.ok) {
           mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
         } else {
-          // ✅ Éxito
           calendario[dia][tipo] = platoFinal;
           actualizarCalendario();
           mostrarMensaje(`✅ Plato agregado en ${dia} (${tipo}).`, 'exito');
-          limpiarSelects();   // solo limpiar si se agregó bien
-          seleccion = null;   // solo borrar selección si se agregó bien
+          limpiarSelects();
+          seleccion = null;
         }
       }
-
-      // 🚫 No reseteamos seleccion ni limpiamos selects en caso de error
-
     } else {
-      // 🔒 Validar ingredientes restringidos antes de asignar automáticamente
       const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
       if (!validacionIngredientes.ok) {
         mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
-        return;  // no limpiar selects ni borrar seleccion
+        return;
       }
 
       const ok = asignarAcalendario(platoFinal, categoriasVegetariano);
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
-        limpiarSelects();  // solo limpiar si fue exitoso
+        limpiarSelects();
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       }
@@ -80,15 +66,10 @@ function validarPlato() {
     return;
   }
 
-  // ----- Motivos específicos de invalidez (veg mejorados) -----
   if (!hasV && !hasP && !hasH && !hasC) {
     mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
   } else if (hasC && (hasV || hasP || hasH)) {
     mostrarMensaje('❌ El plato completo no puede combinarse con otros alimentos.', 'error');
-  } else if (hasV && (!hasP || !hasH)) {
-    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
-  } else if (!hasV && (hasP || hasH)) {
-    mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
   } else {
     mostrarMensaje('❌ En esta versión necesitás verdura + proteína + hidrato para un plato válido.', 'error');
   }
@@ -96,29 +77,23 @@ function validarPlato() {
 
 
 
-
 // =========================
 // STORAGE - Solo Firestore
 // =========================
 function guardarCalendario(){ 
-  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
-  // Si no hay usuario logueado, no guardamos nada
   console.log("guardarCalendario: No hay usuario logueado, no se guarda");
 }
 
 function cargarCalendario(){ 
-  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
-  // Si no hay usuario logueado, usamos calendario vacío
   console.log("cargarCalendario: No hay usuario logueado, usando calendario vacío");
   dias.forEach(dia => calendario[dia] = {almuerzo:null,cena:null});
 }
 
 
-// =========================
-// GENERADOR ALEATORIO (Vegetariano)
-// =========================
 
-// Lee las opciones desde los <select> del HTML
+// =========================
+// GENERADOR ALEATORIO (Vegetariano) — CORREGIDO
+// =========================
 window.getOpciones = window.getOpciones || function (idSelect) {
   const select = document.getElementById(idSelect);
   if (!select) {
@@ -130,16 +105,12 @@ window.getOpciones = window.getOpciones || function (idSelect) {
     .filter(val => val !== "");
 };
 
-// Genera un plato aleatorio vegetariano
 window.generarPlatoAleatorioVeg = function () {
   const verduras  = window.getOpciones("verdura");
   const proteinas = window.getOpciones("proteina");
   const hidratos  = window.getOpciones("hidrato");
   const completos = window.getOpciones("completo");
 
-  // En vegetariano solo se permite: 
-  // 1) un completo, o 
-  // 2) Verdura + Proteína + Hidrato
   const modo = (completos.length > 0 && Math.random() < 0.5) ? "completo" : "combo";
 
   if (modo === "completo") {
@@ -157,8 +128,7 @@ window.generarPlatoAleatorioVeg = function () {
   return `${v}+ ${p}+ ${h}`;
 };
 
-
-// Genera la semana Lun–Vie en almuerzo y cena (vegetariano)
+// ✅ CORREGIDA: evita repetir categoría similar en el mismo día
 window.generarCalendarioAleatorioVeg = function () {
   const dias  = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const tipos = ["almuerzo", "cena"];
@@ -177,10 +147,15 @@ window.generarCalendarioAleatorioVeg = function () {
         if (!candidato) break;
 
         const otroTipo = (tipo === "almuerzo") ? "cena" : "almuerzo";
-        // no repetir mismo plato en el mismo día
+
+        // ❌ No repetir mismo plato
         if (calendario[dia][otroTipo] === candidato) continue;
-        // máximo 2 veces por semana
+
+        // ❌ No más de 2 veces por semana
         if (typeof contarRepeticiones === "function" && contarRepeticiones(candidato) >= 2) continue;
+
+        // ❌ No repetir categoría similar (pasta, milanesa, tarta, etc.)
+        if (typeof mismoDiaValido === "function" && !mismoDiaValido(dia, candidato, calendario, categoriasVegetariano)) continue;
 
         platoValido = candidato;
       }
@@ -204,25 +179,17 @@ window.generarCalendarioAleatorioVeg = function () {
 
 
 
-
-
-
-
 // =========================
-// LISTA PARA AGREGAR ALIMENTOS Y PLATOS QUE NO TIENEN QUE REPETIRSE EN EL MISMO DIA POR SER DE GRUPO SIMILAR
+// CATEGORÍAS SIMILARES
 // =========================
-//IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
 const categoriasVegetariano = {
-  
   "Milanesas de berenjena gratinadas + guacamole": "milanesa",
   "Milanesa de legumbre": "milanesa",
   "Medallon de legumbre":"milanesa",
-  
+
   "Pure de papa":"papa",
   "Papa al horno":"papa",
-  
-  
-  
+
   "Ravioles con salsa de tomate": "pasta",
   "Ravioles con salsa mixta": "pasta",
   "Ravioles con salsa bolognesa": "pasta",
@@ -233,23 +200,18 @@ const categoriasVegetariano = {
 
   "Tarta de espinaca, q. cremoso, cebolla y puerro": "tarta",
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
-  "Tarta de zapallito, q. cremoso, huevo y cebolla":"tarta",
-  
-
-
-
+  "Tarta de zapallito, q. cremoso, huevo y cebolla":"tarta"
 };
+
+
 
 // =========================
 // ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
 // =========================
 const restringidosVegetariano = {
-  
-  //PROTEINAS
   "Medallon de legumbre":3,
   "Milanesa de legumbre":3,
- 
- //HIDRATOS
+
   "Arroz Blanco/ Integral/ Yamani":3,
   "fideos":3,
   "Pure de papa":3,
@@ -258,10 +220,10 @@ const restringidosVegetariano = {
   "Choclo":3,
   "Quinoa":3,
   "Cuscus":3,
-  "Trigo-burgol":3,
-  
-   
+  "Trigo-burgol":3
 };
+
+
 
 // =========================
 // INGREDIENTES DE PLATOS COMPLETOS VEGETARIANOS PARA LISTA DE COMPRAS
@@ -282,6 +244,10 @@ const ingredientesPlatosCompletosVeg = {
   "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
 };
+
+
+
+
 
 
 
