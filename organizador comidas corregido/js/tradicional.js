@@ -59,21 +59,19 @@ function validarPlato() {
           seleccion = null;    // borrar selección SOLO en éxito
         }
       }
-
-      // <-- NO borrar seleccion aquí en caso de error (importante)
     } else {
       // Validar ingredientes restringidos antes de asignar automáticamente
       const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosTradicional);
       if (!validacionIngredientes.ok) {
         mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
-        return; // NO limpiar selects ni tocar seleccion
+        return;
       }
 
       const ok = asignarAcalendario(platoFinal, categoriasTradicional);
 
       if (ok) {
         mostrarMensaje('✅ Plato válido. Asignado correctamente al calendario.', 'exito');
-        limpiarSelects(); // limpiar solo cuando la asignación automática fue exitosa
+        limpiarSelects();
       } else {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       }
@@ -81,7 +79,7 @@ function validarPlato() {
     return;
   }
 
-  // ----- Motivos específicos de invalidez (mejorados) -----
+  // ----- Motivos específicos de invalidez -----
   if (!hasV && !hasP && !hasH && !hasC) {
     mostrarMensaje('❌ No seleccionaste ningún alimento.', 'error');
   } else if (hasC && (hasV || hasP || hasH)) {
@@ -103,72 +101,25 @@ function validarPlato() {
 // STORAGE - Solo Firestore
 // =========================
 function guardarCalendario(){ 
-  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
-  // Si no hay usuario logueado, no guardamos nada
   console.log("guardarCalendario: No hay usuario logueado, no se guarda");
 }
 
 function cargarCalendario(){ 
-  // Esta función será sobrescrita por Firebase cuando el usuario esté logueado
-  // Si no hay usuario logueado, usamos calendario vacío
   console.log("cargarCalendario: No hay usuario logueado, usando calendario vacío");
   dias.forEach(dia => calendario[dia] = {almuerzo:null,cena:null});
 }
 
 
 
-
-
-
-window.generarCalendarioAleatorio = function () {
-  const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-  const tipos = ["almuerzo", "cena"];
-
-  calendario = {};
-  dias.forEach(dia => {
-    calendario[dia] = { almuerzo: "", cena: "" };
-  });
-
-  dias.forEach(dia => {
-    tipos.forEach(tipo => {
-      let platoValido = null;
-      let intentos = 0;
-
-      while (!platoValido && intentos < 50) {
-        intentos++;
-        const candidato = generarPlatoAleatorio();
-        if (!candidato) break;
-
-        const otroTipo = tipo === "almuerzo" ? "cena" : "almuerzo";
-        if (calendario[dia][otroTipo] === candidato) continue;
-        if (contarRepeticiones(candidato) >= 2) continue;
-
-        platoValido = candidato;
-      }
-
-      if (platoValido) {
-        calendario[dia][tipo] = platoValido;
-      }
-    });
-  });
-
-  actualizarCalendario();
-  guardarCalendario();
-  mostrarMensaje("✅ Calendario generado aleatoriamente.", "exito");
-};
-
-
-
-//CALENDARIO ALEATORIO
-
-// Genera 1 plato aleatorio usando las <option> del HTML
+// =========================
+// GENERADOR DE PLATOS ALEATORIO
+// =========================
 window.generarPlatoAleatorio = function () {
   const verduras  = window.getOpciones("verdura");
   const proteinas = window.getOpciones("proteina");
   const hidratos  = window.getOpciones("hidrato");
   const completos = window.getOpciones("completo");
 
-  // 50% plato completo, si hay. Si no, combo V+P+H
   const modo = (completos.length > 0 && Math.random() < 0.5) ? "completo" : "combo";
 
   if (modo === "completo") {
@@ -187,12 +138,14 @@ window.generarPlatoAleatorio = function () {
 };
 
 
-// Genera semana Lun–Vie en almuerzo y cena
+
+// =========================
+// GENERADOR ALEATORIO (Tradicional) — CORREGIDO
+// =========================
 window.generarCalendarioAleatorio = function () {
   const dias  = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const tipos = ["almuerzo", "cena"];
 
-  // Reinicio calendario base
   calendario = {};
   dias.forEach(d => (calendario[d] = { almuerzo: "", cena: "" }));
 
@@ -207,10 +160,15 @@ window.generarCalendarioAleatorio = function () {
         if (!candidato) break;
 
         const otroTipo = (tipo === "almuerzo") ? "cena" : "almuerzo";
-        // no repetir mismo plato en el mismo día
+
+        // ❌ No repetir el mismo plato en el mismo día
         if (calendario[dia][otroTipo] === candidato) continue;
-        // máximo 2 veces por semana
+
+        // ❌ No repetir más de 2 veces por semana
         if (typeof contarRepeticiones === "function" && contarRepeticiones(candidato) >= 2) continue;
+
+        // ❌ No repetir categoría similar (pasta, milanesa, etc.)
+        if (typeof mismoDiaValido === "function" && !mismoDiaValido(dia, candidato, calendario, categoriasTradicional)) continue;
 
         platoValido = candidato;
       }
@@ -226,7 +184,7 @@ window.generarCalendarioAleatorio = function () {
   if (typeof actualizarCalendario === "function") actualizarCalendario();
   if (typeof guardarCalendario === "function") guardarCalendario();
   if (typeof mostrarMensaje === "function") {
-    mostrarMensaje("✅ Calendario generado aleatoriamente.", "exito");
+    mostrarMensaje("✅ Calendario semanal generado correctamente.", "exito");
   } else {
     console.log("✅ Calendario generado:", calendario);
   }
@@ -234,13 +192,9 @@ window.generarCalendarioAleatorio = function () {
 
 
 
-
-
 // =========================
-// LISTA PARA AGREGAR ALIMENTOS Y PLATOS QUE NO TIENEN QUE REPETIRSE EN EL MISMO DIA POR SER DE GRUPO SIMILAR
+// CATEGORÍAS Y RESTRICCIONES
 // =========================
-//IMPORTANTE, CUANDO ES MAS DE UNA LIMITACION SE EESCRIBE ENTRE[] Ej: "Pastel de fuente":["papa", "carne"] 
-
 const categoriasTradicional = {
   "Milanesa carne": "milanesa",
   "Milanesa pollo": "milanesa",
@@ -249,15 +203,12 @@ const categoriasTradicional = {
   "Nugget de pollo": "milanesa",
   "Milanesas de berenjena gratinadas + guacamole": "milanesa",
   
-  "Jamón cocido": "Jamón",
-  "Jamón crudo": "Jamón",
+  "Jamón cocido": "jamon",
+  "Jamón crudo": "jamon",
 
-
-  
   "Pastel de fuente (Puré mixto + carne, verdeo, pimiento y cebolla picada + Gratinado)":"papa",
   "Pure de papa":"papa",
   "Papa al horno":"papa",
-  
   
   "Costeleta vaca": "costeleta",
   "Costeleta cerdo": "costeleta",
@@ -278,16 +229,13 @@ const categoriasTradicional = {
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
   "Tarta de zapallito, q. cremoso,huevo, cebolla":"tarta",
   "Tarta de atún, q. cremoso, tomate, cebolla, huevo,pimiento,ajo": "tarta",
-
-
 };
 
+
 // =========================
-// ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
+// RESTRICCIONES SEMANALES
 // =========================
 const restringidosTradicional = {
-  
-  //PROTEINAS
   "Milanesa carne": 3,
   "Milanesa pollo": 3,
   "Milanesa cerdo": 3,
@@ -300,7 +248,6 @@ const restringidosTradicional = {
   "Bife vacuno":3,
   "Filet pollo":3,
   "Pata muslo pollo":3,
-  
   "Pechuga pollo":3,
   "Filet pescado":3,
   "pollo al horno":3,
@@ -311,7 +258,6 @@ const restringidosTradicional = {
   "Jamón cocido":3,
   "jamón crudo":3,
 
-  //HIDRATOS:
   "Arroz Blanco/ Integral/ Yamani":3,
   "Fideos":3,
   "Pure de papa":3,
@@ -326,8 +272,9 @@ const restringidosTradicional = {
   "Porotos":3,
 };
 
+
 // =========================
-// INGREDIENTES DE PLATOS COMPLETOS PARA LISTA DE COMPRAS
+// INGREDIENTES PARA LISTA DE COMPRAS
 // =========================
 const ingredientesPlatosCompletos = {
   "Tarta de espinaca,q. cremoso,cebolla,puerro": ["Espinaca", "Queso cremoso", "Cebolla", "Puerro", "Masa de tarta"],
@@ -350,10 +297,12 @@ const ingredientesPlatosCompletos = {
   "Ravioles con salsa de tomate": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite"],
   "Ravioles con salsa mixta": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
   "Ravioles con salsa bolognesa": ["Ravioles", "Carne picada", "Tomate", "Cebolla", "Ajo"],
-  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo",],
+  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo"],
   "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
-  "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo",]
+  "Ñoquis con salsa bolognesa": ["Ñoquis", "Carne picada", "Tomate", "Cebolla", "Ajo"]
 };
+
+
 
 
 
