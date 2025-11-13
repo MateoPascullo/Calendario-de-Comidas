@@ -37,6 +37,14 @@ function validarPlato() {
       } else if (contarRepeticiones(platoFinal) >= 2 && calendario[dia][tipo] !== platoFinal) {
         mostrarMensaje(`❌ El plato "${platoFinal}" ya fue asignado 2 veces esta semana.`, 'error');
       } else {
+
+        // 🟣 Nuevo → Validación de grupos limitados
+        const vGrupo = validarGruposLimitados(platoFinal, calendario, gruposLimitadosVegetariano);
+        if (!vGrupo.ok) {
+          mostrarMensaje(`❌ Ya usaste demasiado el grupo "${vGrupo.grupo}" (${vGrupo.repeticiones}/3).`, 'error');
+          return;
+        }
+
         const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
         if (!validacionIngredientes.ok) {
           mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
@@ -49,6 +57,13 @@ function validarPlato() {
         }
       }
     } else {
+
+      const vGrupo = validarGruposLimitados(platoFinal, calendario, gruposLimitadosVegetariano);
+      if (!vGrupo.ok) {
+        mostrarMensaje(`❌ Ya usaste demasiado el grupo "${vGrupo.grupo}" (${vGrupo.repeticiones}/3).`, 'error');
+        return;
+      }
+
       const validacionIngredientes = validarIngredientesRestringidos(platoFinal, calendario, restringidosVegetariano);
       if (!validacionIngredientes.ok) {
         mostrarMensaje(`❌ El ingrediente "${validacionIngredientes.ingrediente}" ya fue usado ${validacionIngredientes.usoActual} veces esta semana (máximo ${validacionIngredientes.limite}).`, 'error');
@@ -92,19 +107,19 @@ function cargarCalendario(){
 
 
 // =========================
-// GENERADOR ALEATORIO (Vegetariano) — CORREGIDO
+// GENERADOR ALEATORIO (Vegetariano con exclusiones)
 // =========================
 window.getOpciones = window.getOpciones || function (idSelect) {
   const select = document.getElementById(idSelect);
-  if (!select) {
-    console.warn(`⚠️ No encontré el <select> #${idSelect}.`);
-    return [];
-  }
+  if (!select) return [];
   return Array.from(select.options)
     .map(opt => (opt.value ?? "").trim())
     .filter(val => val !== "");
 };
 
+
+
+// Genera un plato aleatorio vegetariano
 window.generarPlatoAleatorioVeg = function () {
   const verduras  = window.getOpciones("verdura");
   const proteinas = window.getOpciones("proteina");
@@ -117,18 +132,34 @@ window.generarPlatoAleatorioVeg = function () {
     return completos[Math.floor(Math.random() * completos.length)];
   }
 
-  if (!verduras.length || !proteinas.length || !hidratos.length) {
-    console.error("❌ Faltan opciones en los selects (verdura/proteina/hidrato).");
-    return null;
+  if (!verduras.length || !proteinas.length || !hidratos.length) return null;
+
+  let intento = 0;
+  while (intento < 50) {
+    intento++;
+
+    const v = verduras[Math.floor(Math.random() * verduras.length)];
+    const p = proteinas[Math.floor(Math.random() * proteinas.length)];
+    const h = hidratos[Math.floor(Math.random() * hidratos.length)];
+
+    const combo = [v, p, h];
+    const tieneProhibido = combo.some(alim =>
+      alimentosExcluidosVeg.some(prohibido =>
+        alim.toLowerCase().includes(prohibido.toLowerCase())
+      )
+    );
+
+    if (tieneProhibido) continue;
+
+    return `${v}+ ${p}+ ${h}`;
   }
 
-  const v = verduras[Math.floor(Math.random() * verduras.length)];
-  const p = proteinas[Math.floor(Math.random() * proteinas.length)];
-  const h = hidratos[Math.floor(Math.random() * hidratos.length)];
-  return `${v}+ ${p}+ ${h}`;
+  return null;
 };
 
-// ✅ CORREGIDA: evita repetir categoría similar en el mismo día
+
+
+// Genera calendario aleatorio
 window.generarCalendarioAleatorioVeg = function () {
   const dias  = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const tipos = ["almuerzo", "cena"];
@@ -148,35 +179,52 @@ window.generarCalendarioAleatorioVeg = function () {
 
         const otroTipo = (tipo === "almuerzo") ? "cena" : "almuerzo";
 
-        // ❌ No repetir mismo plato
         if (calendario[dia][otroTipo] === candidato) continue;
-
-        // ❌ No más de 2 veces por semana
         if (typeof contarRepeticiones === "function" && contarRepeticiones(candidato) >= 2) continue;
-
-        // ❌ No repetir categoría similar (pasta, milanesa, tarta, etc.)
         if (typeof mismoDiaValido === "function" && !mismoDiaValido(dia, candidato, calendario, categoriasVegetariano)) continue;
+
+        // 🟣 Nuevo → Validación de grupos limitados
+        const vGrupo = validarGruposLimitados(candidato, calendario, gruposLimitadosVegetariano);
+        if (!vGrupo.ok) continue;
 
         platoValido = candidato;
       }
 
-      if (platoValido) {
-        calendario[dia][tipo] = platoValido;
-      } else {
-        console.warn(`⚠️ No se pudo asignar plato para ${dia} (${tipo})`);
-      }
+      if (platoValido) calendario[dia][tipo] = platoValido;
     });
   });
 
   if (typeof actualizarCalendario === "function") actualizarCalendario();
   if (typeof guardarCalendario === "function") guardarCalendario();
-  if (typeof mostrarMensaje === "function") {
-    mostrarMensaje("✅ Calendario vegetariano generado aleatoriamente.", "exito");
-  } else {
-    console.log("✅ Calendario vegetariano generado:", calendario);
-  }
+  if (typeof mostrarMensaje === "function") mostrarMensaje("✅ Calendario vegetariano generado aleatoriamente.", "exito");
 };
 
+
+// =========================
+//  FUNCIÓN DE VALIDACION DE GRUPOS LIMITADOS
+// =========================
+function validarGruposLimitados(plato, calendario, grupos) {
+  for (const [grupo, lista] of Object.entries(grupos)) {
+    if (lista.includes(plato)) {
+
+      let repeticiones = 0;
+      for (const dia in calendario) {
+        const { almuerzo, cena } = calendario[dia];
+        if (lista.includes(almuerzo)) repeticiones++;
+        if (lista.includes(cena)) repeticiones++;
+      }
+
+      if (repeticiones >= 3) {
+        return {
+          ok: false,
+          grupo,
+          repeticiones
+        };
+      }
+    }
+  }
+  return { ok: true };
+}
 
 
 // =========================
@@ -186,18 +234,13 @@ const categoriasVegetariano = {
   "Milanesas de berenjena gratinadas + guacamole": "milanesa",
   "Milanesa de legumbre": "milanesa",
   "Medallon de legumbre":"milanesa",
-
   "Pure de papa":"papa",
   "Papa al horno":"papa",
-
   "Ravioles con salsa de tomate": "pasta",
   "Ravioles con salsa mixta": "pasta",
-  "Ravioles con salsa bolognesa": "pasta",
   "Ñoquis con salsa de tomate": "pasta",
   "Ñoquis con salsa mixta": "pasta",
-  "Ñoquis con salsa bolognesa": "pasta",
   "Fideos": "pasta",
-
   "Tarta de espinaca, q. cremoso, cebolla y puerro": "tarta",
   "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": "tarta",
   "Tarta de zapallito, q. cremoso, huevo y cebolla":"tarta"
@@ -206,12 +249,11 @@ const categoriasVegetariano = {
 
 
 // =========================
-// ALIMENTOS QUE SOLO SE PUEDEN REPETIR 3 VECES POR SEMANA
+// RESTRINGIDOS (3 veces por semana)
 // =========================
 const restringidosVegetariano = {
   "Medallon de legumbre":3,
   "Milanesa de legumbre":3,
-
   "Arroz Blanco/ Integral/ Yamani":3,
   "fideos":3,
   "Pure de papa":3,
@@ -225,24 +267,39 @@ const restringidosVegetariano = {
 
 
 
+
 // =========================
-// INGREDIENTES DE PLATOS COMPLETOS VEGETARIANOS PARA LISTA DE COMPRAS
+// ALIMENTOS EXCLUIDOS DE LA GENERACIÓN ALEATORIA
 // =========================
-const ingredientesPlatosCompletosVeg = {
-  "Tarta de espinaca, q. cremoso, cebolla y puerro": ["Espinaca", "Queso cremoso", "Cebolla", "Puerro", "Masa de tarta"],
-  "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)": ["Tomate cherry", "Queso cremoso", "Albahaca", "Aceitunas negras", "Masa de tarta"],
-  "Tarta de zapallito, q. cremoso, huevo y cebolla": ["Zapallito", "Queso cremoso", "Huevo", "Cebolla", "Masa de tarta"],
-  "Milanesas de berenjena gratinadas + guacamole": ["Berenjena", "Pan rallado", "Huevo", "Queso cremoso", "Palta", "Limón", "Cebolla", "Tomate"],
-  "Pastel de papa y zapallo": ["Papa", "Zapallo", "Queso cremoso"],
-  "Omeltte de queso y espinaca + Ens. Lenteja y tomate": ["Huevo", "Queso cremoso", "Espinaca", "Lentejas", "Tomate"],
-  "Crepes de espinaca,cebolla, c.verdeo + salsa de morrón y crema": ["Harina", "Huevo", "Leche", "Espinaca", "Cebolla", "Cebolla verdeo", "Morrón", "Crema"],
-  "Wok de fideos de arroz + verduras(pimiento,cebolla,zucchini,zanahoria)": ["Fideos de arroz", "Pimiento", "Cebolla", "Zucchini", "Zanahoria", "Aceite", "Salsa de soja"],
-  "Fajitas de verduras varias(cebolla, pimiento, zanahoria, berenjena)": ["Fajitas", "Cebolla", "Pimiento", "Zanahoria", "Berenjena", "Aceite", "Especias"],
-  "Torrejas de arroz + ensalada de zanahoria , rucula, tomate y huevo": ["Arroz", "Huevo", "Pan rallado", "Zanahoria", "Rúcula", "Tomate", "Huevo"],
-  "Ravioles con salsa de tomate": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite"],
-  "Ravioles con salsa mixta": ["Ravioles", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"],
-  "Ñoquis con salsa de tomate": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite"],
-  "Ñoquis con salsa mixta": ["Ñoquis", "Tomate", "Cebolla", "Ajo", "Aceite", "Crema"]
+const alimentosExcluidosVeg = [ 
+  "Soja texturizada",
+  "Tempeh",
+  "Ricota",
+  "Quesos",
+  "Choclo",
+];
+
+
+
+// =========================
+// GRUPOS DE ALIMENTOS LIMITADOS A 3 VECES POR SEMANA (VEGETARIANO)
+// ➜ Acá agregás vos los grupos que quieras
+// =========================
+const gruposLimitadosVegetariano = {
+  
+   "tarta": [
+    "Tarta de espinaca, q. cremoso, cebolla y puerro",
+    "Tarta capresse ( T. cherry, q. cremoso, albahaca, aceitunas negras)",
+    "Tarta de zapallito, q. cremoso, huevo y cebolla"
+  ],
+  
+  "pasta":[
+  "Ravioles con salsa de tomate",
+  "Ravioles con salsa mixta",
+  "Ñoquis con salsa de tomate",
+  "Ñoquis con salsa mixta",
+  "Fideos",
+  ]
 };
 
 
